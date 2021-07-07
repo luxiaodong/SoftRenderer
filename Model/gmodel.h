@@ -1,0 +1,21 @@
+#ifndef GMODEL_H
+#define GMODEL_H
+
+#include "Render/ggameobject.h"
+#include "Model/gmesh.h"
+
+
+class GModel
+{
+public:
+    GModel();
+    static GMesh loadTriangle();
+//    GGameObject loadCube();
+//    GGameObject loadObject(QString filePath);
+
+private:
+    QString m_resourceDir;
+
+};
+
+#endif // GMODEL_H
