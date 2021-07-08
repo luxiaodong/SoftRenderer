@@ -1,7 +1,7 @@
 #ifndef GMODEL_H
 #define GMODEL_H
 
-#include "Render/ggameobject.h"
+#include "Scene/ggameobject.h"
 #include "Model/gmesh.h"
 
 

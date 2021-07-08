@@ -6,8 +6,10 @@
 #include <QDebug>
 #include <QRectF>
 #include <QColor>
-#include "Render/ggameobject.h"
-#include "Render/gcamear.h"
+#include <QMatrix4x4>
+
+#include "Scene/ggameobject.h"
+#include "Scene/gcamear.h"
 #include "Scene/gscene.h"
 
 class GRender
@@ -18,18 +20,19 @@ public:
     void setRenderSize(const QSize& size){m_size = size;}
     void setClearColor(const QColor& color){m_color = color;}
 
-    void setScene(const GScene& scene){m_scene = scene;}
-    void setCamear(const GCamear& camear){m_camera = camear;}
+    void setViewMatrix(const QMatrix4x4& mat){m_viewMat = mat;}
+    void setProjMatrix(const QMatrix4x4& mat){m_projMat = mat;}
 
 public:
-    virtual QImage DoRendering();
+    virtual float* doRendering(){return 0;}
+    virtual void createBuffer(){}
 
 protected:
     QSize m_size;
     QColor m_color;
 
-    GScene m_scene;
-    GCamear m_camera;
+    QMatrix4x4 m_viewMat; //视口矩阵
+    QMatrix4x4 m_projMat; //投影矩阵,包括正交投影
 };
 
 #endif // GRENDER_H

@@ -2,7 +2,7 @@
 #define WORLD_H
 
 #include "Model/gmodel.h"
-#include "Render/ggameobject.h"
+#include "Scene/ggameobject.h"
 #include <QList>
 
 class GScene

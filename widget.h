@@ -3,8 +3,8 @@
 
 #include <QWidget>
 #include "Scene/gscene.h"
-#include "Render/grender.h"
-#include "Render/gcamear.h"
+#include "Scene/gcamear.h"
+#include "Render/ggraphicsapi.h"
 
 class Widget : public QWidget
 {
@@ -18,9 +18,12 @@ protected:
     void paintEvent(QPaintEvent* );
 
 private:
-    GRender* m_pRender;
+    QImage genImage(int width, int height, float* data);
+
+private:
     GScene* m_pScene;
     GCamear* m_camera;
+    GGraphicsAPI* m_graphicsApi;
 };
 
 #endif // WIDGET_H

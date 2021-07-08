@@ -16,6 +16,7 @@ private:
     QVector3D m_position;
     QQuaternion m_rotate;
     QVector3D m_scale;
+    GGameObject* m_parent;
 
     GMesh m_mesh;
 };

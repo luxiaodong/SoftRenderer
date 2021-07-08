@@ -30,9 +30,12 @@ SOURCES += main.cpp\
     Render/Raster/graster.cpp \
     Math/gmath.cpp \
     Model/gmodel.cpp \
-    Render/ggameobject.cpp \
-    Render/gcamear.cpp \
-    Model/gmesh.cpp
+    Scene/ggameobject.cpp \
+    Scene/gcamear.cpp \
+    Model/gmesh.cpp \
+    Render/ggraphicsapi.cpp \
+    Render/Raster/gframebuffer.cpp \
+    Render/Raster/gdepthbuffer.cpp
 
 HEADERS  += widget.h \
     Scene/gscene.h \
@@ -40,6 +43,9 @@ HEADERS  += widget.h \
     Render/Raster/graster.h \
     Math/gmath.h \
     Model/gmodel.h \
-    Render/ggameobject.h \
-    Render/gcamear.h \
-    Model/gmesh.h
+    Scene/ggameobject.h \
+    Scene/gcamear.h \
+    Model/gmesh.h \
+    Render/ggraphicsapi.h \
+    Render/Raster/gframebuffer.h \
+    Render/Raster/gdepthbuffer.h
