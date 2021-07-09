@@ -19,9 +19,14 @@ void Widget::paintEvent(QPaintEvent*)
     m_pScene->loadSceneTest();
     m_graphicsApi->setClearColor(Qt::red);
 
-    float* data = m_graphicsApi->doRendering();
-    QPainter painter(this);
-    painter.drawImage( QRectF(0,0,this->width(), this->height()), this->genImage(100, 100, data));
+//    m_graphicsApi->setViewMatrix(QVector3D(0,0,0), 30, 45, 60);
+//    m_graphicsApi->setViewMatrix(QVector3D(0,0,0), QVector3D(-0.6, 0.8, 0), QVector3D(0, -5.0f/13, 12.0f/13));
+//    m_graphicsApi->setOrthMatrix(5, 1.892934, 0.3, 1000.0f);
+    m_graphicsApi->setProjMatrix(60, 1.892934, 0.3, 1000.0f);
+
+//    float* data = m_graphicsApi->doRendering();
+//    QPainter painter(this);
+//    painter.drawImage( QRectF(0,0,this->width(), this->height()), this->genImage(100, 100, data));
 }
 
 QImage Widget::genImage(int width, int height, float* data)
