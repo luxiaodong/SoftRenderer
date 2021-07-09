@@ -126,6 +126,26 @@ void GGraphicsAPI::setProjMatrix(float fov, float aspect, float n, float f)
     m_pRender->setProjMatrix(mat);
 }
 
+void GGraphicsAPI::setVertexAttribute(int attId, const GMesh& mesh)
+{
+    int count = mesh.m_points.size();
+    float *vertex = new float[count*3];
+
+    int i = 0;
+    foreach (QVector3D p, mesh.m_points)
+    {
+        vertex[i] =  p.x();
+        vertex[i + 1] =  p.y();
+        vertex[i + 2] =  p.z();
+        i += 3;
+    }
+
+    GVertexAttributeBuffer* vBuffer = new GVertexAttributeBuffer();
+    vBuffer->m_vertexs = vertex;
+    vBuffer->m_vertexCount = count;
+    m_pRender->setVertexAttribute(attId, vBuffer);
+}
+
 float* GGraphicsAPI::doRendering()
 {
     return m_pRender->doRendering();

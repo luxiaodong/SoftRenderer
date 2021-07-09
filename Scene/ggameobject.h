@@ -12,7 +12,7 @@ public:
     GGameObject();
     void setMesh(const GMesh &);
 
-private:
+public:
     QVector3D m_position;
     QQuaternion m_rotate;
     QVector3D m_scale;

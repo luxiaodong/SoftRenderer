@@ -9,8 +9,6 @@ class GMesh
 public:
     GMesh();
     void setPoints(QList<QVector3D> &point){m_points = point;}
-
-
     QList<QVector3D> m_points;
 };
 

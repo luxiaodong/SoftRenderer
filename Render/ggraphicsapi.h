@@ -3,7 +3,10 @@
 
 #include <QImage>
 #include <QVector3D>
-#include "Render/grender.h"
+#include "Render/Raster/graster.h"
+#include "Model/gmesh.h"
+#include "Scene/gscene.h"
+#include "Scene/gcamear.h"
 
 class GGraphicsAPI
 {
@@ -18,13 +21,15 @@ public:
     void setOrthMatrix(float size, float aspect, float n, float f); // aspect = width/height
     void setProjMatrix(float fov,  float aspect, float n, float f);
 
+    void setVertexAttribute(int attId, const GMesh& mesh);
+
     float* doRendering();
 
     void setScene(const GScene& scene){m_scene = scene;}
     void setCamear(const GCamear& camear){m_camera = camear;}
 
 private:
-    GRender* m_pRender;
+    GRaster* m_pRender;
     GScene m_scene;
     GCamear m_camera;
 };

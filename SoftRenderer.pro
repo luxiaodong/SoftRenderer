@@ -26,7 +26,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += main.cpp\
         widget.cpp \
     Scene/gscene.cpp \
-    Render/grender.cpp \
     Render/Raster/graster.cpp \
     Math/gmath.cpp \
     Model/gmodel.cpp \
@@ -35,11 +34,12 @@ SOURCES += main.cpp\
     Model/gmesh.cpp \
     Render/ggraphicsapi.cpp \
     Render/Raster/gframebuffer.cpp \
-    Render/Raster/gdepthbuffer.cpp
+    Render/Raster/gdepthbuffer.cpp \
+    Render/Raster/gvertexattributebuffer.cpp \
+    Shader/gshader.cpp
 
 HEADERS  += widget.h \
     Scene/gscene.h \
-    Render/grender.h \
     Render/Raster/graster.h \
     Math/gmath.h \
     Model/gmodel.h \
@@ -48,4 +48,6 @@ HEADERS  += widget.h \
     Model/gmesh.h \
     Render/ggraphicsapi.h \
     Render/Raster/gframebuffer.h \
-    Render/Raster/gdepthbuffer.h
+    Render/Raster/gdepthbuffer.h \
+    Render/Raster/gvertexattributebuffer.h \
+    Shader/gshader.h
