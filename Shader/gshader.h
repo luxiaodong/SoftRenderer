@@ -1,18 +1,21 @@
 #ifndef GSHADER_H
 #define GSHADER_H
 
+#include <QVector4D>
 #include <QMatrix4x4>
-#include "Render/Raster/gvertexattributebuffer.h"
+#include "Render/Raster/gvertexattribute.h"
 
 class GShader
 {
 public:
     GShader();
 
-    void vertex(GVertexAttributeBuffer*);
+    void vertex(GVertexAttribute*);
+    void tessellator(){}
+    void geometry(){}
     void fragment();
 
-    QVector3D worldToClipping(QVector3D pos);
+    QVector4D worldToClipping(QVector4D pos);
 
 public:
     QMatrix4x4 m_viewMat; //视口矩阵

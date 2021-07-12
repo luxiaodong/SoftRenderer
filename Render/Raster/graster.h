@@ -3,7 +3,8 @@
 
 #include "Render/Raster/gframebuffer.h"
 #include "Render/Raster/gdepthbuffer.h"
-#include "Render/Raster/gvertexattributebuffer.h"
+#include "Render/Raster/gvertexattribute.h"
+#include "Render/Raster/gprimitive.h"
 #include "Shader/gshader.h"
 #include <QMatrix4x4>
 #include <QMap>
@@ -25,7 +26,10 @@ public:
     void setProjMatrix(const QMatrix4x4& mat){ m_shader.m_projMat = mat;}
 
     void clearColor();
-    void setVertexAttribute(int attId, GVertexAttributeBuffer*);
+    void setVertexAttribute(int attId, GVertexAttribute*);
+    void vertexToPrimitive(GVertexAttribute*);
+    bool isTriangleInFrustum(QVector4D a, QVector4D b, QVector4D c);
+    bool isPointInFrustum(QVector4D p);
 
 private:
     QSize m_size;
@@ -34,7 +38,9 @@ private:
 
     GFrameBuffer* m_frameBuffer;
     GDepthBuffer* m_depthBuffer;
-    QMap<int, GVertexAttributeBuffer*> m_vertexs;
+    QMap<int, GVertexAttribute*> m_vertexs;
+    QList<GPrimitive> m_primitivesBeforeCulling;
+    QList<GPrimitive> m_primitivesAfterCulling;
 };
 
 #endif // GRASTER_H

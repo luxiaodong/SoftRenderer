@@ -114,7 +114,7 @@ void GGraphicsAPI::setOrthMatrix(float size, float aspect, float n, float f)
 
 void GGraphicsAPI::setProjMatrix(float fov, float aspect, float n, float f)
 {
-    // z in [-1,1]
+    // z in [-n,f]
     float tan = qTan( qDegreesToRadians(fov/2) );
     QMatrix4x4 mat(
         1.0f/(aspect*tan),       0.0f,          0.0f,          0.0f,
@@ -140,8 +140,8 @@ void GGraphicsAPI::setVertexAttribute(int attId, const GMesh& mesh)
         i += 3;
     }
 
-    GVertexAttributeBuffer* vBuffer = new GVertexAttributeBuffer();
-    vBuffer->m_vertexs = vertex;
+    GVertexAttribute* vBuffer = new GVertexAttribute();
+    vBuffer->m_vertexsInWorld = vertex;
     vBuffer->m_vertexCount = count;
     m_pRender->setVertexAttribute(attId, vBuffer);
 }

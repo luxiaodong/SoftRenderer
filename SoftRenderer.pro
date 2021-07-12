@@ -35,8 +35,9 @@ SOURCES += main.cpp\
     Render/ggraphicsapi.cpp \
     Render/Raster/gframebuffer.cpp \
     Render/Raster/gdepthbuffer.cpp \
-    Render/Raster/gvertexattributebuffer.cpp \
-    Shader/gshader.cpp
+    Shader/gshader.cpp \
+    Render/Raster/gvertexattribute.cpp \
+    Render/Raster/gprimitive.cpp
 
 HEADERS  += widget.h \
     Scene/gscene.h \
@@ -49,5 +50,6 @@ HEADERS  += widget.h \
     Render/ggraphicsapi.h \
     Render/Raster/gframebuffer.h \
     Render/Raster/gdepthbuffer.h \
-    Render/Raster/gvertexattributebuffer.h \
-    Shader/gshader.h
+    Shader/gshader.h \
+    Render/Raster/gvertexattribute.h \
+    Render/Raster/gprimitive.h
