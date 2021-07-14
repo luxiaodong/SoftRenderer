@@ -7,6 +7,8 @@
 #include "Render/Raster/gprimitive.h"
 #include "Shader/gshader.h"
 #include <QMatrix4x4>
+#include <QVector4D>
+#include <QVector3D>
 #include <QMap>
 #include <QSize>
 #include <QColor>
@@ -24,17 +26,23 @@ public:
 
     void setViewMatrix(const QMatrix4x4& mat){ m_shader.m_viewMat = mat;}
     void setProjMatrix(const QMatrix4x4& mat){ m_shader.m_projMat = mat;}
+    void setViewPortMatrix(const QMatrix4x4 &mat){m_viewPortMat = mat;}
+
+    QVector3D ndcToScreenPoint(QVector4D&);
 
     void clearColor();
     void setVertexAttribute(int attId, GVertexAttribute*);
     void vertexToPrimitive(GVertexAttribute*);
     bool isTriangleInFrustum(QVector4D a, QVector4D b, QVector4D c);
     bool isPointInFrustum(QVector4D p);
+    void cullingInHomogeneousSpace(GPrimitive& primitive);
 
 private:
     QSize m_size;
     QColor m_color;
     GShader m_shader;
+
+    QMatrix4x4 m_viewPortMat;
 
     GFrameBuffer* m_frameBuffer;
     GDepthBuffer* m_depthBuffer;

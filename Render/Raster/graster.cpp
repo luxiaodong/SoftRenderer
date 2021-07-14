@@ -59,20 +59,26 @@ void GRaster::vertexToPrimitive(GVertexAttribute* vBuffer)
     }
 }
 
-bool GRaster::isTriangleInFrustum(QVector4D a, QVector4D b, QVector4D c)
+void GRaster::cullingInHomogeneousSpace(GPrimitive& primitive)
 {
-    if (!this->isPointInFrustum(a)) return false;
-    if (!this->isPointInFrustum(b)) return false;
-    if (!this->isPointInFrustum(c)) return false;
-    return true;
+    QList<QVector4D> list = primitive.culling();
+
+    for(int i = 0; i < list.size() - 2; ++i)
+    {
+        QVector4D a = list.at(0);
+        QVector4D b = list.at(i+1);
+        QVector4D c = list.at(i+2);
+
+        GPrimitive primitive;
+        primitive.setTriangle(a, b, c);
+        m_primitivesBeforeCulling.append(primitive);
+    }
 }
 
-bool GRaster::isPointInFrustum(QVector4D p)
+QVector3D GRaster::ndcToScreenPoint(QVector4D& pos)
 {
-    if( p.x() < -p.w() || p.x() > p.w() ) return false;
-    if( p.y() < -p.w() || p.y() > p.w() ) return false;
-    if( p.z() < -p.w() || p.z() > p.w() ) return false;
-    return true;
+    QVector4D p = m_viewPortMat*pos;
+    return QVector3D(p.x(), p.y(), p.z());
 }
 
 float* GRaster::doRendering()
@@ -82,7 +88,6 @@ float* GRaster::doRendering()
 
     //IA(Input Assemble) 获取索引和顶点数据
     m_primitivesBeforeCulling.clear();
-    m_primitivesAfterCulling.clear();
 
     //VS(Vertex Shader) 顶点处理
     QMap<int, GVertexAttribute*>::const_iterator i = m_vertexs.constBegin();
@@ -104,21 +109,24 @@ float* GRaster::doRendering()
     }
 
     //Clipping 剪裁(视锥体剪裁, 将屏幕外的三角形丢掉)
+    m_primitivesAfterCulling.clear();
     foreach (GPrimitive primitive, m_primitivesBeforeCulling)
     {
-        if(this->isTriangleInFrustum(primitive.m_a, primitive.m_b, primitive.m_c))
+        //三个点都在视锥体里面
+        if(primitive.isTriangleInFrustum())
         {
             m_primitivesAfterCulling.append(primitive);
         }
         else
         {
-            //Cohen-Sutherland算法, 找出新的三角形
+            this->cullingInHomogeneousSpace(primitive);
         }
     }
 
-    //
+//    qDebug()<<m_primitivesAfterCulling.size();
     foreach (GPrimitive primitive, m_primitivesAfterCulling)
     {
+        qDebug()<<primitive.m_b;
         //PD(perspective division) 透视除法
         primitive.homogeneousDiv();
 
@@ -128,12 +136,17 @@ float* GRaster::doRendering()
             continue;
         }
 
+        qDebug()<<primitive.m_b;
 
+        //Screen Mapping 屏幕映射
+        QVector3D a = this->ndcToScreenPoint(primitive.m_a);
+        QVector3D b = this->ndcToScreenPoint(primitive.m_b);
+        QVector3D c = this->ndcToScreenPoint(primitive.m_c);
+
+        qDebug()<<a<<b<<c;
+        qDebug()<<"=======================================";
     }
 
-
-
-    //Screen Mapping 屏幕映射
     //建立三角形,然后遍历, 从三个顶点建立三条线,再遍历每条扫描线
     //PZ(Pre-Z)
     //FS(Fragment Shader)

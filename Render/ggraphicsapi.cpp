@@ -126,6 +126,26 @@ void GGraphicsAPI::setProjMatrix(float fov, float aspect, float n, float f)
     m_pRender->setProjMatrix(mat);
 }
 
+void GGraphicsAPI::setViewPortMatrix(float x, float y, float w, float h)
+{
+    float zMax = 1;
+    float zMin = -1;
+    QMatrix4x4 s(
+                 w/2, 0.0f,          0.0f, 0.0f,
+                0.0f,  h/2,          0.0f, 0.0f,
+                0.0f, 0.0f, 1/(zMax-zMin), 0.0f,
+                0.0f, 0.0f,          0.0f, 1.0f);
+
+    QMatrix4x4 t(
+                1.0f, 0.0f, 0.0f, x+w/2,
+                0.0f, 1.0f, 0.0f, y+h/2,
+                0.0f, 0.0f, 1.0f, 0.5f,
+                0.0f, 0.0f, 0.0f, 1.0f);
+
+    m_pRender->setViewPortMatrix(t*s);
+}
+
+
 void GGraphicsAPI::setVertexAttribute(int attId, const GMesh& mesh)
 {
     int count = mesh.m_points.size();

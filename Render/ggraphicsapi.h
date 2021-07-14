@@ -20,6 +20,7 @@ public:
     void setViewMatrix(QVector3D position, QVector3D forward, QVector3D up = QVector3D(0.0f, 1.0f, 0.0f) );
     void setOrthMatrix(float size, float aspect, float n, float f); // aspect = width/height
     void setProjMatrix(float fov,  float aspect, float n, float f);
+    void setViewPortMatrix(float x, float y, float w, float h);
 
     void setVertexAttribute(int attId, const GMesh& mesh);
 

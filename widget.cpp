@@ -20,6 +20,7 @@ Widget::Widget(QWidget *parent)
     //    m_graphicsApi->setViewMatrix(QVector3D(0,0,0), QVector3D(-0.6, 0.8, 0), QVector3D(0, -5.0f/13, 12.0f/13));
     //    m_graphicsApi->setOrthMatrix(5, 1.892934, 0.3, 1000.0f);
     m_graphicsApi->setProjMatrix(60, 1.755299, 0.3, 1000.0f);
+    m_graphicsApi->setViewPortMatrix(0,0,100,100);
 
     int i = 1;
     foreach (GGameObject go, m_pScene->m_gameObjects)
