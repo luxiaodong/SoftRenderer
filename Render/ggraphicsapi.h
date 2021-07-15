@@ -24,7 +24,7 @@ public:
 
     void setVertexAttribute(int attId, const GMesh& mesh);
 
-    float* doRendering();
+    int* doRendering();
 
     void setScene(const GScene& scene){m_scene = scene;}
     void setCamear(const GCamear& camear){m_camera = camear;}

@@ -166,7 +166,7 @@ void GGraphicsAPI::setVertexAttribute(int attId, const GMesh& mesh)
     m_pRender->setVertexAttribute(attId, vBuffer);
 }
 
-float* GGraphicsAPI::doRendering()
+int* GGraphicsAPI::doRendering()
 {
     return m_pRender->doRendering();
 }

@@ -3,6 +3,7 @@
 
 #include <QVector2D>
 #include <QVector4D>
+#include <QColor>
 #include <QList>
 #include <QList>
 
@@ -27,6 +28,9 @@ public:
     QVector4D m_c;
 
 //三个uv值
+    QColor m_colorA;
+    QColor m_colorB;
+    QColor m_colorC;
 };
 
 #endif // GPRIMITIVE_H

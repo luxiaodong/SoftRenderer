@@ -18,7 +18,7 @@ protected:
     void paintEvent(QPaintEvent* );
 
 private:
-    QImage genImage(int width, int height, float* data);
+    QImage genImage(int width, int height, int* data);
 
 private:
     GScene* m_pScene;
