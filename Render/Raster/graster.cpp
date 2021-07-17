@@ -13,6 +13,11 @@ void GRaster::createBuffer()
     m_depthBuffer = new GDepthBuffer(m_size.width(), m_size.height());
 }
 
+void GRaster::setClearDepth()
+{
+    m_depthBuffer->clear();
+}
+
 void GRaster::setVertexAttribute(int attId, GVertexAttribute* vBuffer)
 {
     if (m_vertexs.contains(attId))
@@ -55,6 +60,7 @@ void GRaster::vertexToPrimitive(GVertexAttribute* vBuffer)
 
         GPrimitive primitive;
         primitive.setTriangle(a, b, c);
+        primitive.setColor(Qt::red, Qt::green, Qt::blue);
         m_primitivesBeforeCulling.append(primitive);
     }
 }
@@ -75,13 +81,14 @@ void GRaster::cullingInHomogeneousSpace(GPrimitive& primitive)
     }
 }
 
-QVector3D GRaster::ndcToScreenPoint(QVector4D& pos)
+QVector4D GRaster::ndcToScreenPoint(QVector4D& pos)
 {
+    //保留 pos.w, 方便以后投影插值映射
     QVector4D p = m_viewPortMat*pos;
-    return QVector3D(p.x(), p.y(), p.z());
+    return QVector4D(p.x(), p.y(), p.z(), pos.w());
 }
 
-QRect GRaster::aabb(QVector3D& a, QVector3D& b, QVector3D& c)
+QRect GRaster::aabb(QVector4D& a, QVector4D& b, QVector4D& c)
 {
     int xMin = a.x();
     int xMax = a.x();
@@ -121,7 +128,7 @@ QList<QPoint> GRaster::bresenham(int x0, int y0, int x1, int y1)
     return list;
 }
 
-QList<QPoint> GRaster::calculateBoundary(QVector3D& a,QVector3D& b,QVector3D& c)
+QList<QPoint> GRaster::calculateBoundary(QVector4D& a,QVector4D& b,QVector4D& c)
 {
     QList<QPoint> boundaryPoints;
     boundaryPoints.append( this->bresenham(a.x(), a.y(), b.x(), b.y()));
@@ -155,7 +162,7 @@ QVector3D GRaster::interpolationCoffInTriangle(QPoint a, QPoint b, QPoint c, QPo
 {
     //p = alpha*a + beta*b + gamma*c
     //1 = alpha + beta + gamma
-    // 这里的系数可能 < 0
+    //这里的系数可能 < 0
 
     int temp1 = (a.y() - b.y())*p.x() + (b.x() - a.x())*p.y() + a.x()*b.y() - b.x()*a.y();
     int temp2 = (a.y() - b.y())*c.x() + (b.x() - a.x())*c.y() + a.x()*b.y() - b.x()*a.y();
@@ -168,11 +175,16 @@ QVector3D GRaster::interpolationCoffInTriangle(QPoint a, QPoint b, QPoint c, QPo
     return QVector3D(alpha, beta, gamma);
 }
 
-QColor GRaster::interpolationColor(QColor& ca, QColor& cb, QColor& cc, QVector3D coff)
+QColor GRaster::interpolationColor(QColor& ca, QColor& cb, QColor& cc, QVector3D weight, float zView)
 {
-    int r = ca.red()*1.0f*coff.x() + cb.red()*1.0*coff.y() + cc.red()*1.0*coff.z();
-    int g = ca.green()*1.0f*coff.x() + cb.green()*1.0*coff.y() + cc.green()*1.0*coff.z();
-    int b = ca.blue()*1.0f*coff.x() + cb.blue()*1.0*coff.y() + cc.blue()*1.0*coff.z();
+    float alpha = weight.x();
+    float beta = weight.y();
+    float gamma = weight.z();
+
+    int r = (alpha*ca.red()   + beta*cb.red()   + gamma*cc.red()  ) * zView;
+    int g = (alpha*ca.green() + beta*cb.green() + gamma*cc.green()) * zView;
+    int b = (alpha*ca.blue()  + beta*cb.blue()  + gamma*cc.blue() ) * zView;
+
     if(r > 255) r = 255;
     if(g > 255) g = 255;
     if(b > 255) b = 255;
@@ -237,17 +249,20 @@ int* GRaster::doRendering()
             continue;
         }
 
-//        qDebug()<<primitive.m_b;
+//        qDebug()<<primitive.m_a.z();
+//        qDebug()<<primitive.m_b.z();
+//        qDebug()<<primitive.m_c.z();
 
         //Screen Mapping 屏幕映射
-        QVector3D a = this->ndcToScreenPoint(primitive.m_a);
-        QVector3D b = this->ndcToScreenPoint(primitive.m_b);
-        QVector3D c = this->ndcToScreenPoint(primitive.m_c);
+        QVector4D a = this->ndcToScreenPoint(primitive.m_a);
+        QVector4D b = this->ndcToScreenPoint(primitive.m_b);
+        QVector4D c = this->ndcToScreenPoint(primitive.m_c);
         QList<QPoint> boundaryPair = this->calculateBoundary(a,b,c);
         QColor ca = primitive.m_colorA;
         QColor cb = primitive.m_colorB;
         QColor cc = primitive.m_colorC;
 
+        //建立三角形,然后遍历, 从三个顶点建立三条线,再遍历每条扫描线
         int pairSize = boundaryPair.size()/2;
         for(int j=0; j<pairSize; ++j)
         {
@@ -258,32 +273,39 @@ int* GRaster::doRendering()
             //从左到右扫描
             for(int x=xMin; x<=xMax; ++x)
             {
-                QVector3D coff = this->interpolationCoffInTriangle( QPoint(a.x(), a.y()),
-                                                                    QPoint(b.x(), b.y()),
-                                                                    QPoint(c.x(), c.y()),
-                                                                    QPoint(x,y) );
-                //注,z的插值
-                QColor color = this->interpolationColor(ca, cb, cc, coff);
-                m_frameBuffer->setPixel(x, y, color);
+                QVector3D weight = this->interpolationCoffInTriangle( QPoint(a.x(), a.y()),
+                                                                      QPoint(b.x(), b.y()),
+                                                                      QPoint(c.x(), c.y()),
+                                                                      QPoint(x,y) );
+                // 将2D的权重转化为3D的权重.
+                float alpha = weight.x()/a.w();
+                float beta = weight.y()/b.w();
+                float gamma = weight.z()/c.w();
+
+                // 先算View空间下的Z值.
+                float zView = 1.0f/(alpha + beta + gamma);
+                // 再算深度缓存里的Z值,这里不用投影矩阵计算,而采用插值.
+                float zDepth = (alpha*a.z() + beta*b.z() + gamma*c.z()) * zView;
+                // 对于非透明物体,进行ealy-z
+                if( zDepth < m_depthBuffer->depth(x, y) )
+                {
+                    // 插值顶点属性
+                    QColor color = this->interpolationColor(ca, cb, cc, QVector3D(alpha, beta, gamma), zView);
+                    // FS(Fragment Shader)
+                    color = m_shader.fragment(x*1.0f/m_size.width(), y*1.0f/m_size.height(), color);
+                    //ZT(Z-Test) 模版测试,深度测试
+                    m_depthBuffer->setDepth(x, y, zDepth);
+                    //OM(Output Merger) 进行Alpha Blend，颜色混合
+
+                    m_frameBuffer->setPixel(x, y, color);
+                }
+//                else
+//                {
+//                    qDebug()<<m_depthBuffer->depth(x, y);
+//                }
             }
         }
-
-//        QMap<int, int> range;
-//        qDebug()<<line1.size()<<line2.size()<<line3.size();
-//        qDebug()<<line1;
-//        qDebug()<<line2;
-//        qDebug()<<line3;
-//        qDebug()<<c<<a;
-
-//        qDebug()<<a<<b<<c;
-//        qDebug()<<"=======================================";
     }
-
-    //建立三角形,然后遍历, 从三个顶点建立三条线,再遍历每条扫描线
-    //PZ(Pre-Z)
-    //FS(Fragment Shader)
-    //ZT(Z-Test) 模版测试,深度测试
-    //OM(Output Merger) 进行Alpha Blend，颜色混合
 
     return m_frameBuffer->m_data;
 }

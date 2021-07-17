@@ -21,6 +21,11 @@ void GGraphicsAPI::setClearColor(const QColor& color)
     m_pRender->setClearColor(color);
 }
 
+void GGraphicsAPI::setClearDepth()
+{
+    m_pRender->setClearDepth();
+}
+
 void GGraphicsAPI::setViewMatrix(QVector3D position, float xDegree, float yDegree, float zDegree)
 {
     float xRadians = qDegreesToRadians(xDegree);
@@ -128,13 +133,13 @@ void GGraphicsAPI::setProjMatrix(float fov, float aspect, float n, float f)
 
 void GGraphicsAPI::setViewPortMatrix(float x, float y, float w, float h)
 {
-    float zMax = 1;
-    float zMin = -1;
+//    float zMax = 1;
+//    float zMin = -1;
     QMatrix4x4 s(
-                 w/2, 0.0f,          0.0f, 0.0f,
-                0.0f,  h/2,          0.0f, 0.0f,
-                0.0f, 0.0f, 1/(zMax-zMin), 0.0f,
-                0.0f, 0.0f,          0.0f, 1.0f);
+                 w/2, 0.0f,  0.0f, 0.0f,
+                0.0f,  h/2,  0.0f, 0.0f,
+                0.0f, 0.0f,  0.5f, 0.0f,
+                0.0f, 0.0f,  0.0f, 1.0f);
 
     QMatrix4x4 t(
                 1.0f, 0.0f, 0.0f, x+w/2,
@@ -142,6 +147,7 @@ void GGraphicsAPI::setViewPortMatrix(float x, float y, float w, float h)
                 0.0f, 0.0f, 1.0f, 0.5f,
                 0.0f, 0.0f, 0.0f, 1.0f);
 
+    // 这里将z从[-1,1]映射到[0,1]
     m_pRender->setViewPortMatrix(t*s);
 }
 

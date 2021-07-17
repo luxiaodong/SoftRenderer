@@ -12,6 +12,7 @@ class GPrimitive
 public:
     GPrimitive();
     void setTriangle(QVector4D a, QVector4D b, QVector4D c);
+    void setColor(QColor a, QColor b, QColor c);
     void homogeneousDiv();
     bool isDiscardCullingSuccess();
     bool isTriangleInFrustum();

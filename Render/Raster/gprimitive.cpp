@@ -10,10 +10,13 @@ void GPrimitive::setTriangle(QVector4D a, QVector4D b, QVector4D c)
     m_a = a;
     m_b = b;
     m_c = c;
+}
 
-    m_colorA = Qt::red;
-    m_colorB = Qt::green;
-    m_colorC = Qt::blue;
+void GPrimitive::setColor(QColor a, QColor b, QColor c)
+{
+    m_colorA = a;
+    m_colorB = b;
+    m_colorC = c;
 }
 
 void GPrimitive::homogeneousDiv()

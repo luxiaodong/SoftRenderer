@@ -1,6 +1,7 @@
 #ifndef GSHADER_H
 #define GSHADER_H
 
+#include <QColor>
 #include <QVector4D>
 #include <QMatrix4x4>
 #include "Render/Raster/gvertexattribute.h"
@@ -13,7 +14,7 @@ public:
     void vertex(GVertexAttribute*);
     void tessellator(){}
     void geometry(){}
-    void fragment();
+    QColor fragment(float x, float y, QColor r);
 
     QVector4D worldToClipping(QVector4D pos);
 

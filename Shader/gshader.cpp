@@ -39,7 +39,9 @@ void GShader::vertex(GVertexAttribute* vBuffer)
     }
 }
 
-void GShader::fragment()
+QColor GShader::fragment(float x, float y, QColor r)
 {
-
+    (void)x;
+    (void)y;
+    return r;
 }
