@@ -5,6 +5,9 @@ GRaster::GRaster()
 {
     m_frameBuffer = 0;
     m_depthBuffer = 0;
+    m_enableDepthTest = true;
+    m_enableDepthWrite = true;
+    m_enableBlend = true;
 }
 
 void GRaster::createBuffer()
@@ -184,6 +187,7 @@ QColor GRaster::interpolationColor(QColor& ca, QColor& cb, QColor& cc, QVector3D
     int r = (alpha*ca.red()   + beta*cb.red()   + gamma*cc.red()  ) * zView;
     int g = (alpha*ca.green() + beta*cb.green() + gamma*cc.green()) * zView;
     int b = (alpha*ca.blue()  + beta*cb.blue()  + gamma*cc.blue() ) * zView;
+    int a = (alpha*ca.alpha() + beta*cb.alpha() + gamma*cc.alpha()) * zView;
 
     if(r > 255) r = 255;
     if(g > 255) g = 255;
@@ -191,7 +195,7 @@ QColor GRaster::interpolationColor(QColor& ca, QColor& cb, QColor& cc, QVector3D
     if(r <  0 ) r = 0;
     if(g <  0 ) g = 0;
     if(b <  0 ) b = 0;
-    return QColor(r, g, b);
+    return QColor(r, g, b, a);
 }
 
 int* GRaster::doRendering()
@@ -287,22 +291,35 @@ int* GRaster::doRendering()
                 // 再算深度缓存里的Z值,这里不用投影矩阵计算,而采用插值.
                 float zDepth = (alpha*a.z() + beta*b.z() + gamma*c.z()) * zView;
                 // 对于非透明物体,进行ealy-z
-                if( zDepth < m_depthBuffer->depth(x, y) )
+                if (m_enableDepthTest && zDepth > m_depthBuffer->depth(x, y) )
                 {
-                    // 插值顶点属性
-                    QColor color = this->interpolationColor(ca, cb, cc, QVector3D(alpha, beta, gamma), zView);
-                    // FS(Fragment Shader)
-                    color = m_shader.fragment(x*1.0f/m_size.width(), y*1.0f/m_size.height(), color);
-                    //ZT(Z-Test) 模版测试,深度测试
-                    m_depthBuffer->setDepth(x, y, zDepth);
-                    //OM(Output Merger) 进行Alpha Blend，颜色混合
-
-                    m_frameBuffer->setPixel(x, y, color);
+                    continue;
                 }
-//                else
-//                {
-//                    qDebug()<<m_depthBuffer->depth(x, y);
-//                }
+
+                // 插值顶点属性
+                QColor color = this->interpolationColor(ca, cb, cc, QVector3D(alpha, beta, gamma), zView);
+                // FS(Fragment Shader)
+                QColor srcColor = m_shader.fragment(x*1.0f/m_size.width(), y*1.0f/m_size.height(), color);
+                // 模版测试, 这里暂不支持
+                // ZT(Z-Test) 深度测试
+                if(m_enableDepthTest && m_enableDepthWrite)
+                {
+                    m_depthBuffer->setDepth(x, y, zDepth);
+                }
+
+                // OM(Output Merger) 进行Alpha Blend，颜色混合
+                if(m_enableBlend)
+                {
+                    QColor dstColor = m_frameBuffer->pixel(x, y);
+                    float r = srcColor.redF()  *srcColor.alphaF() + dstColor.redF()  *(1 - srcColor.alphaF());
+                    float g = srcColor.greenF()*srcColor.alphaF() + dstColor.greenF()*(1 - srcColor.alphaF());
+                    float b = srcColor.blueF() *srcColor.alphaF() + dstColor.blueF() *(1 - srcColor.alphaF());
+                    m_frameBuffer->setPixel(x, y, QColor(r*255, g*255, b*255) );
+                }
+                else
+                {
+                    m_frameBuffer->setPixel(x, y, srcColor);
+                }
             }
         }
     }

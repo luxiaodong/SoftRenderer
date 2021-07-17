@@ -55,6 +55,10 @@ private:
     QMap<int, GVertexAttribute*> m_vertexs;
     QList<GPrimitive> m_primitivesBeforeCulling;
     QList<GPrimitive> m_primitivesAfterCulling;
+
+    bool m_enableDepthTest;
+    bool m_enableDepthWrite;
+    bool m_enableBlend;
 };
 
 #endif // GRASTER_H
