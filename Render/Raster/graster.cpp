@@ -70,17 +70,39 @@ void GRaster::vertexToPrimitive(GVertexAttribute* vBuffer)
 
 void GRaster::cullingInHomogeneousSpace(GPrimitive& primitive)
 {
-    QList<QVector4D> list = primitive.culling();
+    QList<GVertexCullingRatio> list = primitive.culling();
+
+    QList<QColor> colorList;
+    foreach(GVertexCullingRatio single, list)
+    {
+        QColor ca = primitive.m_colorA;
+        QColor cb = primitive.m_colorB;
+        QColor cc = primitive.m_colorC;
+
+        float alpha = single.m_ratio.x();
+        float beta  = single.m_ratio.y();
+        float gamma = single.m_ratio.z();
+
+        float r = alpha*ca.redF()   + beta*cb.redF()   + gamma*cc.redF();
+        float g = alpha*ca.greenF() + beta*cb.greenF() + gamma*cc.greenF();
+        float b = alpha*ca.blueF()  + beta*cb.blueF()  + gamma*cc.blueF();
+        float a = alpha*ca.alphaF() + beta*cb.alphaF() + gamma*cc.alphaF();
+
+        QColor color;
+        color.setRgbF(r,g,b,a);
+        colorList.append(color);
+    }
 
     for(int i = 0; i < list.size() - 2; ++i)
     {
-        QVector4D a = list.at(0);
-        QVector4D b = list.at(i+1);
-        QVector4D c = list.at(i+2);
+        QVector4D a = list.at(0).m_point;
+        QVector4D b = list.at(i+1).m_point;
+        QVector4D c = list.at(i+2).m_point;
 
         GPrimitive primitive;
         primitive.setTriangle(a, b, c);
-        m_primitivesBeforeCulling.append(primitive);
+        primitive.setColor( colorList.at(0), colorList.at(i+1), colorList.at(i+2) );
+        m_primitivesAfterCulling.append(primitive);
     }
 }
 
@@ -108,7 +130,7 @@ QRect GRaster::aabb(QVector4D& a, QVector4D& b, QVector4D& c)
     if (c.y() < yMin) yMin = c.y();
     if (c.y() > yMax) yMax = c.y();
 
-    return QRect(xMin, yMin, xMax-xMin, yMax-xMin);
+    return QRect(xMin, yMin, xMax-xMin, yMax-yMin);
 }
 
 QList<QPoint> GRaster::bresenham(int x0, int y0, int x1, int y1)
@@ -241,6 +263,7 @@ int* GRaster::doRendering()
     }
 
 //    qDebug()<<m_primitivesAfterCulling.size();
+    //对每个三角形进行遍历
     foreach (GPrimitive primitive, m_primitivesAfterCulling)
     {
 //        qDebug()<<primitive.m_b;
@@ -252,10 +275,6 @@ int* GRaster::doRendering()
         {
             continue;
         }
-
-//        qDebug()<<primitive.m_a.z();
-//        qDebug()<<primitive.m_b.z();
-//        qDebug()<<primitive.m_c.z();
 
         //Screen Mapping 屏幕映射
         QVector4D a = this->ndcToScreenPoint(primitive.m_a);
@@ -273,6 +292,9 @@ int* GRaster::doRendering()
             int xMin = boundaryPair.at(2*j).x();
             int xMax = boundaryPair.at(2*j+1).x();
             int y = boundaryPair.at(2*j).y();
+
+            //右边边界不能取整数
+            xMax = qMin(xMax, m_size.width() - 1);
 
             //从左到右扫描
             for(int x=xMin; x<=xMax; ++x)

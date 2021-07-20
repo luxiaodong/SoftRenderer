@@ -24,20 +24,25 @@ Widget::Widget(QWidget *parent)
     int i = 1;
     foreach (GGameObject go, m_pScene->m_gameObjects)
     {
-        m_graphicsApi->setVertexAttribute(i, go.m_mesh);
+        m_graphicsApi->setVertexAttribute(i++, go.m_mesh);
     }
 
-    m_graphicsApi->doRendering();
+    m_drawOnce = 0;
+//    m_graphicsApi->doRendering();
 }
 
 void Widget::paintEvent(QPaintEvent*)
 {
-    m_graphicsApi->setClearColor(Qt::black);
-    m_graphicsApi->setClearDepth();
+    m_drawOnce++;
+    if(m_drawOnce == 3)
+    {
+        m_graphicsApi->setClearColor(Qt::black);
+        m_graphicsApi->setClearDepth();
 
-    int* data = m_graphicsApi->doRendering();
-    QPainter painter(this);
-    painter.drawImage( QRectF(0,0,this->width(), this->height()), this->genImage(100, 100, data));
+        int* data = m_graphicsApi->doRendering();
+        QPainter painter(this);
+        painter.drawImage( QRectF(0,0,this->width(), this->height()), this->genImage(100, 100, data));
+    }
 }
 
 QImage Widget::genImage(int width, int height, int* data)

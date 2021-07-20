@@ -1,4 +1,5 @@
 #include "gprimitive.h"
+#include <QDebug>
 
 GPrimitive::GPrimitive()
 {
@@ -31,13 +32,13 @@ void GPrimitive::homogeneousDiv()
     m_c = c;
 }
 
-bool GPrimitive::isDiscardCullingSuccess()
+bool GPrimitive::isDiscardCullingSuccess() const
 {
     float value = (m_b.x() - m_a.x())*(m_c.y() - m_a.y()) - (m_b.y() - m_a.y())*(m_c.x() - m_a.x());
     return value < 0.0f;
 }
 
-bool GPrimitive::isTriangleInFrustum()
+bool GPrimitive::isTriangleInFrustum() const
 {
     if (!this->isPointInFrustum(m_a)) return false;
     if (!this->isPointInFrustum(m_b)) return false;
@@ -45,92 +46,129 @@ bool GPrimitive::isTriangleInFrustum()
     return true;
 }
 
-bool GPrimitive::isPointInFrustum(QVector4D p)
+bool GPrimitive::isPointInFrustum(QVector4D p) const
 {
     if( p.w() < 0.0001 ) return false;
-    if( p.x() < -p.w() || p.x() > p.w() ) return false;
-    if( p.y() < -p.w() || p.y() > p.w() ) return false;
-    if( p.z() < -p.w() || p.z() > p.w() ) return false;
+    if( !this->isPointInSinglePlane(p, 0) ) return false;
+    if( !this->isPointInSinglePlane(p, 1) ) return false;
+    if( !this->isPointInSinglePlane(p, 2) ) return false;
+    if( !this->isPointInSinglePlane(p, 3) ) return false;
+    if( !this->isPointInSinglePlane(p, 4) ) return false;
+    if( !this->isPointInSinglePlane(p, 5) ) return false;
     return true;
 }
 
-QList<QVector4D> GPrimitive::culling()
+bool GPrimitive::isPointInSinglePlane(QVector4D p, int plane) const
 {
-    QList<QVector4D> list;
-    list.append(m_a);
-    list.append(m_b);
-    list.append(m_c);
+    if(plane == 0) // w=-x
+    {
+        return p.x() >= -p.w();
+    }
+    else if(plane == 1) // w=x
+    {
+        return p.x() <= p.w();
+    }
+    else if(plane == 2) // w=-y
+    {
+        return p.y() >= -p.w();
+    }
+    else if(plane == 3) // w=y
+    {
+        return p.y() <= p.w();
+    }
+    else if(plane == 4) // w=-z
+    {
+        return p.z() >= -p.w();
+    }
+    else if(plane == 5) // w=z
+    {
+        return p.z() <= p.w();
+    }
+
+    return false;
+}
+
+QList<GVertexCullingRatio> GPrimitive::culling() const
+{
+    QList<GVertexCullingRatio> list;
+    list.append(GVertexCullingRatio(m_a, QVector3D(1.0, 0.0, 0.0)));
+    list.append(GVertexCullingRatio(m_b, QVector3D(0.0, 1.0, 0.0)));
+    list.append(GVertexCullingRatio(m_c, QVector3D(0.0, 0.0, 1.0)));
+
     list = this->cullingSinglePlane(list, 0);
     list = this->cullingSinglePlane(list, 1);
     list = this->cullingSinglePlane(list, 2);
     list = this->cullingSinglePlane(list, 3);
     list = this->cullingSinglePlane(list, 4);
     list = this->cullingSinglePlane(list, 5);
+
     return list;
 }
 
 // 一条直线和一个平面只有一个交点
-QList<QVector4D> GPrimitive::cullingSinglePlane(QList<QVector4D>& inList, int plane)
+QList<GVertexCullingRatio> GPrimitive::cullingSinglePlane(QList<GVertexCullingRatio>& inList, int plane) const
 {
-    QList<QVector4D> outList;
+    QList<GVertexCullingRatio> outList;
 
     for(int i=0; i< inList.size(); ++i)
     {
         int next = i+1;
         if(next == inList.size()) next = 0;
 
-        QVector4D curr_pos = inList.at(i);
-        QVector4D next_pos = inList.at(next);
+        QVector4D curr_pos = inList.at(i).m_point;
+        QVector4D next_pos = inList.at(next).m_point;
+        QVector3D curr_rat = inList.at(i).m_ratio;
+        QVector3D next_rat = inList.at(next).m_ratio;
 
-        if(this->isPointInFrustum(curr_pos))
+        if(this->isPointInSinglePlane(curr_pos, plane))
         {
-            outList.append(curr_pos);
+            outList.append(GVertexCullingRatio(curr_pos, curr_rat));
         }
 
         float percent = this->calculateCullingPercent(curr_pos, next_pos, plane);
-
         if(percent > 0.00001 && percent < 0.99999)
         {
-            QVector4D newPos = curr_pos + next_pos*percent;
-            outList.append(newPos);
+            QVector4D new_pos = curr_pos*(1-percent) + next_pos*percent;
+            QVector3D new_rat = curr_rat*(1-percent) + next_rat*percent;
+            outList.append(GVertexCullingRatio(new_pos, new_rat));
         }
     }
 
     return outList;
 }
 
-// p = p1 + t*(p2 - p1), and w = 1.
-float GPrimitive::calculateCullingPercent(QVector4D p1, QVector4D p2, int plane)
+// p = p1 + t*(p2 - p1).
+float GPrimitive::calculateCullingPercent(QVector4D p1, QVector4D p2, int plane) const
 {
     if(plane == 0) // w=-x
     {
-        return calculateCullingPercent(p1.x(), p2.x(), p1.w(), p2.w(), -1);
+        return this->calculateCullingPercent(p1.x(), p2.x(), p1.w(), p2.w(), -1);
     }
     else if(plane == 1) // w=x
     {
-        return calculateCullingPercent(p1.x(), p2.x(), p1.w(), p2.w(), 1);
+        return this->calculateCullingPercent(p1.x(), p2.x(), p1.w(), p2.w(), 1);
     }
     else if(plane == 2) // w=-y
     {
-        return calculateCullingPercent(p1.y(), p2.y(), p1.w(), p2.w(), -1);
+        return this->calculateCullingPercent(p1.y(), p2.y(), p1.w(), p2.w(), -1);
     }
     else if(plane == 3) // w=y
     {
-        return calculateCullingPercent(p1.y(), p2.y(), p1.w(), p2.w(), 1);
+        return this->calculateCullingPercent(p1.y(), p2.y(), p1.w(), p2.w(), 1);
     }
     else if(plane == 4) // w=-z
     {
-        return calculateCullingPercent(p1.z(), p2.z(), p1.w(), p2.w(), -1);
+        return this->calculateCullingPercent(p1.z(), p2.z(), p1.w(), p2.w(), -1);
     }
     else if(plane == 5) // w=z
     {
-        return calculateCullingPercent(p1.z(), p2.z(), p1.w(), p2.w(), 1);
+        return this->calculateCullingPercent(p1.z(), p2.z(), p1.w(), p2.w(), 1);
     }
 
     return 0.0f;
 }
 
-float GPrimitive::calculateCullingPercent(int x1, int x2, int w1, int w2, int sign)
+float GPrimitive::calculateCullingPercent(float x1, float x2, float w1, float w2, int sign) const
 {
     float numerator = sign*w1 - x1;
     float denominator = (x2-x1) - sign*(w2-w1);

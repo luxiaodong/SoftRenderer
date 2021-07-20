@@ -24,6 +24,7 @@ private:
     GScene* m_pScene;
     GCamear* m_camera;
     GGraphicsAPI* m_graphicsApi;
+    int m_drawOnce;
 };
 
 #endif // WIDGET_H
