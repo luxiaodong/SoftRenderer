@@ -10,8 +10,8 @@ class GModel
 public:
     GModel();
     static GMesh loadTriangle();
-//    GGameObject loadCube();
-//    GGameObject loadObject(QString filePath);
+    static GMesh loadPlane();
+    static GMesh loadObject(QString filePath);
 
 private:
     QString m_resourceDir;

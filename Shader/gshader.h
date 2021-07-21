@@ -16,9 +16,10 @@ public:
     void geometry(){}
     QColor fragment(float x, float y, QColor r);
 
-    QVector4D worldToClipping(QVector4D pos);
+    QVector4D objectToClipping(QVector4D pos);
 
 public:
+    QMatrix4x4 m_modelMat; //模型矩阵
     QMatrix4x4 m_viewMat; //视口矩阵
     QMatrix4x4 m_projMat; //投影矩阵,包括正交投影
 };

@@ -26,6 +26,53 @@ void GGraphicsAPI::setClearDepth()
     m_pRender->setClearDepth();
 }
 
+void GGraphicsAPI::setModelMatrix(QVector3D position, QVector3D rotate, QVector3D scale)
+{
+    float xRadians = qDegreesToRadians(rotate.x());
+    float yRadians = qDegreesToRadians(rotate.y());
+    float zRadians = qDegreesToRadians(rotate.z());
+
+    QMatrix4x4 xMat(
+                1.0,            0.0,             0.0, 0.0,
+                0.0, qCos(xRadians), -qSin(xRadians), 0.0,
+                0.0, qSin(xRadians),  qCos(xRadians), 0.0,
+                0.0,            0.0,             0.0, 1.0
+                );
+
+    QMatrix4x4 yMat(
+                qCos(yRadians),  0.0, qSin(yRadians), 0.0,
+                0.0,             1.0,            0.0, 0.0,
+                -qSin(yRadians), 0.0, qCos(yRadians), 0.0,
+                0.0,             0.0,            0.0, 1.0
+                );
+
+    QMatrix4x4 zMat(
+                qCos(zRadians), -qSin(zRadians), 0.0, 0.0,
+                qSin(zRadians),  qCos(zRadians), 0.0, 0.0,
+                0.0,            0.0,             1.0, 0.0,
+                0.0,            0.0,             0.0, 1.0
+                );
+
+
+    QMatrix4x4 s(
+                scale.x(),    0.0f,         0.0f, 0.0f,
+                0.0f,    scale.y(),         0.0f, 0.0f,
+                0.0f,         0.0f,    scale.z(), 0.0f,
+                0.0f,         0.0f,         0.0f, 1.0f
+                );
+
+    QMatrix4x4 r = yMat*xMat*zMat;
+
+    QMatrix4x4 t(
+                1.0f, 0.0f, 0.0f, position.x(),
+                0.0f, 1.0f, 0.0f, position.y(),
+                0.0f, 0.0f, 1.0f, position.z(),
+                0.0f, 0.0f, 0.0f, 1.0f
+                );
+
+    m_pRender->setModelMatrix(t*r*s);
+}
+
 void GGraphicsAPI::setViewMatrix(QVector3D position, float xDegree, float yDegree, float zDegree)
 {
     float xRadians = qDegreesToRadians(xDegree);
@@ -167,7 +214,7 @@ void GGraphicsAPI::setVertexAttribute(int attId, const GMesh& mesh)
     }
 
     GVertexAttribute* vBuffer = new GVertexAttribute();
-    vBuffer->m_vertexsInWorld = vertex;
+    vBuffer->m_vertexsInObject = vertex;
     vBuffer->m_vertexCount = count;
     m_pRender->setVertexAttribute(attId, vBuffer);
 }

@@ -21,6 +21,8 @@ private:
     QImage genImage(int width, int height, int* data);
 
 private:
+    int m_width;
+    int m_height;
     GScene* m_pScene;
     GCamear* m_camera;
     GGraphicsAPI* m_graphicsApi;

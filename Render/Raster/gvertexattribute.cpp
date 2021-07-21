@@ -2,6 +2,6 @@
 
 GVertexAttribute::GVertexAttribute()
 {
-    m_vertexsInWorld = 0;
+    m_vertexsInObject = 0;
     m_vertexsInClips = 0;
 }

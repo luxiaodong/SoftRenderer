@@ -11,8 +11,12 @@ GScene::GScene()
 void GScene::loadSceneTest()
 {
     m_gameObjects.clear();
-    // load triangle
+
     GGameObject obj = GGameObject();
-    obj.setMesh(GModel::loadTriangle());
+//    obj.setMesh(GModel::loadTriangle());
+    obj.setMesh(GModel::loadPlane());
+//    obj.setPosition(0,0,1);
+//    obj.setScale(0.5, 0.5, 1);
+//    obj.setRotate(60, 0, 0);
     m_gameObjects.append(obj);
 }

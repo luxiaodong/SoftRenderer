@@ -27,6 +27,7 @@ public:
     void setClearColor(const QColor& color){m_color = color;}
     void setClearDepth();
 
+    void setModelMatrix(const QMatrix4x4& mat){ m_shader.m_modelMat = mat;}
     void setViewMatrix(const QMatrix4x4& mat){ m_shader.m_viewMat = mat;}
     void setProjMatrix(const QMatrix4x4& mat){ m_shader.m_projMat = mat;}
     void setViewPortMatrix(const QMatrix4x4 &mat){m_viewPortMat = mat;}
@@ -49,7 +50,6 @@ private:
     GShader m_shader;
 
     QMatrix4x4 m_viewPortMat;
-
     GFrameBuffer* m_frameBuffer;
     GDepthBuffer* m_depthBuffer;
     QMap<int, GVertexAttribute*> m_vertexs;

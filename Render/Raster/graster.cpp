@@ -63,7 +63,7 @@ void GRaster::vertexToPrimitive(GVertexAttribute* vBuffer)
 
         GPrimitive primitive;
         primitive.setTriangle(a, b, c);
-        primitive.setColor(Qt::red, Qt::green, Qt::blue);
+        primitive.setColor(Qt::white, Qt::white, Qt::white);
         m_primitivesBeforeCulling.append(primitive);
     }
 }
@@ -262,17 +262,17 @@ int* GRaster::doRendering()
         }
     }
 
-//    qDebug()<<m_primitivesAfterCulling.size();
+    //qDebug()<<m_primitivesAfterCulling.size();
     //对每个三角形进行遍历
     foreach (GPrimitive primitive, m_primitivesAfterCulling)
     {
-//        qDebug()<<primitive.m_b;
         //PD(perspective division) 透视除法
         primitive.homogeneousDiv();
 
         //FC(face culling) 背面剔除
         if(primitive.isDiscardCullingSuccess())
         {
+            qDebug()<<"discard culling";
             continue;
         }
 
@@ -280,6 +280,8 @@ int* GRaster::doRendering()
         QVector4D a = this->ndcToScreenPoint(primitive.m_a);
         QVector4D b = this->ndcToScreenPoint(primitive.m_b);
         QVector4D c = this->ndcToScreenPoint(primitive.m_c);
+//qDebug()<<primitive.m_a<<primitive.m_b<<primitive.m_c;
+//qDebug()<<a<<b<<c;
         QList<QPoint> boundaryPair = this->calculateBoundary(a,b,c);
         QColor ca = primitive.m_colorA;
         QColor cb = primitive.m_colorB;
