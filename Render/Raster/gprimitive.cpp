@@ -65,7 +65,7 @@ QList<GVertexCullingRatio> GPrimitive::cullingSinglePlane(QList<GVertexCullingRa
 
 bool GPrimitive::isTriangleInFrustum() const
 {
-    for(int i = 0; i < 2; ++i)
+    for(int i = 0; i < 3; ++i)
     {
         if (!this->isPointInFrustum(m_triangle[i].m_vertex))
         {
@@ -168,7 +168,7 @@ bool GPrimitive::isDiscardCullingSuccess() const
 
 void GPrimitive::homogeneousDiv()
 {
-    for(int i = 0; i < 2; ++i)
+    for(int i = 0; i < 3; ++i)
     {
         QVector4D p = m_triangle[i].m_vertex;
         p = QVector4D(p.x()/p.w(), p.y()/p.w(), p.z()/p.w(), 1.0f);
