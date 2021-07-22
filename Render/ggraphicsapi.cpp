@@ -198,25 +198,17 @@ void GGraphicsAPI::setViewPortMatrix(float x, float y, float w, float h)
     m_pRender->setViewPortMatrix(t*s);
 }
 
-
-void GGraphicsAPI::setVertexAttribute(int attId, const GMesh& mesh)
+void GGraphicsAPI::setVertexAttribute(const GMesh& mesh, const GMaterial& material)
 {
-    int count = mesh.m_points.size();
-    float *vertex = new float[count*3];
-
-    int i = 0;
-    foreach (QVector3D p, mesh.m_points)
+    m_pRender->m_vertexAttributesBeforeVertexShader.clear();
+    foreach (GVertexIndex index, mesh.m_indexs)
     {
-        vertex[i] =  p.x();
-        vertex[i + 1] =  p.y();
-        vertex[i + 2] =  p.z();
-        i += 3;
-    }
+        QVector3D vertex = mesh.m_vertexs.at( index.m_vertexIndex );
+        QVector2D uv = mesh.m_uvs.at( index.m_uvIndex );
+        QVector3D normal = mesh.m_normals.at( index.m_normalIndex );
 
-    GVertexAttribute* vBuffer = new GVertexAttribute();
-    vBuffer->m_vertexsInObject = vertex;
-    vBuffer->m_vertexCount = count;
-    m_pRender->setVertexAttribute(attId, vBuffer);
+        m_pRender->m_vertexAttributesBeforeVertexShader.append( GVertexAttribute(vertex, uv, normal) );
+    }
 }
 
 int* GGraphicsAPI::doRendering()

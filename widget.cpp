@@ -27,11 +27,11 @@ Widget::Widget(QWidget *parent)
     foreach (GGameObject go, m_pScene->m_gameObjects)
     {
         m_graphicsApi->setModelMatrix(go.m_position, go.m_rotate, go.m_scale);
-        m_graphicsApi->setVertexAttribute(i++, go.m_mesh);
+        m_graphicsApi->setVertexAttribute(go.m_mesh, go.m_material);
     }
 
     m_drawOnce = 0;
-    this->resize(600,600);
+    this->resize(m_width, m_height);
 //    m_graphicsApi->doRendering();
 }
 

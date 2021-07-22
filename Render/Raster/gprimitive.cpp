@@ -6,43 +6,73 @@ GPrimitive::GPrimitive()
 
 }
 
-void GPrimitive::setTriangle(QVector4D a, QVector4D b, QVector4D c)
+GPrimitive::GPrimitive(GVertexAttribute& a, GVertexAttribute& b, GVertexAttribute& c)
 {
-    m_a = a;
-    m_b = b;
-    m_c = c;
+    m_triangle[0] = a;
+    m_triangle[1] = b;
+    m_triangle[2] = c;
 }
 
-void GPrimitive::setColor(QColor a, QColor b, QColor c)
+QList<GVertexCullingRatio> GPrimitive::culling() const
 {
-    m_colorA = a;
-    m_colorB = b;
-    m_colorC = c;
+    QList<GVertexCullingRatio> list;
+    list.append(GVertexCullingRatio(m_triangle[0].m_vertex, QVector3D(1.0, 0.0, 0.0)));
+    list.append(GVertexCullingRatio(m_triangle[1].m_vertex, QVector3D(0.0, 1.0, 0.0)));
+    list.append(GVertexCullingRatio(m_triangle[2].m_vertex, QVector3D(0.0, 0.0, 1.0)));
+
+    list = this->cullingSinglePlane(list, 0);
+    list = this->cullingSinglePlane(list, 1);
+    list = this->cullingSinglePlane(list, 2);
+    list = this->cullingSinglePlane(list, 3);
+    list = this->cullingSinglePlane(list, 4);
+    list = this->cullingSinglePlane(list, 5);
+
+    return list;
 }
 
-void GPrimitive::homogeneousDiv()
-{
-    //z in [-1,1]
-    QVector4D a = QVector4D(m_a.x()/m_a.w(), m_a.y()/m_a.w(), m_a.z()/m_a.w(), 1.0f);
-    QVector4D b = QVector4D(m_b.x()/m_b.w(), m_b.y()/m_b.w(), m_b.z()/m_b.w(), 1.0f);
-    QVector4D c = QVector4D(m_c.x()/m_c.w(), m_c.y()/m_c.w(), m_c.z()/m_c.w(), 1.0f);
 
-    m_a = a;
-    m_b = b;
-    m_c = c;
-}
-
-bool GPrimitive::isDiscardCullingSuccess() const
+// 一条直线和一个平面只有一个交点
+QList<GVertexCullingRatio> GPrimitive::cullingSinglePlane(QList<GVertexCullingRatio>& inList, int plane) const
 {
-    float value = (m_b.x() - m_a.x())*(m_c.y() - m_a.y()) - (m_b.y() - m_a.y())*(m_c.x() - m_a.x());
-    return value < 0.0f;
+    QList<GVertexCullingRatio> outList;
+
+    for(int i=0; i< inList.size(); ++i)
+    {
+        int next = i+1;
+        if(next == inList.size()) next = 0;
+
+        QVector4D curr_pos = inList.at(i).m_point;
+        QVector4D next_pos = inList.at(next).m_point;
+        QVector3D curr_rat = inList.at(i).m_ratio;
+        QVector3D next_rat = inList.at(next).m_ratio;
+
+        if(this->isPointInSinglePlane(curr_pos, plane))
+        {
+            outList.append(GVertexCullingRatio(curr_pos, curr_rat));
+        }
+
+        float percent = this->calculateCullingPercent(curr_pos, next_pos, plane);
+        if(percent > 0.00001 && percent < 0.99999)
+        {
+            QVector4D new_pos = curr_pos*(1-percent) + next_pos*percent;
+            QVector3D new_rat = curr_rat*(1-percent) + next_rat*percent;
+            outList.append(GVertexCullingRatio(new_pos, new_rat));
+        }
+    }
+
+    return outList;
 }
 
 bool GPrimitive::isTriangleInFrustum() const
 {
-    if (!this->isPointInFrustum(m_a)) return false;
-    if (!this->isPointInFrustum(m_b)) return false;
-    if (!this->isPointInFrustum(m_c)) return false;
+    for(int i = 0; i < 2; ++i)
+    {
+        if (!this->isPointInFrustum(m_triangle[i].m_vertex))
+        {
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -88,54 +118,6 @@ bool GPrimitive::isPointInSinglePlane(QVector4D p, int plane) const
     return false;
 }
 
-QList<GVertexCullingRatio> GPrimitive::culling() const
-{
-    QList<GVertexCullingRatio> list;
-    list.append(GVertexCullingRatio(m_a, QVector3D(1.0, 0.0, 0.0)));
-    list.append(GVertexCullingRatio(m_b, QVector3D(0.0, 1.0, 0.0)));
-    list.append(GVertexCullingRatio(m_c, QVector3D(0.0, 0.0, 1.0)));
-
-    list = this->cullingSinglePlane(list, 0);
-    list = this->cullingSinglePlane(list, 1);
-    list = this->cullingSinglePlane(list, 2);
-    list = this->cullingSinglePlane(list, 3);
-    list = this->cullingSinglePlane(list, 4);
-    list = this->cullingSinglePlane(list, 5);
-
-    return list;
-}
-
-// 一条直线和一个平面只有一个交点
-QList<GVertexCullingRatio> GPrimitive::cullingSinglePlane(QList<GVertexCullingRatio>& inList, int plane) const
-{
-    QList<GVertexCullingRatio> outList;
-
-    for(int i=0; i< inList.size(); ++i)
-    {
-        int next = i+1;
-        if(next == inList.size()) next = 0;
-
-        QVector4D curr_pos = inList.at(i).m_point;
-        QVector4D next_pos = inList.at(next).m_point;
-        QVector3D curr_rat = inList.at(i).m_ratio;
-        QVector3D next_rat = inList.at(next).m_ratio;
-
-        if(this->isPointInSinglePlane(curr_pos, plane))
-        {
-            outList.append(GVertexCullingRatio(curr_pos, curr_rat));
-        }
-
-        float percent = this->calculateCullingPercent(curr_pos, next_pos, plane);
-        if(percent > 0.00001 && percent < 0.99999)
-        {
-            QVector4D new_pos = curr_pos*(1-percent) + next_pos*percent;
-            QVector3D new_rat = curr_rat*(1-percent) + next_rat*percent;
-            outList.append(GVertexCullingRatio(new_pos, new_rat));
-        }
-    }
-
-    return outList;
-}
 
 // p = p1 + t*(p2 - p1).
 float GPrimitive::calculateCullingPercent(QVector4D p1, QVector4D p2, int plane) const
@@ -173,4 +155,36 @@ float GPrimitive::calculateCullingPercent(float x1, float x2, float w1, float w2
     float numerator = sign*w1 - x1;
     float denominator = (x2-x1) - sign*(w2-w1);
     return numerator/denominator;
+}
+
+bool GPrimitive::isDiscardCullingSuccess() const
+{
+    QVector4D a = m_triangle[0].m_vertex;
+    QVector4D b = m_triangle[1].m_vertex;
+    QVector4D c = m_triangle[2].m_vertex;
+    float value = (b.x() - a.x())*(c.y() - a.y()) - (b.y() - a.y())*(c.x() - a.x());
+    return value < 0.0f;
+}
+
+void GPrimitive::homogeneousDiv()
+{
+    for(int i = 0; i < 2; ++i)
+    {
+        QVector4D p = m_triangle[i].m_vertex;
+        p = QVector4D(p.x()/p.w(), p.y()/p.w(), p.z()/p.w(), 1.0f);
+        m_triangle[i].m_vertex = p;
+    }
+}
+
+GVertexAttribute GPrimitive::interpolationAttribute(QVector3D ratio)
+{
+    float alpha = ratio.x();
+    float beta  = ratio.y();
+    float gamma = ratio.z();
+
+    QVector4D vertex = alpha*m_triangle[0].m_vertex + beta*m_triangle[1].m_vertex + gamma*m_triangle[2].m_vertex;
+    QVector2D uv     = alpha*m_triangle[0].m_uv     + beta*m_triangle[1].m_uv     + gamma*m_triangle[2].m_uv;
+    QVector3D normal = alpha*m_triangle[0].m_normal + beta*m_triangle[1].m_normal + gamma*m_triangle[2].m_normal;
+
+    return GVertexAttribute(vertex, uv, normal);
 }

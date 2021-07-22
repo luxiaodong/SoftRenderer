@@ -21,88 +21,22 @@ void GRaster::setClearDepth()
     m_depthBuffer->clear();
 }
 
-void GRaster::setVertexAttribute(int attId, GVertexAttribute* vBuffer)
-{
-    if (m_vertexs.contains(attId))
-    {
-        GVertexAttribute* p = m_vertexs.value(attId);
-        delete []p;
-        m_vertexs.remove(attId);
-    }
-
-    m_vertexs.insert(attId, vBuffer);
-}
-
-void GRaster::vertexToPrimitive(GVertexAttribute* vBuffer)
-{
-    if (vBuffer->m_vertexCount%3 > 0)
-    {
-        qDebug()<<"vertex count is not 3n.";
-        return ;
-    }
-
-    for(int i = 0; i < vBuffer->m_vertexCount; i+=3)
-    {
-        float x = vBuffer->m_vertexsInClips[4*i];
-        float y = vBuffer->m_vertexsInClips[4*i + 1];
-        float z = vBuffer->m_vertexsInClips[4*i + 2];
-        float w = vBuffer->m_vertexsInClips[4*i + 3];
-        QVector4D a(x, y, z, w);
-
-        x = vBuffer->m_vertexsInClips[4*(i+1)];
-        y = vBuffer->m_vertexsInClips[4*(i+1) + 1];
-        z = vBuffer->m_vertexsInClips[4*(i+1) + 2];
-        w = vBuffer->m_vertexsInClips[4*(i+1) + 3];
-        QVector4D b(x, y, z, w);
-
-        x = vBuffer->m_vertexsInClips[4*(i+2)];
-        y = vBuffer->m_vertexsInClips[4*(i+2) + 1];
-        z = vBuffer->m_vertexsInClips[4*(i+2) + 2];
-        w = vBuffer->m_vertexsInClips[4*(i+2) + 3];
-        QVector4D c(x, y, z, w);
-
-        GPrimitive primitive;
-        primitive.setTriangle(a, b, c);
-        primitive.setColor(Qt::white, Qt::white, Qt::white);
-        m_primitivesBeforeCulling.append(primitive);
-    }
-}
-
 void GRaster::cullingInHomogeneousSpace(GPrimitive& primitive)
 {
     QList<GVertexCullingRatio> list = primitive.culling();
-
-    QList<QColor> colorList;
+    QList<GVertexAttribute> vaList;
     foreach(GVertexCullingRatio single, list)
     {
-        QColor ca = primitive.m_colorA;
-        QColor cb = primitive.m_colorB;
-        QColor cc = primitive.m_colorC;
-
-        float alpha = single.m_ratio.x();
-        float beta  = single.m_ratio.y();
-        float gamma = single.m_ratio.z();
-
-        float r = alpha*ca.redF()   + beta*cb.redF()   + gamma*cc.redF();
-        float g = alpha*ca.greenF() + beta*cb.greenF() + gamma*cc.greenF();
-        float b = alpha*ca.blueF()  + beta*cb.blueF()  + gamma*cc.blueF();
-        float a = alpha*ca.alphaF() + beta*cb.alphaF() + gamma*cc.alphaF();
-
-        QColor color;
-        color.setRgbF(r,g,b,a);
-        colorList.append(color);
+        vaList.append( primitive.interpolationAttribute(single.m_ratio) );
     }
 
-    for(int i = 0; i < list.size() - 2; ++i)
+    for(int i = 0; i < vaList.size() - 2; ++i)
     {
-        QVector4D a = list.at(0).m_point;
-        QVector4D b = list.at(i+1).m_point;
-        QVector4D c = list.at(i+2).m_point;
+        GVertexAttribute a = vaList.at(0);
+        GVertexAttribute b = vaList.at(i+1);
+        GVertexAttribute c = vaList.at(i+2);
 
-        GPrimitive primitive;
-        primitive.setTriangle(a, b, c);
-        primitive.setColor( colorList.at(0), colorList.at(i+1), colorList.at(i+2) );
-        m_primitivesAfterCulling.append(primitive);
+        m_primitivesAfterCulling.append( GPrimitive(a,b,c) );
     }
 }
 
@@ -228,23 +162,35 @@ int* GRaster::doRendering()
     //IA(Input Assemble) 获取索引和顶点数据
     m_primitivesBeforeCulling.clear();
 
-    //VS(Vertex Shader) 顶点处理
-    QMap<int, GVertexAttribute*>::const_iterator i = m_vertexs.constBegin();
-    while( i != m_vertexs.constEnd())
+    if ( m_vertexAttributesBeforeVertexShader.size()%3 > 0 )
     {
-        m_shader.vertex(i.value());
+        qDebug()<<"vertex count is not 3n.";
+        return m_frameBuffer->m_data;
+    }
 
-        //曲面细分着色器,分为三部分,TCS,TE,TES
-        //TCS(Tessellation Control Shaders, DX叫 Hull Shader) 控制细分等级
-        //TE(Tessellation Engine) 将复杂曲面转换为点线面
-        //TES(Tessellation Evaluation Shaders, DX叫Domain Shader) 细分后的顶点运行该着色器,重新转化为顶点
+    //VS(Vertex Shader) 顶点处理
+    m_vertexAttributesAfterVertexShader.clear();
+    foreach(GVertexAttribute va, m_vertexAttributesBeforeVertexShader)
+    {
+        m_vertexAttributesAfterVertexShader.append( m_shader.vertex(va) );
+    }
 
-        //GS(Geometry Shader) 输入图元,选择性使用顶点,输出图元
-        //SO(Stream Out) 允许数据写回内存, 比如毛发,水流的物理计算
+    //曲面细分着色器,分为三部分,TCS,TE,TES
+    //TCS(Tessellation Control Shaders, DX叫 Hull Shader) 控制细分等级
+    //TE(Tessellation Engine) 将复杂曲面转换为点线面
+    //TES(Tessellation Evaluation Shaders, DX叫Domain Shader) 细分后的顶点运行该着色器,重新转化为顶点
 
-        //PA(Primitive Assembly) 图元装配,顶点组装成图元,三个顶点归为一组
-        this->vertexToPrimitive(i.value());
-        ++i;
+    //GS(Geometry Shader) 输入图元,选择性使用顶点,输出图元
+    //SO(Stream Out) 允许数据写回内存, 比如毛发,水流的物理计算
+
+    //PA(Primitive Assembly) 图元装配,顶点组装成图元,三个顶点归为一组
+    int count = m_vertexAttributesAfterVertexShader.size()/3;
+    for(int i = 0; i < count; ++i)
+    {
+        GVertexAttribute v1 = m_vertexAttributesAfterVertexShader.at(3*i);
+        GVertexAttribute v2 = m_vertexAttributesAfterVertexShader.at(3*i+1);
+        GVertexAttribute v3 = m_vertexAttributesAfterVertexShader.at(3*i+2);
+        m_primitivesBeforeCulling.append( GPrimitive(v1, v2, v3) );
     }
 
     //Clipping 剪裁(视锥体剪裁, 将屏幕外的三角形丢掉)
@@ -262,7 +208,7 @@ int* GRaster::doRendering()
         }
     }
 
-    //qDebug()<<m_primitivesAfterCulling.size();
+    qDebug()<<"primitives count is "<<m_primitivesAfterCulling.size();
     //对每个三角形进行遍历
     foreach (GPrimitive primitive, m_primitivesAfterCulling)
     {
@@ -277,15 +223,16 @@ int* GRaster::doRendering()
         }
 
         //Screen Mapping 屏幕映射
-        QVector4D a = this->ndcToScreenPoint(primitive.m_a);
-        QVector4D b = this->ndcToScreenPoint(primitive.m_b);
-        QVector4D c = this->ndcToScreenPoint(primitive.m_c);
-//qDebug()<<primitive.m_a<<primitive.m_b<<primitive.m_c;
+        QVector4D a = this->ndcToScreenPoint(primitive.m_triangle[0].m_vertex);
+        QVector4D b = this->ndcToScreenPoint(primitive.m_triangle[1].m_vertex);
+        QVector4D c = this->ndcToScreenPoint(primitive.m_triangle[2].m_vertex);
+//qDebug()<<primitive.m_triangle[0].m_vertex<<primitive.m_triangle[1].m_vertex<<primitive.m_triangle[2].m_vertex;
 //qDebug()<<a<<b<<c;
         QList<QPoint> boundaryPair = this->calculateBoundary(a,b,c);
-        QColor ca = primitive.m_colorA;
-        QColor cb = primitive.m_colorB;
-        QColor cc = primitive.m_colorC;
+
+//        QColor ca = primitive.m_colorA;
+//        QColor cb = primitive.m_colorB;
+//        QColor cc = primitive.m_colorC;
 
         //建立三角形,然后遍历, 从三个顶点建立三条线,再遍历每条扫描线
         int pairSize = boundaryPair.size()/2;
@@ -321,7 +268,8 @@ int* GRaster::doRendering()
                 }
 
                 // 插值顶点属性
-                QColor color = this->interpolationColor(ca, cb, cc, QVector3D(alpha, beta, gamma), zView);
+//                QColor color = this->interpolationColor(ca, cb, cc, QVector3D(alpha, beta, gamma), zView);
+                QColor color = Qt::white;
                 // FS(Fragment Shader)
                 QColor srcColor = m_shader.fragment(x*1.0f/m_size.width(), y*1.0f/m_size.height(), color);
                 // 模版测试, 这里暂不支持

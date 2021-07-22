@@ -11,7 +11,8 @@ class GShader
 public:
     GShader();
 
-    void vertex(GVertexAttribute*);
+    GVertexAttribute vertex(GVertexAttribute& va);
+
     void tessellator(){}
     void geometry(){}
     QColor fragment(float x, float y, QColor r);

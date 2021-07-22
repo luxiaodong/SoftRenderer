@@ -39,10 +39,11 @@ public:
     QColor interpolationColor(QColor& ca, QColor& cb, QColor& cc, QVector3D weight, float zView);
 
     void clearColor();
-    void setVertexAttribute(int attId, GVertexAttribute*);
-    void vertexToPrimitive(GVertexAttribute*);
     void cullingInHomogeneousSpace(GPrimitive& primitive);
     QRect aabb(QVector4D& a, QVector4D& b, QVector4D& c);
+
+public:
+    QList<GVertexAttribute> m_vertexAttributesBeforeVertexShader;
 
 private:
     QSize m_size;
@@ -52,7 +53,9 @@ private:
     QMatrix4x4 m_viewPortMat;
     GFrameBuffer* m_frameBuffer;
     GDepthBuffer* m_depthBuffer;
-    QMap<int, GVertexAttribute*> m_vertexs;
+
+    QList<GVertexAttribute> m_vertexAttributesAfterVertexShader;
+
     QList<GPrimitive> m_primitivesBeforeCulling;
     QList<GPrimitive> m_primitivesAfterCulling;
 

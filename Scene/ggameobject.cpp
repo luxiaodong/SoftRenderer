@@ -14,6 +14,11 @@ void GGameObject::setMesh(const GMesh &mesh)
     m_mesh = mesh;
 }
 
+void GGameObject::setMaterial(const GMaterial &material)
+{
+    m_material = material;
+}
+
 void GGameObject::setPosition(float x, float y, float z)
 {
     m_position = QVector3D(x, y, z);

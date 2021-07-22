@@ -2,6 +2,10 @@
 
 GVertexAttribute::GVertexAttribute()
 {
-    m_vertexsInObject = 0;
-    m_vertexsInClips = 0;
+
+}
+
+GVertexAttribute::GVertexAttribute(QVector3D p, QVector2D u, QVector3D n):m_uv(u),m_normal(n)
+{
+    m_vertex = QVector4D(p, 1.0f);
 }

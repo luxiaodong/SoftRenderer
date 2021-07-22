@@ -37,7 +37,8 @@ SOURCES += main.cpp\
     Render/Raster/gdepthbuffer.cpp \
     Shader/gshader.cpp \
     Render/Raster/gvertexattribute.cpp \
-    Render/Raster/gprimitive.cpp
+    Render/Raster/gprimitive.cpp \
+    Model/gmaterial.cpp
 
 HEADERS  += widget.h \
     Scene/gscene.h \
@@ -52,4 +53,5 @@ HEADERS  += widget.h \
     Render/Raster/gdepthbuffer.h \
     Shader/gshader.h \
     Render/Raster/gvertexattribute.h \
-    Render/Raster/gprimitive.h
+    Render/Raster/gprimitive.h \
+    Model/gmaterial.h

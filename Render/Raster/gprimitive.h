@@ -6,6 +6,7 @@
 #include <QColor>
 #include <QList>
 #include <QMap>
+#include <Render/Raster/gvertexattribute.h>
 
 class GVertexCullingRatio
 {
@@ -19,28 +20,22 @@ class GPrimitive
 {
 public:
     GPrimitive();
-    void setTriangle(QVector4D a, QVector4D b, QVector4D c);
-    void setColor(QColor a, QColor b, QColor c);
-    void homogeneousDiv();
-    bool isDiscardCullingSuccess() const;
+    GPrimitive(GVertexAttribute& a, GVertexAttribute& b, GVertexAttribute& c);
     bool isTriangleInFrustum() const;
     bool isPointInFrustum(QVector4D p) const;
     bool isPointInSinglePlane(QVector4D p, int plane) const;
+
+    void homogeneousDiv();
+    bool isDiscardCullingSuccess() const;
 
     QList<GVertexCullingRatio> culling() const;
     QList<GVertexCullingRatio> cullingSinglePlane(QList<GVertexCullingRatio>&, int plane) const;
     float calculateCullingPercent(QVector4D a, QVector4D b, int plane) const;
     float calculateCullingPercent(float x1, float x2, float w1, float w2, int sign) const;
 
-//三个顶点
-    QVector4D m_a;
-    QVector4D m_b;
-    QVector4D m_c;
-
-//三个uv值
-    QColor m_colorA;
-    QColor m_colorB;
-    QColor m_colorC;
+    GVertexAttribute interpolationAttribute(QVector3D ratio);
+public:
+    GVertexAttribute  m_triangle[3];
 };
 
 #endif // GPRIMITIVE_H

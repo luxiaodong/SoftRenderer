@@ -6,6 +6,7 @@
 #include <QQuaternion>
 #include "Render/Raster/graster.h"
 #include "Model/gmesh.h"
+#include "Model/gmaterial.h"
 #include "Scene/gscene.h"
 #include "Scene/gcamear.h"
 
@@ -25,7 +26,7 @@ public:
     void setProjMatrix(float fov,  float aspect, float n, float f);
     void setViewPortMatrix(float x, float y, float w, float h);
 
-    void setVertexAttribute(int attId, const GMesh& mesh);
+    void setVertexAttribute(const GMesh& mesh, const GMaterial& material);
 
     int* doRendering();
 
