@@ -204,8 +204,18 @@ void GGraphicsAPI::setVertexAttribute(const GMesh& mesh, const GMaterial& materi
     foreach (GVertexIndex index, mesh.m_indexs)
     {
         QVector3D vertex = mesh.m_vertexs.at( index.m_vertexIndex );
-        QVector2D uv = mesh.m_uvs.at( index.m_uvIndex );
-        QVector3D normal = mesh.m_normals.at( index.m_normalIndex );
+
+        QVector2D uv = QVector2D(0,0);
+        if (mesh.m_uvs.size() > 0)
+        {
+            uv = mesh.m_uvs.at( index.m_uvIndex );
+        }
+
+        QVector3D normal = QVector3D(0,0,1);
+        if (mesh.m_normals.size() > 0)
+        {
+            normal = mesh.m_normals.at( index.m_normalIndex );
+        }
 
         m_pRender->m_vertexAttributesBeforeVertexShader.append( GVertexAttribute(vertex, uv, normal) );
     }

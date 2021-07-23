@@ -208,7 +208,7 @@ int* GRaster::doRendering()
         }
     }
 
-//    qDebug()<<"primitives count is "<<m_primitivesAfterCulling.size();
+    qDebug()<<"primitives count is "<<m_primitivesAfterCulling.size();
     //对每个三角形进行遍历
     foreach (GPrimitive primitive, m_primitivesAfterCulling)
     {
@@ -218,7 +218,7 @@ int* GRaster::doRendering()
         //FC(face culling) 背面剔除
         if(primitive.isDiscardCullingSuccess())
         {
-            qDebug()<<"discard culling";
+            //qDebug()<<"discard culling";
             continue;
         }
 

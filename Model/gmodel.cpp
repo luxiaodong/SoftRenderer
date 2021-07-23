@@ -50,7 +50,8 @@ GMesh GModel::loadPlane()
 
 GMesh GModel::loadMarry()
 {
-    return GModel::loadObject("/Users/luxiaodong/Project/SoftRenderer/Resource/cube.obj");
+//    return GModel::loadObject("/Users/luxiaodong/Project/SoftRenderer/Resource/cube.obj");
+    return GModel::loadObject("C:/Users/luxia/Documents/GitHub/SoftRenderer/Resource/suzanne.obj");
 }
 
 GMesh GModel::loadObject(QString filePath)
@@ -95,9 +96,9 @@ GMesh GModel::loadObject(QString filePath)
                     for(int i = 1; i < tempList.size(); i+=3 )
                     {
                         GVertexIndex vIndex;
-                        vIndex.m_vertexIndex = tempList.at(i).toInt();
-                        vIndex.m_uvIndex = tempList.at(i+1).toInt();
-                        vIndex.m_normalIndex = tempList.at(i+2).toInt();
+                        vIndex.m_vertexIndex = tempList.at(i).toInt() - 1;
+                        vIndex.m_uvIndex = tempList.at(i+1).toInt() - 1;
+                        vIndex.m_normalIndex = tempList.at(i+2).toInt() - 1;
                         mesh.m_indexs.append(vIndex);
                     }
                 }
@@ -105,5 +106,6 @@ GMesh GModel::loadObject(QString filePath)
         }
     }
 
+    mesh.printInfo();
     return mesh;
 }

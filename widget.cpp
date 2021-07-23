@@ -38,7 +38,7 @@ Widget::Widget(QWidget *parent)
 void Widget::paintEvent(QPaintEvent*)
 {
     m_drawOnce++;
-    if(m_drawOnce == 3)
+    if(m_drawOnce >= 0)
     {
         m_graphicsApi->setClearColor(Qt::black);
         m_graphicsApi->setClearDepth();

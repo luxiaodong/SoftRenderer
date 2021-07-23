@@ -21,6 +21,7 @@ class GMesh
 {
 public:
     GMesh();
+    void printInfo();
 
     QList<QVector2D> m_uvs;
     QList<QVector3D> m_vertexs;
