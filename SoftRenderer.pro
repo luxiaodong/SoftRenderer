@@ -30,7 +30,7 @@ SOURCES += main.cpp\
     Math/gmath.cpp \
     Model/gmodel.cpp \
     Scene/ggameobject.cpp \
-    Scene/gcamear.cpp \
+    Scene/gcamera.cpp \
     Model/gmesh.cpp \
     Render/ggraphicsapi.cpp \
     Render/Raster/gframebuffer.cpp \
@@ -46,7 +46,7 @@ HEADERS  += widget.h \
     Math/gmath.h \
     Model/gmodel.h \
     Scene/ggameobject.h \
-    Scene/gcamear.h \
+    Scene/gcamera.h \
     Model/gmesh.h \
     Render/ggraphicsapi.h \
     Render/Raster/gframebuffer.h \

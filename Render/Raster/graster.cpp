@@ -267,6 +267,8 @@ int* GRaster::doRendering()
                     continue;
                 }
 
+                GVertexAttribute va = primitive.interpolationAttribute(QVector3D(alpha, beta, gamma));
+
                 // 插值顶点属性
 //                QColor color = this->interpolationColor(ca, cb, cc, QVector3D(alpha, beta, gamma), zView);
                 QColor color = Qt::white;

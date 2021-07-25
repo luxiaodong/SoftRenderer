@@ -219,6 +219,8 @@ void GGraphicsAPI::setVertexAttribute(const GMesh& mesh, const GMaterial& materi
 
         m_pRender->m_vertexAttributesBeforeVertexShader.append( GVertexAttribute(vertex, uv, normal) );
     }
+
+    m_pRender->m_material = material;
 }
 
 int* GGraphicsAPI::doRendering()

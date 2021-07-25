@@ -6,6 +6,8 @@
 #include "Render/Raster/gvertexattribute.h"
 #include "Render/Raster/gprimitive.h"
 #include "Shader/gshader.h"
+#include "Model/gmaterial.h"
+#include "Scene/gcamera.h"
 #include <QMatrix4x4>
 #include <QVector4D>
 #include <QVector3D>
@@ -27,6 +29,8 @@ public:
     void setClearColor(const QColor& color){m_color = color;}
     void setClearDepth();
 
+    void setCamera(GCamera& camera){m_camera = camera;}
+
     void setModelMatrix(const QMatrix4x4& mat){ m_shader.m_modelMat = mat;}
     void setViewMatrix(const QMatrix4x4& mat){ m_shader.m_viewMat = mat;}
     void setProjMatrix(const QMatrix4x4& mat){ m_shader.m_projMat = mat;}
@@ -44,6 +48,8 @@ public:
 
 public:
     QList<GVertexAttribute> m_vertexAttributesBeforeVertexShader;
+    GMaterial m_material;
+    GCamera m_camera;
 
 private:
     QSize m_size;

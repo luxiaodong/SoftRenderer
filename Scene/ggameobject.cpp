@@ -1,5 +1,6 @@
 #include "ggameobject.h"
 #include <QVector3D>
+#include "Shader/gshader.h"
 #include <QMatrix4x4>
 
 GGameObject::GGameObject()
@@ -7,6 +8,8 @@ GGameObject::GGameObject()
     m_position = QVector3D(0,0,0);
     m_rotate = QVector3D(0,0,0);
     m_scale = QVector3D(1,1,1);
+
+    m_material.setShader( new GShader() );
 }
 
 void GGameObject::setMesh(const GMesh &mesh)

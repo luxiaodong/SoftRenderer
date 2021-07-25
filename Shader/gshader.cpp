@@ -29,3 +29,8 @@ QColor GShader::fragment(float x, float y, QColor r)
     (void)y;
     return r;
 }
+
+QColor GShader::fragment(GVertexAttribute& va)
+{
+    return Qt::white;
+}

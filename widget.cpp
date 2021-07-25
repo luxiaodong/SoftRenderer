@@ -1,6 +1,6 @@
 #include "widget.h"
 #include "Scene/gscene.h"
-#include "Scene/gcamear.h"
+#include "Scene/gcamera.h"
 #include "Render/ggraphicsapi.h"
 #include <QDebug>
 #include <QPainter>
@@ -11,19 +11,19 @@ Widget::Widget(QWidget *parent)
     m_width = 649;
     m_height = m_width;
 
-    m_camera = new GCamear();
+    m_camera = new GCamera();
+    m_camera->setViewMatrix(QVector3D(0, 10, -10), 45, 0, 0);
+    //m_camera->setViewMatrix(QVector3D(0,0,0), QVector3D(-0.6, 0.8, 0), QVector3D(0, -5.0f/13, 12.0f/13));
+    m_camera->setProjMatrix(60, 1, 0.3f, 1000.0f);
+    m_camera->setViewPortMatrix(0,0,m_width,m_height);
+
     m_pScene = new GScene();
     m_pScene->loadSceneTest();
 
     m_graphicsApi = new GGraphicsAPI();
+    m_graphicsApi->setCamera(*m_camera);
     m_graphicsApi->setRenderSize(QSize(m_width, m_height));
-    m_graphicsApi->setViewMatrix(QVector3D(0, 10, -10), 45, 0, 0);
-    //    m_graphicsApi->setViewMatrix(QVector3D(0,0,0), QVector3D(-0.6, 0.8, 0), QVector3D(0, -5.0f/13, 12.0f/13));
-    //    m_graphicsApi->setOrthMatrix(5, 1.892934, 0.3, 1000.0f);
-    m_graphicsApi->setProjMatrix(60, 1, 0.3f, 1000.0f);
-    m_graphicsApi->setViewPortMatrix(0,0,m_width,m_height);
 
-    int i = 1;
     foreach (GGameObject go, m_pScene->m_gameObjects)
     {
         m_graphicsApi->setModelMatrix(go.m_position, go.m_rotate, go.m_scale);

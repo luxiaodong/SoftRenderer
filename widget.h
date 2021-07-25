@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include "Scene/gscene.h"
-#include "Scene/gcamear.h"
+#include "Scene/gcamera.h"
 #include "Render/ggraphicsapi.h"
 
 class Widget : public QWidget
@@ -24,7 +24,7 @@ private:
     int m_width;
     int m_height;
     GScene* m_pScene;
-    GCamear* m_camera;
+    GCamera* m_camera;
     GGraphicsAPI* m_graphicsApi;
     int m_drawOnce;
 };

@@ -8,7 +8,7 @@
 #include "Model/gmesh.h"
 #include "Model/gmaterial.h"
 #include "Scene/gscene.h"
-#include "Scene/gcamear.h"
+#include "Scene/gcamera.h"
 
 class GGraphicsAPI
 {
@@ -31,12 +31,11 @@ public:
     int* doRendering();
 
     void setScene(const GScene& scene){m_scene = scene;}
-    void setCamear(const GCamear& camear){m_camera = camear;}
+    void setCamera(const GCamera& camera){m_pRender->m_camera = camera;}
 
 private:
     GRaster* m_pRender;
     GScene m_scene;
-    GCamear m_camera;
 };
 
 #endif // GGRAPHICSAPI_H
