@@ -23,14 +23,7 @@ GVertexAttribute GShader::vertex(GVertexAttribute& va)
     return outVa;
 }
 
-QColor GShader::fragment(float x, float y, QColor r)
-{
-    (void)x;
-    (void)y;
-    return r;
-}
-
-QColor GShader::fragment(GVertexAttribute& va)
+QColor GShader::fragment(float x, float y, GVertexAttribute& va)
 {
     return Qt::white;
 }

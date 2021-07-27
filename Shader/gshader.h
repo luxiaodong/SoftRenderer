@@ -6,7 +6,7 @@
 #include <QMatrix4x4>
 #include <QImage>
 #include <QMap>
-#include "Render/Raster/gvertexattribute.h"
+#include "Raster/gvertexattribute.h"
 
 class GShader
 {
@@ -17,8 +17,7 @@ public:
 
     void tessellator(){}
     void geometry(){}
-    QColor fragment(float x, float y, QColor r);
-    QColor fragment(GVertexAttribute& va);
+    QColor fragment(float x, float y, GVertexAttribute& va);
 
     QVector4D objectToClipping(QVector4D pos);
 

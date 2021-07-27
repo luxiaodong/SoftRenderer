@@ -1,7 +1,6 @@
 #include "widget.h"
 #include "Scene/gscene.h"
 #include "Scene/gcamera.h"
-#include "Render/ggraphicsapi.h"
 #include <QDebug>
 #include <QPainter>
 
@@ -11,41 +10,39 @@ Widget::Widget(QWidget *parent)
     m_width = 649;
     m_height = m_width;
 
-    m_camera = new GCamera();
-    m_camera->setViewMatrix(QVector3D(0, 10, -10), 45, 0, 0);
-    //m_camera->setViewMatrix(QVector3D(0,0,0), QVector3D(-0.6, 0.8, 0), QVector3D(0, -5.0f/13, 12.0f/13));
-    m_camera->setProjMatrix(60, 1, 0.3f, 1000.0f);
-    m_camera->setViewPortMatrix(0,0,m_width,m_height);
+    GCamera* pCamera = new GCamera();
+    pCamera->setViewMatrix(QVector3D(0, 10, -10), 45, 0, 0);
+    //pCamera->setViewMatrix(QVector3D(0,0,0), QVector3D(-0.6, 0.8, 0), QVector3D(0, -5.0f/13, 12.0f/13));
+    pCamera->setProjMatrix(60, m_width*1.0f/m_height, 0.3f, 1000.0f);
+    pCamera->setViewPortMatrix(0,0,m_width,m_height);
+
+    m_raster = new GRaster();
+    m_raster->setCamera(pCamera);
+    m_raster->setRenderSize(QSize(m_width, m_height));
 
     m_pScene = new GScene();
     m_pScene->loadSceneTest();
 
-    m_graphicsApi = new GGraphicsAPI();
-    m_graphicsApi->setCamera(*m_camera);
-    m_graphicsApi->setRenderSize(QSize(m_width, m_height));
-
-    foreach (GGameObject go, m_pScene->m_gameObjects)
-    {
-        m_graphicsApi->setModelMatrix(go.m_position, go.m_rotate, go.m_scale);
-        m_graphicsApi->setVertexAttribute(go.m_mesh, go.m_material);
-    }
-
     m_drawOnce = 0;
     this->resize(m_width, m_height);
-//    m_graphicsApi->doRendering();
 }
 
 void Widget::paintEvent(QPaintEvent*)
 {
     m_drawOnce++;
-    if(m_drawOnce >= 0)
+    if(m_drawOnce == 3)
     {
-        m_graphicsApi->setClearColor(Qt::black);
-        m_graphicsApi->setClearDepth();
+        m_raster->clearColor(Qt::black);
+        m_raster->clearDepth();
 
-        int* data = m_graphicsApi->doRendering();
+        qDebug()<<"gameobject count is "<<m_pScene->m_gameObjects.size();
+        foreach (GGameObject go, m_pScene->m_gameObjects)
+        {
+            m_raster->renderGameObject(go);
+        }
+
         QPainter painter(this);
-        painter.drawImage( QRectF(0,0,this->width(), this->height()), this->genImage(m_width, m_height, data));
+        painter.drawImage( QRectF(0,0,m_width, m_height), this->genImage(m_width, m_height, m_raster->frameBuffer()));
     }
 }
 

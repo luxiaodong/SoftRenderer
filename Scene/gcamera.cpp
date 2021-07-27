@@ -129,3 +129,10 @@ void GCamera::setViewPortMatrix(float x, float y, float w, float h)
     QMatrix4x4 mat = t*s;
     m_viewPortMat = mat;
 }
+
+QVector4D GCamera::ndcToScreenPoint(QVector4D& pos)
+{
+    //保留 pos.w, 方便以后投影插值映射
+    QVector4D p = m_viewPortMat*pos;
+    return QVector4D(p.x(), p.y(), p.z(), pos.w());
+}

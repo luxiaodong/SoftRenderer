@@ -6,7 +6,7 @@
 #include <QColor>
 #include <QList>
 #include <QMap>
-#include <Render/Raster/gvertexattribute.h>
+#include "Raster/gvertexattribute.h"
 
 class GVertexCullingRatio
 {

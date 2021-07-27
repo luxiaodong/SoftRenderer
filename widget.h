@@ -4,7 +4,7 @@
 #include <QWidget>
 #include "Scene/gscene.h"
 #include "Scene/gcamera.h"
-#include "Render/ggraphicsapi.h"
+#include "Raster/graster.h"
 
 class Widget : public QWidget
 {
@@ -24,8 +24,7 @@ private:
     int m_width;
     int m_height;
     GScene* m_pScene;
-    GCamera* m_camera;
-    GGraphicsAPI* m_graphicsApi;
+    GRaster* m_raster;
     int m_drawOnce;
 };
 

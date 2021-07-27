@@ -2,6 +2,7 @@
 #define GCAMEAR_H
 
 #include <QVector3D>
+#include <QVector4D>
 #include <QMatrix4x4>
 
 class GCamera
@@ -16,7 +17,9 @@ public:
     void setProjMatrix(float fov,  float aspect, float n, float f);
     void setViewPortMatrix(float x, float y, float w, float h);
 
-private:
+    QVector4D ndcToScreenPoint(QVector4D& pos);
+
+public:
     QMatrix4x4 m_viewMat; //视口矩阵
     QMatrix4x4 m_projMat; //投影矩阵,包括正交投影
     QMatrix4x4 m_viewPortMat;

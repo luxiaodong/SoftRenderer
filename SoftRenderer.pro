@@ -26,32 +26,30 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += main.cpp\
         widget.cpp \
     Scene/gscene.cpp \
-    Render/Raster/graster.cpp \
+    Raster/graster.cpp \
     Math/gmath.cpp \
     Model/gmodel.cpp \
     Scene/ggameobject.cpp \
     Scene/gcamera.cpp \
     Model/gmesh.cpp \
-    Render/ggraphicsapi.cpp \
-    Render/Raster/gframebuffer.cpp \
-    Render/Raster/gdepthbuffer.cpp \
+    Raster/gframebuffer.cpp \
+    Raster/gdepthbuffer.cpp \
     Shader/gshader.cpp \
-    Render/Raster/gvertexattribute.cpp \
-    Render/Raster/gprimitive.cpp \
+    Raster/gvertexattribute.cpp \
+    Raster/gprimitive.cpp \
     Model/gmaterial.cpp
 
 HEADERS  += widget.h \
     Scene/gscene.h \
-    Render/Raster/graster.h \
+    Raster/graster.h \
     Math/gmath.h \
     Model/gmodel.h \
     Scene/ggameobject.h \
     Scene/gcamera.h \
     Model/gmesh.h \
-    Render/ggraphicsapi.h \
-    Render/Raster/gframebuffer.h \
-    Render/Raster/gdepthbuffer.h \
+    Raster/gframebuffer.h \
+    Raster/gdepthbuffer.h \
     Shader/gshader.h \
-    Render/Raster/gvertexattribute.h \
-    Render/Raster/gprimitive.h \
+    Raster/gvertexattribute.h \
+    Raster/gprimitive.h \
     Model/gmaterial.h

@@ -10,15 +10,29 @@ GRaster::GRaster()
     m_enableBlend = true;
 }
 
-void GRaster::createBuffer()
+void GRaster::setRenderSize(const QSize& size)
 {
+    m_size = size;
     m_frameBuffer = new GFrameBuffer(m_size.width(), m_size.height(), 3);
     m_depthBuffer = new GDepthBuffer(m_size.width(), m_size.height());
 }
 
-void GRaster::setClearDepth()
+void GRaster::clearColor(const QColor& color)
+{
+    m_frameBuffer->clearColor(color);
+}
+
+void GRaster::clearDepth()
 {
     m_depthBuffer->clear();
+}
+
+void GRaster::renderGameObject(const GGameObject& obj)
+{
+    m_modelMat = obj.objectToWorldMatrix();
+    m_mesh = obj.m_mesh;
+    m_pShader = obj.m_material.m_pShader;
+    this->doRendering();
 }
 
 void GRaster::cullingInHomogeneousSpace(GPrimitive& primitive)
@@ -38,13 +52,6 @@ void GRaster::cullingInHomogeneousSpace(GPrimitive& primitive)
 
         m_primitivesAfterCulling.append( GPrimitive(a,b,c) );
     }
-}
-
-QVector4D GRaster::ndcToScreenPoint(QVector4D& pos)
-{
-    //保留 pos.w, 方便以后投影插值映射
-    QVector4D p = m_viewPortMat*pos;
-    return QVector4D(p.x(), p.y(), p.z(), pos.w());
 }
 
 QRect GRaster::aabb(QVector4D& a, QVector4D& b, QVector4D& c)
@@ -154,25 +161,45 @@ QColor GRaster::interpolationColor(QColor& ca, QColor& cb, QColor& cc, QVector3D
     return QColor(r, g, b, a);
 }
 
-int* GRaster::doRendering()
+void GRaster::doRendering()
 {
     //ME(Micro Engine) 配置管线, 比如渲染结果回传给cpu
-    m_frameBuffer->clearColor(m_color);
 
     //IA(Input Assemble) 获取索引和顶点数据
-    m_primitivesBeforeCulling.clear();
+    m_vertexAttributesBeforeVertexShader.clear();
+    foreach (GVertexIndex index, m_mesh.m_indexs)
+    {
+        QVector3D vertex = m_mesh.m_vertexs.at( index.m_vertexIndex );
+
+        QVector2D uv = QVector2D(0,0);
+        if (m_mesh.m_uvs.size() > 0)
+        {
+            uv = m_mesh.m_uvs.at( index.m_uvIndex );
+        }
+
+        QVector3D normal = QVector3D(0,0,1);
+        if (m_mesh.m_normals.size() > 0)
+        {
+            normal = m_mesh.m_normals.at( index.m_normalIndex );
+        }
+
+        m_vertexAttributesBeforeVertexShader.append( GVertexAttribute(vertex, uv, normal) );
+    }
 
     if ( m_vertexAttributesBeforeVertexShader.size()%3 > 0 )
     {
         qDebug()<<"vertex count is not 3n.";
-        return m_frameBuffer->m_data;
+        return ;
     }
 
     //VS(Vertex Shader) 顶点处理
+    m_pShader->m_modelMat = m_modelMat;
+    m_pShader->m_viewMat = m_pCamera->m_viewMat;
+    m_pShader->m_projMat = m_pCamera->m_projMat;
     m_vertexAttributesAfterVertexShader.clear();
     foreach(GVertexAttribute va, m_vertexAttributesBeforeVertexShader)
     {
-        m_vertexAttributesAfterVertexShader.append( m_shader.vertex(va) );
+        m_vertexAttributesAfterVertexShader.append( m_pShader->vertex(va) );
     }
 
     //曲面细分着色器,分为三部分,TCS,TE,TES
@@ -184,6 +211,7 @@ int* GRaster::doRendering()
     //SO(Stream Out) 允许数据写回内存, 比如毛发,水流的物理计算
 
     //PA(Primitive Assembly) 图元装配,顶点组装成图元,三个顶点归为一组
+    m_primitivesBeforeCulling.clear();
     int count = m_vertexAttributesAfterVertexShader.size()/3;
     for(int i = 0; i < count; ++i)
     {
@@ -223,16 +251,12 @@ int* GRaster::doRendering()
         }
 
         //Screen Mapping 屏幕映射
-        QVector4D a = this->ndcToScreenPoint(primitive.m_triangle[0].m_vertex);
-        QVector4D b = this->ndcToScreenPoint(primitive.m_triangle[1].m_vertex);
-        QVector4D c = this->ndcToScreenPoint(primitive.m_triangle[2].m_vertex);
+        QVector4D a = m_pCamera->ndcToScreenPoint(primitive.m_triangle[0].m_vertex);
+        QVector4D b = m_pCamera->ndcToScreenPoint(primitive.m_triangle[1].m_vertex);
+        QVector4D c = m_pCamera->ndcToScreenPoint(primitive.m_triangle[2].m_vertex);
 //qDebug()<<primitive.m_triangle[0].m_vertex<<primitive.m_triangle[1].m_vertex<<primitive.m_triangle[2].m_vertex;
 //qDebug()<<a<<b<<c;
         QList<QPoint> boundaryPair = this->calculateBoundary(a,b,c);
-
-//        QColor ca = primitive.m_colorA;
-//        QColor cb = primitive.m_colorB;
-//        QColor cc = primitive.m_colorC;
 
         //建立三角形,然后遍历, 从三个顶点建立三条线,再遍历每条扫描线
         int pairSize = boundaryPair.size()/2;
@@ -267,13 +291,11 @@ int* GRaster::doRendering()
                     continue;
                 }
 
+                // 插值顶点属性
                 GVertexAttribute va = primitive.interpolationAttribute(QVector3D(alpha, beta, gamma));
 
-                // 插值顶点属性
-//                QColor color = this->interpolationColor(ca, cb, cc, QVector3D(alpha, beta, gamma), zView);
-                QColor color = Qt::white;
                 // FS(Fragment Shader)
-                QColor srcColor = m_shader.fragment(x*1.0f/m_size.width(), y*1.0f/m_size.height(), color);
+                QColor srcColor = m_pShader->fragment(x*1.0f/m_size.width(), y*1.0f/m_size.height(), va);
                 // 模版测试, 这里暂不支持
                 // ZT(Z-Test) 深度测试
                 if(m_enableDepthTest && m_enableDepthWrite)
@@ -297,6 +319,4 @@ int* GRaster::doRendering()
             }
         }
     }
-
-    return m_frameBuffer->m_data;
 }

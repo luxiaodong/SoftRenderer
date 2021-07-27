@@ -1,24 +1,22 @@
 #ifndef GMATERIAL_H
 #define GMATERIAL_H
 
+#include <QString>
 #include <QImage>
 #include <QColor>
 #include <QPoint>
 #include <QVector2D>
+#include <QMap>
 #include "Shader/gshader.h"
 
 class GMaterial
 {
 public:
     GMaterial();
-    QColor baseColor(QVector2D uv);
-    void setShader(GShader* pShader){m_pShader = pShader;}
+    QColor color(QString texName, QVector2D uv);
 
-private:
-    QImage m_baseImage;
-
-
-// 各种贴图.
+public:
+    QMap<QString, QImage> m_imageMap;
     GShader* m_pShader;
 };
 

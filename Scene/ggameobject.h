@@ -18,6 +18,8 @@ public:
     void setRotate(float rx, float ry, float rz);
     void setPosition(float x, float y, float z);
 
+    QMatrix4x4 objectToWorldMatrix() const;
+
 public:
     QVector3D m_position;
     QVector3D m_rotate;
