@@ -50,7 +50,8 @@ GMesh GModel::loadPlane()
 
 GMesh GModel::loadMarry()
 {
-    return GModel::loadObject("/Users/luxiaodong/Project/SoftRenderer/Resource/suzanne.obj");
+    return GModel::loadObject(":/mesh/cube.obj");
+//    return GModel::loadObject("/Users/luxiaodong/Project/SoftRenderer/Resource/suzanne.obj");
 //    return GModel::loadObject("C:/Users/luxia/Documents/GitHub/SoftRenderer/Resource/suzanne.obj");
 }
 

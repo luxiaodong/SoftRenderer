@@ -12,12 +12,14 @@
 class GMaterial
 {
 public:
-    GMaterial();
-    QColor color(QString texName, QVector2D uv);
+    GMaterial(){}
+    GMaterial(GShader* shader):m_pShader(shader){}
+    void setShader(GShader* shader){m_pShader = shader;}
 
+    void addImage(QString key, QString filePath);
 public:
-    QMap<QString, QImage> m_imageMap;
     GShader* m_pShader;
+    QMap<QString, QImage> m_imageSet;
 };
 
 #endif // GMATERIAL_H

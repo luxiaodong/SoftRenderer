@@ -31,6 +31,7 @@ void GRaster::renderGameObject(const GGameObject& obj)
 {
     m_modelMat = obj.objectToWorldMatrix();
     m_mesh = obj.m_mesh;
+    m_material = obj.m_material;
     m_pShader = obj.m_material.m_pShader;
     this->doRendering();
 }
@@ -295,7 +296,7 @@ void GRaster::doRendering()
                 GVertexAttribute va = primitive.interpolationAttribute(QVector3D(alpha, beta, gamma));
 
                 // FS(Fragment Shader)
-                QColor srcColor = m_pShader->fragment(x*1.0f/m_size.width(), y*1.0f/m_size.height(), va);
+                QColor srcColor = m_pShader->fragment(x*1.0f/m_size.width(), y*1.0f/m_size.height(), va, m_material.m_imageSet);
                 // 模版测试, 这里暂不支持
                 // ZT(Z-Test) 深度测试
                 if(m_enableDepthTest && m_enableDepthWrite)

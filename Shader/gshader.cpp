@@ -1,9 +1,13 @@
 #include "gshader.h"
+#include <QPoint>
+#include <QVector2D>
+#include <QImage>
 #include <QDebug>
 
 GShader::GShader()
 {
-
+    m_white = QImage(1,1,QImage::Format_RGBA8888);
+    m_white.fill(Qt::white);
 }
 
 QVector4D GShader::objectToClipping(QVector4D pos)
@@ -23,7 +27,14 @@ GVertexAttribute GShader::vertex(GVertexAttribute& va)
     return outVa;
 }
 
-QColor GShader::fragment(float x, float y, GVertexAttribute& va)
+QColor GShader::fragment(float x, float y, GVertexAttribute& va, QMap<QString, QImage>& map)
 {
-    return Qt::white;
+    QImage image = map.value("base", m_white);
+    return this->color(image, va.m_uv);
+}
+
+QColor GShader::color(QImage& image, QVector2D uv)
+{
+    QPoint pt = QPoint( uv.x()*(image.width()-1), uv.y()*(image.height()-1) );
+    return image.pixelColor(pt.x(), pt.y());
 }

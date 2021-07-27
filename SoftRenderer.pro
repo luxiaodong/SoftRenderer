@@ -53,3 +53,6 @@ HEADERS  += widget.h \
     Raster/gvertexattribute.h \
     Raster/gprimitive.h \
     Model/gmaterial.h
+
+RESOURCES += \
+    Resource/assets.qrc
