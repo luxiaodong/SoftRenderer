@@ -22,8 +22,8 @@ GMesh GModel::loadTriangle()
     mesh.m_uvs.append(QVector2D(0.0, 0.0));
     mesh.m_uvs.append(QVector2D(1.0, 0.0));
     mesh.m_indexs.append( GVertexIndex(0, 0, 0) );
-    mesh.m_indexs.append( GVertexIndex(1, 1, 0) );
     mesh.m_indexs.append( GVertexIndex(2, 2, 0) );
+    mesh.m_indexs.append( GVertexIndex(1, 1, 0) );
     return mesh;
 }
 
@@ -40,11 +40,11 @@ GMesh GModel::loadPlane()
     mesh.m_uvs.append(QVector2D(1.0, 0.0));
     mesh.m_uvs.append(QVector2D(0.0, 1.0));
     mesh.m_indexs.append( GVertexIndex(0, 0, 0) );
-    mesh.m_indexs.append( GVertexIndex(1, 1, 0) );
     mesh.m_indexs.append( GVertexIndex(2, 2, 0) );
-    mesh.m_indexs.append( GVertexIndex(3, 3, 0) );
     mesh.m_indexs.append( GVertexIndex(1, 1, 0) );
+    mesh.m_indexs.append( GVertexIndex(3, 3, 0) );    
     mesh.m_indexs.append( GVertexIndex(0, 0, 0) );
+    mesh.m_indexs.append( GVertexIndex(1, 1, 0) );
     return mesh;
 }
 

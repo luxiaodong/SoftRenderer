@@ -6,5 +6,6 @@
     </qresource>
     <qresource prefix="/texture">
         <file>rgb.png</file>
+        <file>marry.png</file>
     </qresource>
 </RCC>

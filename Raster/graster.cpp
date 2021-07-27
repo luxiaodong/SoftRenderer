@@ -125,6 +125,18 @@ QList<QPoint> GRaster::calculateBoundary(QVector4D& a,QVector4D& b,QVector4D& c)
     return boundaryPair;
 }
 
+bool GRaster::isZeroArea(QPoint a, QPoint b, QPoint c)
+{
+    int temp2 = (a.y() - b.y())*c.x() + (b.x() - a.x())*c.y() + a.x()*b.y() - b.x()*a.y();
+    int temp4 = (a.y() - c.y())*b.x() + (c.x() - a.x())*b.y() + a.x()*c.y() - c.x()*a.y();
+    if (temp2 == 0 || temp4 == 0)
+    {
+        return true;
+    }
+
+    return false;
+}
+
 QVector3D GRaster::interpolationCoffInTriangle(QPoint a, QPoint b, QPoint c, QPoint p)
 {
     //p = alpha*a + beta*b + gamma*c
@@ -138,8 +150,17 @@ QVector3D GRaster::interpolationCoffInTriangle(QPoint a, QPoint b, QPoint c, QPo
 
     float gamma = temp1*1.0f/temp2;
     float beta = temp3*1.0f/temp4;
-    float alpha = 1.0f - beta - gamma;
+    float alpha = 1.0f - gamma - beta;
+
     return QVector3D(alpha, beta, gamma);
+}
+
+bool GRaster::isInTriangle(QVector3D weight)
+{
+    if (weight.x() < -0.0001) return false;
+    if (weight.y() < -0.0001) return false;
+    if (weight.z() < -0.0001) return false;
+    return true;
 }
 
 QColor GRaster::interpolationColor(QColor& ca, QColor& cb, QColor& cc, QVector3D weight, float zView)
@@ -255,6 +276,13 @@ void GRaster::doRendering()
         QVector4D a = m_pCamera->ndcToScreenPoint(primitive.m_triangle[0].m_vertex);
         QVector4D b = m_pCamera->ndcToScreenPoint(primitive.m_triangle[1].m_vertex);
         QVector4D c = m_pCamera->ndcToScreenPoint(primitive.m_triangle[2].m_vertex);
+
+        //面积为0的三角形跳过
+        if( this->isZeroArea(QPoint(a.x(), a.y()), QPoint(b.x(), b.y()), QPoint(c.x(), c.y()) ) )
+        {
+            continue;
+        }
+
 //qDebug()<<primitive.m_triangle[0].m_vertex<<primitive.m_triangle[1].m_vertex<<primitive.m_triangle[2].m_vertex;
 //qDebug()<<a<<b<<c;
         QList<QPoint> boundaryPair = this->calculateBoundary(a,b,c);
@@ -277,6 +305,11 @@ void GRaster::doRendering()
                                                                       QPoint(b.x(), b.y()),
                                                                       QPoint(c.x(), c.y()),
                                                                       QPoint(x,y) );
+                if(this->isInTriangle(weight) == false)
+                {
+                    continue;
+                }
+
                 // 将2D的权重转化为3D的权重.
                 float alpha = weight.x()/a.w();
                 float beta = weight.y()/b.w();
@@ -297,6 +330,14 @@ void GRaster::doRendering()
 
                 // FS(Fragment Shader)
                 QColor srcColor = m_pShader->fragment(x*1.0f/m_size.width(), y*1.0f/m_size.height(), va, m_material.m_imageSet);
+
+//                QColor srcColor = Qt::black;
+//                if( va.m_uv.x() == nan  || va.m_uv.y() == nan )
+//                {
+//                    srcColor = Qt::white;
+//                    qDebug()<<va.m_uv;
+//                }
+
                 // 模版测试, 这里暂不支持
                 // ZT(Z-Test) 深度测试
                 if(m_enableDepthTest && m_enableDepthWrite)

@@ -15,5 +15,10 @@ void GMesh::printInfo()
     qDebug()<<"uv size is "<<m_uvs.size();
     qDebug()<<"normal size is "<<m_normals.size();
     qDebug()<<"indexs size is "<<m_indexs.size();
+
+//    foreach(QVector2D uv, m_uvs)
+//    {
+//        qDebug()<<uv;
+//    }
 }
 

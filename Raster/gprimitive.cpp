@@ -163,7 +163,7 @@ bool GPrimitive::isDiscardCullingSuccess() const
     QVector4D b = m_triangle[1].m_vertex;
     QVector4D c = m_triangle[2].m_vertex;
     float value = (b.x() - a.x())*(c.y() - a.y()) - (b.y() - a.y())*(c.x() - a.x());
-    return value < 0.0f;
+    return value > 0.0f;
 }
 
 void GPrimitive::homogeneousDiv()
