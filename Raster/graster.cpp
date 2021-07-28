@@ -1,5 +1,6 @@
 #include "graster.h"
 #include <QDebug>
+#include <QString>
 
 GRaster::GRaster()
 {
@@ -7,7 +8,7 @@ GRaster::GRaster()
     m_depthBuffer = 0;
     m_enableDepthTest = true;
     m_enableDepthWrite = true;
-    m_enableBlend = true;
+    m_enableBlend = false;
 }
 
 void GRaster::setRenderSize(const QSize& size)
@@ -312,7 +313,7 @@ void GRaster::doRendering()
 
                 // 将2D的权重转化为3D的权重.
                 float alpha = weight.x()/a.w();
-                float beta = weight.y()/b.w();
+                float beta  = weight.y()/b.w();
                 float gamma = weight.z()/c.w();
 
                 // 先算View空间下的Z值.

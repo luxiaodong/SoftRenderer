@@ -22,7 +22,7 @@ void GScene::loadSceneTest()
     GGameObject obj1 = GGameObject();
     obj1.setMesh(GModel::loadPlane());
     obj1.m_material.setShader( new GShader() );
-    obj1.m_material.addImage("base", ":/texture/rgb.png");
+//    obj1.m_material.addImage("base", ":/texture/rgb.png");
     obj1.setPosition(0,0,-1);
     m_gameObjects.append(obj1);
 
@@ -32,6 +32,6 @@ void GScene::loadSceneTest()
     obj2.m_material.addImage("base", ":/texture/marry.png");
     obj2.setPosition(0,0,-2);
     obj2.setScale(2, 2, 2);
-    obj2.setRotate(0, 150, 0);
+    obj2.setRotate(0, 180, 0);
     m_gameObjects.append(obj2);
 }

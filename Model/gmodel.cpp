@@ -22,8 +22,8 @@ GMesh GModel::loadTriangle()
     mesh.m_uvs.append(QVector2D(0.0, 0.0));
     mesh.m_uvs.append(QVector2D(1.0, 0.0));
     mesh.m_indexs.append( GVertexIndex(0, 0, 0) );
-    mesh.m_indexs.append( GVertexIndex(2, 2, 0) );
     mesh.m_indexs.append( GVertexIndex(1, 1, 0) );
+    mesh.m_indexs.append( GVertexIndex(2, 2, 0) );
     return mesh;
 }
 
@@ -40,11 +40,11 @@ GMesh GModel::loadPlane()
     mesh.m_uvs.append(QVector2D(1.0, 0.0));
     mesh.m_uvs.append(QVector2D(0.0, 1.0));
     mesh.m_indexs.append( GVertexIndex(0, 0, 0) );
+    mesh.m_indexs.append( GVertexIndex(1, 1, 0) );
     mesh.m_indexs.append( GVertexIndex(2, 2, 0) );
+    mesh.m_indexs.append( GVertexIndex(3, 3, 0) );
     mesh.m_indexs.append( GVertexIndex(1, 1, 0) );
-    mesh.m_indexs.append( GVertexIndex(3, 3, 0) );    
     mesh.m_indexs.append( GVertexIndex(0, 0, 0) );
-    mesh.m_indexs.append( GVertexIndex(1, 1, 0) );
     return mesh;
 }
 
@@ -74,7 +74,8 @@ GMesh GModel::loadObject(QString filePath)
                     float x = tempList.at(1).toFloat();
                     float y = tempList.at(2).toFloat();
                     float z = tempList.at(3).toFloat();
-                    mesh.m_vertexs.append(QVector3D(x, y, z));
+                    //这里的模型坐标系和unity互为镜像.
+                    mesh.m_vertexs.append(QVector3D(-x, y, z));
                 }
                 else if (line.left(3) == "vn ")
                 {
@@ -89,7 +90,8 @@ GMesh GModel::loadObject(QString filePath)
                     QStringList tempList = line.split(" ");
                     float x = tempList.at(1).toFloat();
                     float y = tempList.at(2).toFloat();
-                    mesh.m_uvs.append(QVector2D(x,y));
+                    //这里的模型y轴颠倒
+                    mesh.m_uvs.append(QVector2D(x,1.0f-y));
                 }
                 else if (line.left(2) == "f ")
                 {
