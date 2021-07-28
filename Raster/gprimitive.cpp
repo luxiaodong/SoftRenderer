@@ -186,5 +186,5 @@ GVertexAttribute GPrimitive::interpolationAttribute(QVector3D ratio)
     QVector2D uv     = alpha*m_triangle[0].m_uv     + beta*m_triangle[1].m_uv     + gamma*m_triangle[2].m_uv;
     QVector3D normal = alpha*m_triangle[0].m_normal + beta*m_triangle[1].m_normal + gamma*m_triangle[2].m_normal;
 
-    return GVertexAttribute(vertex, uv, normal);
+    return GVertexAttribute(vertex, uv, normal.normalized() );
 }

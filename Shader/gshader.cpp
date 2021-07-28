@@ -18,11 +18,18 @@ QVector4D GShader::objectToClipping(QVector4D pos)
     return m_projMat*m_viewMat*m_modelMat*pos;
 }
 
+QVector3D GShader::objectToWorldDir(QVector3D pos)
+{
+    QMatrix4x4 mat = m_modelMat.transposed().inverted();
+    QVector3D outPos = mat*QVector4D(pos,1).toVector3D().normalized();;
+    return outPos;
+}
+
 GVertexAttribute GShader::vertex(GVertexAttribute& va)
 {
     GVertexAttribute outVa;
     outVa.m_vertex = this->objectToClipping(va.m_vertex);
-    outVa.m_normal = va.m_normal; // 法向量需要修正
+    outVa.m_normal = this->objectToWorldDir(va.m_normal);
     outVa.m_uv = va.m_uv;
     return outVa;
 }

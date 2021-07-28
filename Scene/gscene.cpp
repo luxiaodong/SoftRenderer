@@ -1,7 +1,9 @@
 #include "gscene.h"
-#include "Shader/gshader.h"
+
 #include <QDir>
 #include <QDebug>
+#include "Shader/gshader.h"
+#include "Shader/phongshader.h"
 
 GScene::GScene()
 {
@@ -28,7 +30,7 @@ void GScene::loadSceneTest()
 
     GGameObject obj2 = GGameObject();
     obj2.setMesh(GModel::loadObject(":/mesh/marry.obj"));
-    obj2.m_material.setShader( new GShader() );
+    obj2.m_material.setShader( new PhongShader() );
     obj2.m_material.addImage("base", ":/texture/marry.png");
     obj2.setPosition(0,0,-2);
     obj2.setScale(2, 2, 2);

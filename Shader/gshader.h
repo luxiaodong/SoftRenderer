@@ -3,6 +3,7 @@
 
 #include <QColor>
 #include <QVector4D>
+#include <QVector3D>
 #include <QMatrix4x4>
 #include <QImage>
 #include <QMap>
@@ -18,8 +19,9 @@ public:
 
     void tessellator(){}
     void geometry(){}
-    QColor fragment(float x, float y, GVertexAttribute& va, QMap<QString, QImage>& map);
+    virtual QColor fragment(float x, float y, GVertexAttribute& va, QMap<QString, QImage>& map);
 
+    QVector3D objectToWorldDir(QVector3D pos);
     QVector4D objectToClipping(QVector4D pos);
     QColor color(QImage& image, QVector2D uv);
 

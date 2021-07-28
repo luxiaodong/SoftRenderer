@@ -7,8 +7,8 @@
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
 {
-    m_width = 649;
-    m_height = m_width;
+    m_width = 742;
+    m_height = 580;
 
     GCamera* pCamera = new GCamera();
     pCamera->setViewMatrix(QVector3D(0, 10, -10), 45, 0, 0);
@@ -30,7 +30,7 @@ Widget::Widget(QWidget *parent)
 void Widget::paintEvent(QPaintEvent*)
 {
     m_drawOnce++;
-    if(m_drawOnce == 3)
+    if(m_drawOnce >= 3)
     {
         m_raster->clearColor(Qt::black);
         m_raster->clearDepth();
