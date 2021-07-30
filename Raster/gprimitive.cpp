@@ -176,11 +176,11 @@ void GPrimitive::homogeneousDiv()
     }
 }
 
-GVertexAttribute GPrimitive::interpolationAttribute(QVector3D ratio)
+GVertexAttribute GPrimitive::interpolationAttribute(QVector3D weight)
 {
-    float alpha = ratio.x();
-    float beta  = ratio.y();
-    float gamma = ratio.z();
+    float alpha = weight.x();
+    float beta  = weight.y();
+    float gamma = weight.z();
 
     QVector4D vertex = alpha*m_triangle[0].m_vertex + beta*m_triangle[1].m_vertex + gamma*m_triangle[2].m_vertex;
     QVector2D uv     = alpha*m_triangle[0].m_uv     + beta*m_triangle[1].m_uv     + gamma*m_triangle[2].m_uv;

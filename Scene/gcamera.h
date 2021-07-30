@@ -4,6 +4,7 @@
 #include <QVector3D>
 #include <QVector4D>
 #include <QMatrix4x4>
+#include <QPoint>
 
 class GCamera
 {
@@ -17,7 +18,7 @@ public:
     void setProjMatrix(float fov,  float aspect, float n, float f);
     void setViewPortMatrix(float x, float y, float w, float h);
 
-    QVector4D ndcToScreenPoint(QVector4D& pos);
+    QPoint ndcToScreenPoint(QVector4D& pos);
 
 public:
     QMatrix4x4 m_viewMat; //视口矩阵

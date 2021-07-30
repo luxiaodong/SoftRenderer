@@ -56,7 +56,7 @@ void GRaster::cullingInHomogeneousSpace(GPrimitive& primitive)
     }
 }
 
-QRect GRaster::aabb(QVector4D& a, QVector4D& b, QVector4D& c)
+QRect GRaster::aabb(QPoint& a, QPoint& b, QPoint& c)
 {
     int xMin = a.x();
     int xMax = a.x();
@@ -96,7 +96,7 @@ QList<QPoint> GRaster::bresenham(int x0, int y0, int x1, int y1)
     return list;
 }
 
-QList<QPoint> GRaster::calculateBoundary(QVector4D& a,QVector4D& b,QVector4D& c)
+QList<QPoint> GRaster::calculateBoundary(QPoint& a, QPoint& b,QPoint& c)
 {
     QList<QPoint> boundaryPoints;
     boundaryPoints.append( this->bresenham(a.x(), a.y(), b.x(), b.y()));
@@ -274,12 +274,12 @@ void GRaster::doRendering()
         }
 
         //Screen Mapping 屏幕映射
-        QVector4D a = m_pCamera->ndcToScreenPoint(primitive.m_triangle[0].m_vertex);
-        QVector4D b = m_pCamera->ndcToScreenPoint(primitive.m_triangle[1].m_vertex);
-        QVector4D c = m_pCamera->ndcToScreenPoint(primitive.m_triangle[2].m_vertex);
+        QPoint a = m_pCamera->ndcToScreenPoint(primitive.m_triangle[0].m_vertex);
+        QPoint b = m_pCamera->ndcToScreenPoint(primitive.m_triangle[1].m_vertex);
+        QPoint c = m_pCamera->ndcToScreenPoint(primitive.m_triangle[2].m_vertex);
 
         //面积为0的三角形跳过
-        if( this->isZeroArea(QPoint(a.x(), a.y()), QPoint(b.x(), b.y()), QPoint(c.x(), c.y()) ) )
+        if( this->isZeroArea(a, b, c) )
         {
             continue;
         }
@@ -302,41 +302,48 @@ void GRaster::doRendering()
             //从左到右扫描
             for(int x=xMin; x<=xMax; ++x)
             {
-                QVector3D weight = this->interpolationCoffInTriangle( QPoint(a.x(), a.y()),
-                                                                      QPoint(b.x(), b.y()),
-                                                                      QPoint(c.x(), c.y()),
-                                                                      QPoint(x,y) );
+                QVector3D weight = this->interpolationCoffInTriangle( a, b, c, QPoint(x,y) );
                 if(this->isInTriangle(weight) == false)
                 {
                     continue;
                 }
 
-                // 将2D的权重转化为3D的权重.
-                float alpha = weight.x()/a.w();
-                float beta  = weight.y()/b.w();
-                float gamma = weight.z()/c.w();
+//                QRect debugRect(280,450,30,50);
+//                if(debugRect.contains(x, y) == false)
+//                {
+//                    continue;
+//                }
 
-                // 先算View空间下的Z值.
+                // 将2D的权重转化为3D的权重.
+                float alpha = weight.x()/primitive.m_triangle[0].m_vertex.w();
+                float beta  = weight.y()/primitive.m_triangle[1].m_vertex.w();
+                float gamma = weight.z()/primitive.m_triangle[2].m_vertex.w();
                 float zView = 1.0f/(alpha + beta + gamma);
-                // 再算深度缓存里的Z值,这里不用投影矩阵计算,而采用插值.
-                float zDepth = (alpha*a.z() + beta*b.z() + gamma*c.z()) * zView;
+                alpha *= zView;
+                beta  *= zView;
+                gamma *= zView;
+
+                // 插值顶点属性
+                GVertexAttribute va = primitive.interpolationAttribute(QVector3D(alpha, beta, gamma));
+                float zDepth = va.m_vertex.z()*0.5f + 0.5; //再转到 (0-1).
+
+                // 先算zBuffer空间下的Z值,这里不用投影矩阵计算,而采用插值.
+//                float zDepth = alpha*a.z() + beta*b.z() + gamma*c.z();
                 // 对于非透明物体,进行ealy-z
                 if (m_enableDepthTest && zDepth > m_depthBuffer->depth(x, y) )
                 {
                     continue;
                 }
 
-                // 插值顶点属性
-                GVertexAttribute va = primitive.interpolationAttribute(QVector3D(alpha, beta, gamma));
+//                GVertexAttribute va2 = primitive.interpolationAttribute(weight);
 
                 // FS(Fragment Shader)
                 QColor srcColor = m_pShader->fragment(x*1.0f/m_size.width(), y*1.0f/m_size.height(), va, m_material.m_imageSet);
 
-//                QColor srcColor = Qt::black;
+//                QColor srcColor = Qt::white;
 //                if( va.m_uv.x() == nan  || va.m_uv.y() == nan )
 //                {
-//                    srcColor = Qt::white;
-//                    qDebug()<<va.m_uv;
+//                    srcColor = Qt::black;
 //                }
 
                 // 模版测试, 这里暂不支持

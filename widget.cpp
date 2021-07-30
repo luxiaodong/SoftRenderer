@@ -7,8 +7,8 @@
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
 {
-    m_width = 742;
-    m_height = 580;
+    m_width = 600;
+    m_height = 600;
 
     GCamera* pCamera = new GCamera();
     pCamera->setViewMatrix(QVector3D(0, 10, -10), 45, 0, 0);
@@ -54,14 +54,15 @@ QImage Widget::genImage(int width, int height, int* data)
     {
         for(int i=0; i < width; ++i)
         {
-            int r = data[((height-1 -j)*width + i)*3];
-            int g = data[((height-1 -j)*width + i)*3 + 1];
-            int b = data[((height-1 -j)*width + i)*3 + 2];
+            int r = data[(j*width + i)*3];
+            int g = data[(j*width + i)*3 + 1];
+            int b = data[(j*width + i)*3 + 2];
             image.setPixelColor(i,j, QColor(r,g,b));
         }
     }
 
-    return image;
+//    image = image.copy(450,750,50,50);
+    return image.mirrored();
 }
 
 Widget::~Widget()

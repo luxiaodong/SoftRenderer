@@ -33,7 +33,7 @@ public:
     float calculateCullingPercent(QVector4D a, QVector4D b, int plane) const;
     float calculateCullingPercent(float x1, float x2, float w1, float w2, int sign) const;
 
-    GVertexAttribute interpolationAttribute(QVector3D ratio);
+    GVertexAttribute interpolationAttribute(QVector3D weight);
 public:
     GVertexAttribute  m_triangle[3];
 };
