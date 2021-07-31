@@ -164,26 +164,6 @@ bool GRaster::isInTriangle(QVector3D weight)
     return true;
 }
 
-QColor GRaster::interpolationColor(QColor& ca, QColor& cb, QColor& cc, QVector3D weight, float zView)
-{
-    float alpha = weight.x();
-    float beta = weight.y();
-    float gamma = weight.z();
-
-    int r = (alpha*ca.red()   + beta*cb.red()   + gamma*cc.red()  ) * zView;
-    int g = (alpha*ca.green() + beta*cb.green() + gamma*cc.green()) * zView;
-    int b = (alpha*ca.blue()  + beta*cb.blue()  + gamma*cc.blue() ) * zView;
-    int a = (alpha*ca.alpha() + beta*cb.alpha() + gamma*cc.alpha()) * zView;
-
-    if(r > 255) r = 255;
-    if(g > 255) g = 255;
-    if(b > 255) b = 255;
-    if(r <  0 ) r = 0;
-    if(g <  0 ) g = 0;
-    if(b <  0 ) b = 0;
-    return QColor(r, g, b, a);
-}
-
 void GRaster::doRendering()
 {
     //ME(Micro Engine) 配置管线, 比如渲染结果回传给cpu
@@ -274,9 +254,9 @@ void GRaster::doRendering()
         }
 
         //Screen Mapping 屏幕映射
-        QPoint a = m_pCamera->ndcToScreenPoint(primitive.m_triangle[0].m_vertex);
-        QPoint b = m_pCamera->ndcToScreenPoint(primitive.m_triangle[1].m_vertex);
-        QPoint c = m_pCamera->ndcToScreenPoint(primitive.m_triangle[2].m_vertex);
+        QPoint a = m_pCamera->ndcToScreenPoint(primitive.m_triangle[0].m_vertex.toVector3D());
+        QPoint b = m_pCamera->ndcToScreenPoint(primitive.m_triangle[1].m_vertex.toVector3D());
+        QPoint c = m_pCamera->ndcToScreenPoint(primitive.m_triangle[2].m_vertex.toVector3D());
 
         //面积为0的三角形跳过
         if( this->isZeroArea(a, b, c) )
@@ -318,10 +298,10 @@ void GRaster::doRendering()
                 float alpha = weight.x()/primitive.m_triangle[0].m_vertex.w();
                 float beta  = weight.y()/primitive.m_triangle[1].m_vertex.w();
                 float gamma = weight.z()/primitive.m_triangle[2].m_vertex.w();
-                float zView = 1.0f/(alpha + beta + gamma);
-                alpha *= zView;
-                beta  *= zView;
-                gamma *= zView;
+                float zView = alpha + beta + gamma;
+                alpha = alpha/zView;
+                beta  = beta/zView;
+                gamma = gamma/zView;
 
                 // 插值顶点属性
                 GVertexAttribute va = primitive.interpolationAttribute(QVector3D(alpha, beta, gamma));
@@ -335,8 +315,6 @@ void GRaster::doRendering()
                     continue;
                 }
 
-//                GVertexAttribute va2 = primitive.interpolationAttribute(weight);
-
                 // FS(Fragment Shader)
                 QColor srcColor = m_pShader->fragment(x*1.0f/m_size.width(), y*1.0f/m_size.height(), va, m_material.m_imageSet);
 
@@ -346,7 +324,7 @@ void GRaster::doRendering()
 //                    srcColor = Qt::black;
 //                }
 
-                // 模版测试, 这里暂不支持
+                // 模版测试, 暂不支持
                 // ZT(Z-Test) 深度测试
                 if(m_enableDepthTest && m_enableDepthWrite)
                 {

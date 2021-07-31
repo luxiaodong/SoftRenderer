@@ -43,6 +43,11 @@ void Widget::paintEvent(QPaintEvent*)
 
         QPainter painter(this);
         painter.drawImage( QRectF(0,0,m_width, m_height), this->genImage(m_width, m_height, m_raster->frameBuffer()));
+
+//        QPainter painter(this);
+//        QImage image;
+//        image.load(":/texture/uv.tga");
+//        painter.drawImage( QRectF(0,0,m_width, m_height), image);
     }
 }
 

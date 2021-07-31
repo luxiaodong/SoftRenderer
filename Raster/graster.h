@@ -36,7 +36,6 @@ public:
     QList<QPoint> bresenham(int x0, int y0, int x1, int y1);
     QList<QPoint> calculateBoundary(QPoint&,QPoint&,QPoint&);
     QVector3D interpolationCoffInTriangle(QPoint a, QPoint b, QPoint c, QPoint p);
-    QColor interpolationColor(QColor& ca, QColor& cb, QColor& cc, QVector3D weight, float zView);
     bool isZeroArea(QPoint a, QPoint b, QPoint c);
     bool isInTriangle(QVector3D weight);
     void cullingInHomogeneousSpace(GPrimitive& primitive);

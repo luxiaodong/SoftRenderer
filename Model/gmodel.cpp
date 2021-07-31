@@ -18,9 +18,9 @@ GMesh GModel::loadTriangle()
     mesh.m_vertexs.append( QVector3D(-5.0, 0.0, -5.0) );
     mesh.m_vertexs.append( QVector3D(5.0, 0.0, -5.0) );
     mesh.m_normals.append( QVector3D(0.0, 1.0, 0.0) );
-    mesh.m_uvs.append(QVector2D(1.0, 1.0));
-    mesh.m_uvs.append(QVector2D(0.0, 0.0));
-    mesh.m_uvs.append(QVector2D(1.0, 0.0));
+    mesh.m_uvs.append(QVector2D(1.0, 1.0f - 1.0));
+    mesh.m_uvs.append(QVector2D(0.0, 1.0f - 0.0));
+    mesh.m_uvs.append(QVector2D(1.0, 1.0f - 0.0));
     mesh.m_indexs.append( GVertexIndex(0, 0, 0) );
     mesh.m_indexs.append( GVertexIndex(1, 1, 0) );
     mesh.m_indexs.append( GVertexIndex(2, 2, 0) );
@@ -35,10 +35,10 @@ GMesh GModel::loadPlane()
     mesh.m_vertexs.append( QVector3D(5.0, 0.0,-5.0) );
     mesh.m_vertexs.append( QVector3D(-5.0,0.0, 5.0) );
     mesh.m_normals.append( QVector3D(0.0, 1.0, 0.0) );
-    mesh.m_uvs.append(QVector2D(1.0, 1.0));
-    mesh.m_uvs.append(QVector2D(0.0, 0.0));
-    mesh.m_uvs.append(QVector2D(1.0, 0.0));
     mesh.m_uvs.append(QVector2D(0.0, 1.0));
+    mesh.m_uvs.append(QVector2D(1.0, 0.0));
+    mesh.m_uvs.append(QVector2D(0.0, 0.0));
+    mesh.m_uvs.append(QVector2D(1.0, 1.0));
     mesh.m_indexs.append( GVertexIndex(0, 0, 0) );
     mesh.m_indexs.append( GVertexIndex(1, 1, 0) );
     mesh.m_indexs.append( GVertexIndex(2, 2, 0) );
@@ -90,7 +90,6 @@ GMesh GModel::loadObject(QString filePath)
                     QStringList tempList = line.split(" ");
                     float x = tempList.at(1).toFloat();
                     float y = tempList.at(2).toFloat();
-                    //这里的模型y轴颠倒
                     mesh.m_uvs.append(QVector2D(x,1.0f-y));
                 }
                 else if (line.left(2) == "f ")

@@ -7,5 +7,6 @@
     <qresource prefix="/texture">
         <file>rgb.png</file>
         <file>marry.png</file>
+        <file>uv.tga</file>
     </qresource>
 </RCC>

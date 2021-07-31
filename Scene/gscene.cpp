@@ -24,7 +24,7 @@ void GScene::loadSceneTest()
     GGameObject obj1 = GGameObject();
     obj1.setMesh(GModel::loadPlane());
     obj1.m_material.setShader( new GShader() );
-//    obj1.m_material.addImage("base", ":/texture/rgb.png");
+    obj1.m_material.addImage("base", ":/texture/uv.tga");
     obj1.setPosition(0,0,-1);
     m_gameObjects.append(obj1);
 

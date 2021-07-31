@@ -18,7 +18,7 @@ public:
     void setProjMatrix(float fov,  float aspect, float n, float f);
     void setViewPortMatrix(float x, float y, float w, float h);
 
-    QPoint ndcToScreenPoint(QVector4D& pos);
+    QPoint ndcToScreenPoint(QVector3D pos);
 
 public:
     QMatrix4x4 m_viewMat; //视口矩阵
