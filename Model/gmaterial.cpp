@@ -17,6 +17,10 @@ void GMaterial::addImage(QString key, QString filePath)
     {
         image = QImage(filePath, "png");
     }
+    else if(filePath.right(4) == ".jpg")
+    {
+        image = QImage(filePath, "jpg");
+    }
 
     m_imageSet.insert(key, image);
 }

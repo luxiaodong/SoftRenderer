@@ -11,6 +11,8 @@ public:
     GModel();
     static GMesh loadTriangle();
     static GMesh loadPlane();
+    static GMesh loadCube(bool isSkybox);
+    static GMesh loadUnityCube();
     static GMesh loadMarry();
     static GMesh loadObject(QString filePath);
 

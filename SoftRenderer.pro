@@ -38,7 +38,8 @@ SOURCES += main.cpp\
     Raster/gvertexattribute.cpp \
     Raster/gprimitive.cpp \
     Model/gmaterial.cpp \
-    Shader/phongshader.cpp
+    Shader/phongshader.cpp \
+    Shader/skyboxshader.cpp
 
 HEADERS  += widget.h \
     Scene/gscene.h \
@@ -54,7 +55,8 @@ HEADERS  += widget.h \
     Raster/gvertexattribute.h \
     Raster/gprimitive.h \
     Model/gmaterial.h \
-    Shader/phongshader.h
+    Shader/phongshader.h \
+    Shader/skyboxshader.h
 
 RESOURCES += \
     Resource/assets.qrc

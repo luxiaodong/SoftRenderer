@@ -18,6 +18,16 @@ QVector4D GShader::objectToClipping(QVector4D pos)
     return m_projMat*m_viewMat*m_modelMat*pos;
 }
 
+QVector4D GShader::objectToView(QVector4D pos)
+{
+    return m_viewMat*m_modelMat*pos;
+}
+
+QVector4D GShader::objectToWorld(QVector4D pos)
+{
+    return m_modelMat*pos;
+}
+
 QVector3D GShader::objectToWorldDir(QVector3D pos)
 {
     QMatrix4x4 mat = m_modelMat.transposed().inverted();

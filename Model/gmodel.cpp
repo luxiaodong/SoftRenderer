@@ -30,21 +30,213 @@ GMesh GModel::loadTriangle()
 GMesh GModel::loadPlane()
 {
     GMesh mesh;
-    mesh.m_vertexs.append( QVector3D(5.0, 0.0, 5.0) );
     mesh.m_vertexs.append( QVector3D(-5.0,0.0,-5.0) );
     mesh.m_vertexs.append( QVector3D(5.0, 0.0,-5.0) );
+    mesh.m_vertexs.append( QVector3D(5.0, 0.0, 5.0) );
     mesh.m_vertexs.append( QVector3D(-5.0,0.0, 5.0) );
     mesh.m_normals.append( QVector3D(0.0, 1.0, 0.0) );
-    mesh.m_uvs.append(QVector2D(0.0, 1.0));
-    mesh.m_uvs.append(QVector2D(1.0, 0.0));
     mesh.m_uvs.append(QVector2D(0.0, 0.0));
+    mesh.m_uvs.append(QVector2D(1.0, 0.0));
     mesh.m_uvs.append(QVector2D(1.0, 1.0));
+    mesh.m_uvs.append(QVector2D(0.0, 1.0));
     mesh.m_indexs.append( GVertexIndex(0, 0, 0) );
     mesh.m_indexs.append( GVertexIndex(1, 1, 0) );
     mesh.m_indexs.append( GVertexIndex(2, 2, 0) );
-    mesh.m_indexs.append( GVertexIndex(3, 3, 0) );
-    mesh.m_indexs.append( GVertexIndex(1, 1, 0) );
     mesh.m_indexs.append( GVertexIndex(0, 0, 0) );
+    mesh.m_indexs.append( GVertexIndex(2, 2, 0) );
+    mesh.m_indexs.append( GVertexIndex(3, 3, 0) );
+    return mesh;
+}
+
+GMesh GModel::loadUnityCube()
+{
+    GMesh mesh;
+    mesh.m_vertexs.append(QVector3D(0.5, -0.5, 0.5));
+    mesh.m_vertexs.append(QVector3D(-0.5, -0.5, 0.5));
+    mesh.m_vertexs.append(QVector3D(0.5, 0.5, 0.5));
+    mesh.m_vertexs.append(QVector3D(-0.5, 0.5, 0.5));
+    mesh.m_vertexs.append(QVector3D(0.5, 0.5, -0.5));
+    mesh.m_vertexs.append(QVector3D(-0.5, 0.5, -0.5));
+    mesh.m_vertexs.append(QVector3D(0.5, -0.5, -0.5));
+    mesh.m_vertexs.append(QVector3D(-0.5, -0.5, -0.5));
+    mesh.m_vertexs.append(QVector3D(0.5, 0.5, 0.5));
+    mesh.m_vertexs.append(QVector3D(-0.5, 0.5, 0.5));
+    mesh.m_vertexs.append(QVector3D(0.5, 0.5, -0.5));
+    mesh.m_vertexs.append(QVector3D(-0.5, 0.5, -0.5));
+    mesh.m_vertexs.append(QVector3D(0.5, -0.5, -0.5));
+    mesh.m_vertexs.append(QVector3D(0.5, -0.5, 0.5));
+    mesh.m_vertexs.append(QVector3D(-0.5, -0.5, 0.5));
+    mesh.m_vertexs.append(QVector3D(-0.5, -0.5, -0.5));
+    mesh.m_vertexs.append(QVector3D(-0.5, -0.5, 0.5));
+    mesh.m_vertexs.append(QVector3D(-0.5, 0.5, 0.5));
+    mesh.m_vertexs.append(QVector3D(-0.5, 0.5, -0.5));
+    mesh.m_vertexs.append(QVector3D(-0.5, -0.5, -0.5));
+    mesh.m_vertexs.append(QVector3D(0.5, -0.5, -0.5));
+    mesh.m_vertexs.append(QVector3D(0.5, 0.5, -0.5));
+    mesh.m_vertexs.append(QVector3D(0.5, 0.5, 0.5));
+    mesh.m_vertexs.append(QVector3D(0.5, -0.5, 0.5));
+    mesh.m_uvs.append(QVector2D(0.0, 0.0));
+    mesh.m_uvs.append(QVector2D(1.0, 0.0));
+    mesh.m_uvs.append(QVector2D(0.0, 1.0));
+    mesh.m_uvs.append(QVector2D(1.0, 1.0));
+    mesh.m_uvs.append(QVector2D(0.0, 1.0));
+    mesh.m_uvs.append(QVector2D(1.0, 1.0));
+    mesh.m_uvs.append(QVector2D(0.0, 1.0));
+    mesh.m_uvs.append(QVector2D(1.0, 1.0));
+    mesh.m_uvs.append(QVector2D(0.0, 0.0));
+    mesh.m_uvs.append(QVector2D(1.0, 0.0));
+    mesh.m_uvs.append(QVector2D(0.0, 0.0));
+    mesh.m_uvs.append(QVector2D(1.0, 0.0));
+    mesh.m_uvs.append(QVector2D(0.0, 0.0));
+    mesh.m_uvs.append(QVector2D(0.0, 1.0));
+    mesh.m_uvs.append(QVector2D(1.0, 1.0));
+    mesh.m_uvs.append(QVector2D(1.0, 0.0));
+    mesh.m_uvs.append(QVector2D(0.0, 0.0));
+    mesh.m_uvs.append(QVector2D(0.0, 1.0));
+    mesh.m_uvs.append(QVector2D(1.0, 1.0));
+    mesh.m_uvs.append(QVector2D(1.0, 0.0));
+    mesh.m_uvs.append(QVector2D(0.0, 0.0));
+    mesh.m_uvs.append(QVector2D(0.0, 1.0));
+    mesh.m_uvs.append(QVector2D(1.0, 1.0));
+    mesh.m_uvs.append(QVector2D(1.0, 0.0));
+    mesh.m_normals.append(QVector3D(0.0, 0.0, 1.0));
+    mesh.m_normals.append(QVector3D(0.0, 0.0, 1.0));
+    mesh.m_normals.append(QVector3D(0.0, 0.0, 1.0));
+    mesh.m_normals.append(QVector3D(0.0, 0.0, 1.0));
+    mesh.m_normals.append(QVector3D(0.0, 1.0, 0.0));
+    mesh.m_normals.append(QVector3D(0.0, 1.0, 0.0));
+    mesh.m_normals.append(QVector3D(0.0, 0.0, -1.0));
+    mesh.m_normals.append(QVector3D(0.0, 0.0, -1.0));
+    mesh.m_normals.append(QVector3D(0.0, 1.0, 0.0));
+    mesh.m_normals.append(QVector3D(0.0, 1.0, 0.0));
+    mesh.m_normals.append(QVector3D(0.0, 0.0, -1.0));
+    mesh.m_normals.append(QVector3D(0.0, 0.0, -1.0));
+    mesh.m_normals.append(QVector3D(0.0, -1.0, 0.0));
+    mesh.m_normals.append(QVector3D(0.0, -1.0, 0.0));
+    mesh.m_normals.append(QVector3D(0.0, -1.0, 0.0));
+    mesh.m_normals.append(QVector3D(0.0, -1.0, 0.0));
+    mesh.m_normals.append(QVector3D(-1.0, 0.0, 0.0));
+    mesh.m_normals.append(QVector3D(-1.0, 0.0, 0.0));
+    mesh.m_normals.append(QVector3D(-1.0, 0.0, 0.0));
+    mesh.m_normals.append(QVector3D(-1.0, 0.0, 0.0));
+    mesh.m_normals.append(QVector3D(1.0, 0.0, 0.0));
+    mesh.m_normals.append(QVector3D(1.0, 0.0, 0.0));
+    mesh.m_normals.append(QVector3D(1.0, 0.0, 0.0));
+    mesh.m_normals.append(QVector3D(1.0, 0.0, 0.0));
+    mesh.m_indexs.append(GVertexIndex(0));
+    mesh.m_indexs.append(GVertexIndex(2));
+    mesh.m_indexs.append(GVertexIndex(3));
+    mesh.m_indexs.append(GVertexIndex(0));
+    mesh.m_indexs.append(GVertexIndex(3));
+    mesh.m_indexs.append(GVertexIndex(1));
+    mesh.m_indexs.append(GVertexIndex(8));
+    mesh.m_indexs.append(GVertexIndex(4));
+    mesh.m_indexs.append(GVertexIndex(5));
+    mesh.m_indexs.append(GVertexIndex(8));
+    mesh.m_indexs.append(GVertexIndex(5));
+    mesh.m_indexs.append(GVertexIndex(9));
+    mesh.m_indexs.append(GVertexIndex(10));
+    mesh.m_indexs.append(GVertexIndex(6));
+    mesh.m_indexs.append(GVertexIndex(7));
+    mesh.m_indexs.append(GVertexIndex(10));
+    mesh.m_indexs.append(GVertexIndex(7));
+    mesh.m_indexs.append(GVertexIndex(11));
+    mesh.m_indexs.append(GVertexIndex(12));
+    mesh.m_indexs.append(GVertexIndex(13));
+    mesh.m_indexs.append(GVertexIndex(14));
+    mesh.m_indexs.append(GVertexIndex(12));
+    mesh.m_indexs.append(GVertexIndex(14));
+    mesh.m_indexs.append(GVertexIndex(15));
+    mesh.m_indexs.append(GVertexIndex(16));
+    mesh.m_indexs.append(GVertexIndex(17));
+    mesh.m_indexs.append(GVertexIndex(18));
+    mesh.m_indexs.append(GVertexIndex(16));
+    mesh.m_indexs.append(GVertexIndex(18));
+    mesh.m_indexs.append(GVertexIndex(19));
+    mesh.m_indexs.append(GVertexIndex(20));
+    mesh.m_indexs.append(GVertexIndex(21));
+    mesh.m_indexs.append(GVertexIndex(22));
+    mesh.m_indexs.append(GVertexIndex(20));
+    mesh.m_indexs.append(GVertexIndex(22));
+    mesh.m_indexs.append(GVertexIndex(23));
+    return mesh;
+}
+
+GMesh GModel::loadCube(bool isSkybox)
+{
+    GMesh mesh;
+    mesh.m_vertexs.append( QVector3D(-0.5,-0.5,-0.5) );
+    mesh.m_vertexs.append( QVector3D(0.5,-0.5,-0.5) );
+    mesh.m_vertexs.append( QVector3D(0.5,0.5,-0.5) );
+    mesh.m_vertexs.append( QVector3D(-0.5,0.5,-0.5) );
+    mesh.m_vertexs.append( QVector3D(-0.5,-0.5,0.5) );
+    mesh.m_vertexs.append( QVector3D(0.5,-0.5,0.5) );
+    mesh.m_vertexs.append( QVector3D(0.5,0.5,0.5) );
+    mesh.m_vertexs.append( QVector3D(-0.5,0.5,0.5) );
+    mesh.m_normals.append( QVector3D(0,0,-1) );
+    mesh.m_normals.append( QVector3D(1,0,0) );
+    mesh.m_normals.append( QVector3D(0,0,1) );
+    mesh.m_normals.append( QVector3D(-1,0,0) );
+    mesh.m_normals.append( QVector3D(0,1,0) );
+    mesh.m_normals.append( QVector3D(0,-1,0) );
+    mesh.m_uvs.append(QVector2D(0.0, 0.0));
+    mesh.m_uvs.append(QVector2D(1.0, 0.0));
+    mesh.m_uvs.append(QVector2D(1.0, 1.0));
+    mesh.m_uvs.append(QVector2D(0.0, 1.0));
+
+    mesh.m_indexs.append( GVertexIndex(0,0,0) );
+    mesh.m_indexs.append( GVertexIndex(1,1,0) );
+    mesh.m_indexs.append( GVertexIndex(2,2,0) );
+    mesh.m_indexs.append( GVertexIndex(0,0,0) );
+    mesh.m_indexs.append( GVertexIndex(2,2,0) );
+    mesh.m_indexs.append( GVertexIndex(3,3,0) );
+
+    mesh.m_indexs.append( GVertexIndex(1,0,1) );
+    mesh.m_indexs.append( GVertexIndex(5,1,1) );
+    mesh.m_indexs.append( GVertexIndex(6,2,1) );
+    mesh.m_indexs.append( GVertexIndex(1,0,1) );
+    mesh.m_indexs.append( GVertexIndex(6,2,1) );
+    mesh.m_indexs.append( GVertexIndex(2,3,1) );
+
+    mesh.m_indexs.append( GVertexIndex(6,0,2) );
+    mesh.m_indexs.append( GVertexIndex(5,1,2) );
+    mesh.m_indexs.append( GVertexIndex(4,2,2) );
+    mesh.m_indexs.append( GVertexIndex(7,3,2) );
+    mesh.m_indexs.append( GVertexIndex(6,0,2) );
+    mesh.m_indexs.append( GVertexIndex(4,2,2) );
+
+//    mesh.m_indexs.append( GVertexIndex(4,0,3) );
+//    mesh.m_indexs.append( GVertexIndex(0,1,3) );
+//    mesh.m_indexs.append( GVertexIndex(3,2,3) );
+//    mesh.m_indexs.append( GVertexIndex(7,3,3) );
+//    mesh.m_indexs.append( GVertexIndex(4,0,3) );
+//    mesh.m_indexs.append( GVertexIndex(3,2,3) );
+
+//    mesh.m_indexs.append( GVertexIndex(3,0,4) );
+//    mesh.m_indexs.append( GVertexIndex(2,1,4) );
+//    mesh.m_indexs.append( GVertexIndex(6,2,4) );
+//    mesh.m_indexs.append( GVertexIndex(3,0,4) );
+//    mesh.m_indexs.append( GVertexIndex(6,2,4) );
+//    mesh.m_indexs.append( GVertexIndex(7,3,4) );
+
+//    mesh.m_indexs.append( GVertexIndex(5,0,5) );
+//    mesh.m_indexs.append( GVertexIndex(1,1,5) );
+//    mesh.m_indexs.append( GVertexIndex(0,2,5) );
+//    mesh.m_indexs.append( GVertexIndex(4,3,5) );
+//    mesh.m_indexs.append( GVertexIndex(5,0,5) );
+//    mesh.m_indexs.append( GVertexIndex(0,2,5) );
+
+    if(isSkybox)
+    {
+        for(int i = 0; i<mesh.m_indexs.size()/3; ++i)
+        {
+            GVertexIndex one = mesh.m_indexs.at(3*i);
+            GVertexIndex two = mesh.m_indexs.at(3*i+1);
+            mesh.m_indexs.replace(3*i, two);
+            mesh.m_indexs.replace(3*i+1, one);
+        }
+    }
+
     return mesh;
 }
 

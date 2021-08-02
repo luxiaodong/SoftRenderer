@@ -276,6 +276,8 @@ void GRaster::doRendering()
             int xMax = boundaryPair.at(2*j+1).x();
             int y = boundaryPair.at(2*j).y();
 
+            if(y >= m_size.height()) continue;
+
             //右边边界不能取整数
             xMax = qMin(xMax, m_size.width() - 1);
 

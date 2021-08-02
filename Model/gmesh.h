@@ -9,6 +9,7 @@ class GVertexIndex
 {
 public:
     GVertexIndex(){}
+    GVertexIndex(int i):m_vertexIndex(i),m_uvIndex(i),m_normalIndex(i){}
     GVertexIndex(int v, int u, int n):m_vertexIndex(v),m_uvIndex(u),m_normalIndex(n){}
 
 public:

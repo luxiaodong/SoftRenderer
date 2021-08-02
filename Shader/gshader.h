@@ -15,13 +15,15 @@ class GShader
 public:
     GShader();
 
-    GVertexAttribute vertex(GVertexAttribute& va);
+    virtual GVertexAttribute vertex(GVertexAttribute& va);
 
     void tessellator(){}
     void geometry(){}
     virtual QColor fragment(float x, float y, GVertexAttribute& va, QMap<QString, QImage>& map);
 
     QVector3D objectToWorldDir(QVector3D pos);
+    QVector4D objectToWorld(QVector4D pos);
+    QVector4D objectToView(QVector4D pos);
     QVector4D objectToClipping(QVector4D pos);
     QColor color(QImage& image, QVector2D uv);
 

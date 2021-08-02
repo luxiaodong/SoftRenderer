@@ -11,6 +11,10 @@ public:
     GScene();
 
     void loadSceneTest();
+    void loadTriangle();
+    void loadSphere();
+
+    GGameObject skybox();
 
 public:
     QList<GGameObject> m_gameObjects;

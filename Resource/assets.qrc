@@ -3,10 +3,18 @@
         <file>cube.obj</file>
         <file>suzanne.obj</file>
         <file>marry.obj</file>
+        <file>sphere.obj</file>
     </qresource>
     <qresource prefix="/texture">
         <file>rgb.png</file>
         <file>marry.png</file>
         <file>uv.tga</file>
+        <file>skybox.tga</file>
+        <file>cubmap/negx.jpg</file>
+        <file>cubmap/negy.jpg</file>
+        <file>cubmap/negz.jpg</file>
+        <file>cubmap/posx.jpg</file>
+        <file>cubmap/posy.jpg</file>
+        <file>cubmap/posz.jpg</file>
     </qresource>
 </RCC>
