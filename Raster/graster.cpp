@@ -225,6 +225,7 @@ void GRaster::doRendering()
     }
 
     //Clipping 剪裁(视锥体剪裁, 将屏幕外的三角形丢掉)
+    qDebug()<<"primitives count is "<<m_primitivesBeforeCulling.size();
     m_primitivesAfterCulling.clear();
     foreach (GPrimitive primitive, m_primitivesBeforeCulling)
     {

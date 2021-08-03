@@ -13,6 +13,8 @@ public:
     void loadSceneTest();
     void loadTriangle();
     void loadSphere();
+    void loadPlane();
+    void loadModel();
 
     GGameObject skybox();
 

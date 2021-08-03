@@ -22,5 +22,5 @@ void GMaterial::addImage(QString key, QString filePath)
         image = QImage(filePath, "jpg");
     }
 
-    m_imageSet.insert(key, image);
+    m_imageSet.insert(key, image.mirrored() );
 }

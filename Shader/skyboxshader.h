@@ -13,9 +13,9 @@ public:
 
 private:
     QString mapKey(QVector3D normal);
-    QVector2D uv(QString key, QVector3D normal);
+    QVector2D uvIn6Side(QString key, QVector2D uv);
 
-    QVector3D m_cameraPos;
+    QVector2D uv(QString key, QVector3D normal);
 };
 
 #endif // SKYBOXSHADER_H

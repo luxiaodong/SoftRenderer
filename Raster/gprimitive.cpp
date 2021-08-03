@@ -20,13 +20,19 @@ QList<GVertexCullingRatio> GPrimitive::culling() const
     list.append(GVertexCullingRatio(m_triangle[1].m_vertex, QVector3D(0.0, 1.0, 0.0)));
     list.append(GVertexCullingRatio(m_triangle[2].m_vertex, QVector3D(0.0, 0.0, 1.0)));
 
+//qDebug()<<"0->"<<list.size();
     list = this->cullingSinglePlane(list, 0);
+//qDebug()<<"1->"<<list.size();
     list = this->cullingSinglePlane(list, 1);
+//qDebug()<<"2->"<<list.size();
     list = this->cullingSinglePlane(list, 2);
+//qDebug()<<"3->"<<list.size();
     list = this->cullingSinglePlane(list, 3);
+//qDebug()<<"4->"<<list.size();
     list = this->cullingSinglePlane(list, 4);
+//qDebug()<<"5->"<<list.size();
     list = this->cullingSinglePlane(list, 5);
-
+//qDebug()<<"6->"<<list.size();
     return list;
 }
 
@@ -52,7 +58,8 @@ QList<GVertexCullingRatio> GPrimitive::cullingSinglePlane(QList<GVertexCullingRa
         }
 
         float percent = this->calculateCullingPercent(curr_pos, next_pos, plane);
-        if(percent > 0.00001 && percent < 0.99999)
+
+        if(percent > 0.0f && percent < 1.0f)
         {
             QVector4D new_pos = curr_pos*(1-percent) + next_pos*percent;
             QVector3D new_rat = curr_rat*(1-percent) + next_rat*percent;
@@ -163,7 +170,8 @@ bool GPrimitive::isDiscardCullingSuccess() const
     QVector4D b = m_triangle[1].m_vertex;
     QVector4D c = m_triangle[2].m_vertex;
     float value = (b.x() - a.x())*(c.y() - a.y()) - (b.y() - a.y())*(c.x() - a.x());
-    return value < 0.0f;
+//    return value < 0.0f;
+    return false;
 }
 
 void GPrimitive::homogeneousDiv()

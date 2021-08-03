@@ -41,6 +41,7 @@ GVertexAttribute GShader::vertex(GVertexAttribute& va)
     outVa.m_vertex = this->objectToClipping(va.m_vertex);
     outVa.m_normal = this->objectToWorldDir(va.m_normal);
     outVa.m_uv = va.m_uv;
+//qDebug()<<va.m_vertex<<"--->"<<objectToWorld(va.m_vertex)<<"--->"<<(outVa.m_vertex/outVa.m_vertex.w());
     return outVa;
 }
 
