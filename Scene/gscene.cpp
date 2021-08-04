@@ -58,9 +58,9 @@ void GScene::loadSphere()
 GGameObject GScene::skybox()
 {
     GGameObject obj = GGameObject();
-//    obj.setMesh(GModel::loadCube(true));
     obj.setMesh(GModel::loadUnityCube());
-    obj.m_material.setShader( new SkyboxShader() );
+    obj.m_material.setShader( new SkyboxShader(true) );
+    obj.m_material.addImage("skybox", ":/texture/skybox.tga");
 
     if(true)
     {
@@ -84,7 +84,23 @@ GGameObject GScene::skybox()
     float camearFar = 1000;
     obj.setPosition(0, 10, -10);
     obj.setRotate(0,-90,0);
-//    obj.setRotate(-60,-45,0);
+    obj.setScale(camearFar,camearFar,camearFar);
+    return obj;
+}
+
+GGameObject GScene::skybox2()
+{
+    GGameObject obj = GGameObject();
+    obj.setMesh(GModel::loadObject(":/mesh/sphere.obj"));
+
+    GShader* pShader = new SkyboxShader(false);
+    pShader->m_cullType = 2;
+    obj.m_material.setShader(pShader);
+    obj.m_material.addImage("skybox", ":/texture/skybox.tga");
+
+    float camearFar = 1000;
+//    obj.setPosition(0, 10, -10);
+//    obj.setRotate(0,0,0);
     obj.setScale(camearFar,camearFar,camearFar);
     return obj;
 }

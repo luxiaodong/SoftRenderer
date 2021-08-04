@@ -17,6 +17,7 @@ public:
     void loadModel();
 
     GGameObject skybox();
+    GGameObject skybox2();
 
 public:
     QList<GGameObject> m_gameObjects;

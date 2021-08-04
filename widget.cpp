@@ -44,7 +44,7 @@ void Widget::paintEvent(QPaintEvent*)
             m_raster->renderGameObject(go);
         }
 
-        m_raster->renderGameObject( m_pScene->skybox() );
+        m_raster->renderGameObject( m_pScene->skybox2() );
 
         QPainter painter(this);
         painter.drawImage( QRectF(0,0,m_width, m_height), this->genImage(m_width, m_height, m_raster->frameBuffer()));

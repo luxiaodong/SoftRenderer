@@ -2,15 +2,16 @@
 #include <QtMath>
 #include <QDebug>
 
-SkyboxShader::SkyboxShader()
+SkyboxShader::SkyboxShader(bool is6Side)
 {
+    m_is6Side = is6Side;
 }
 
 GVertexAttribute SkyboxShader::vertex(GVertexAttribute& va)
 {
     GVertexAttribute outVa;
     outVa.m_vertex = this->objectToClipping(va.m_vertex);
-    outVa.m_normal = va.m_normal; // va.m_vertex.toVector3D().normalized();
+    outVa.m_normal = va.m_normal;
     outVa.m_uv = va.m_uv;
     return outVa;
 }
@@ -18,11 +19,17 @@ GVertexAttribute SkyboxShader::vertex(GVertexAttribute& va)
 QColor SkyboxShader::fragment(float x, float y, GVertexAttribute& va, QMap<QString, QImage>& map)
 {
     QVector3D normal = va.m_normal.normalized();
-    QString key = this->mapKey(normal);
-    QVector2D uv = this->uvIn6Side(key, va.m_uv);
-    QImage image = map.value(key, m_white);
+    if(m_is6Side)
+    {
+        QString key = this->mapKey(normal);
+        QVector2D uv = this->uvIn6Side(key, va.m_uv);
+        QImage image = map.value(key, m_white);
+        return this->color(image, uv);
+    }
+
+    QVector2D uv = this->uvInPanoramic(va.m_normal);
+    QImage image = map.value("skybox", m_white);
     return this->color(image, uv);
-//    return this->color(image, va.m_uv);
 }
 
 QString SkyboxShader::mapKey(QVector3D normal)
@@ -65,41 +72,53 @@ QVector2D SkyboxShader::uvIn6Side(QString key, QVector2D uv)
     return QVector2D(u, v);
 }
 
-//https://zhuanlan.zhihu.com/p/268645600?utm_source=qq&utm_medium=social&utm_oi=910587312751153152
-QVector2D SkyboxShader::uv(QString key, QVector3D normal)
+QVector2D SkyboxShader::uvInPanoramic(QVector3D normal)
 {
-    float u = 0.0f;
-    float v = 0.0f;
-
-    float x = normal.x();
-    float y = normal.y();
-    float z = normal.z();
-
-    if(key == "left" || key == "right" )
-    {
-        u = z/qAbs(x);
-        v = y/qAbs(x);
-    }
-    else if(key == "down" || key == "up")
-    {
-        u = x/qAbs(y);
-        v = z/qAbs(y);
-    }
-    else if(key == "back" || key == "farward")
-    {
-        u = x/qAbs(z);
-        v = y/qAbs(z);
-    }
-
-    u = 0.5*u+0.5;
-    v = 0.5*v+0.5;
-
-    if(key == "down" || key == "up" || key == "forward")
-    {
-        u = 1.0 - u;
-        v = 1.0 - v;
-    }
-
-    return QVector2D(u, v);
+    normal.normalize();
+    float phi = qAcos(normal.y()); //(0, pi)
+    float theta = qAtan2(normal.z(), normal.x()); //(-pi, pi)
+    float u = theta/(2*3.1415926f);
+    float v = phi/3.1415926f;
+    return QVector2D(0.5f - u, 1.0f - v);
 }
+
+
+
+//https://zhuanlan.zhihu.com/p/268645600?utm_source=qq&utm_medium=social&utm_oi=910587312751153152
+//QVector2D SkyboxShader::uv(QString key, QVector3D normal)
+//{
+//    float u = 0.0f;
+//    float v = 0.0f;
+
+//    float x = normal.x();
+//    float y = normal.y();
+//    float z = normal.z();
+
+//    if(key == "left" || key == "right" )
+//    {
+//        u = z/qAbs(x);
+//        v = y/qAbs(x);
+//    }
+//    else if(key == "down" || key == "up")
+//    {
+//        u = x/qAbs(y);
+//        v = z/qAbs(y);
+//    }
+//    else if(key == "back" || key == "farward")
+//    {
+//        u = x/qAbs(z);
+//        v = y/qAbs(z);
+//    }
+
+//    u = 0.5*u+0.5;
+//    v = 0.5*v+0.5;
+
+//    if(key == "down" || key == "up" || key == "forward")
+//    {
+//        u = 1.0 - u;
+//        v = 1.0 - v;
+//    }
+
+//    return QVector2D(u, v);
+//}
 

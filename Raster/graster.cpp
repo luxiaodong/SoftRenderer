@@ -248,7 +248,7 @@ void GRaster::doRendering()
         primitive.homogeneousDiv();
 
         //FC(face culling) 背面剔除
-        if(primitive.isDiscardCullingSuccess())
+        if( primitive.isDiscardCullingSuccess(m_pShader->m_cullType) )
         {
             //qDebug()<<"discard culling";
             continue;

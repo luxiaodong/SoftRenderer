@@ -164,13 +164,17 @@ float GPrimitive::calculateCullingPercent(float x1, float x2, float w1, float w2
     return numerator/denominator;
 }
 
-bool GPrimitive::isDiscardCullingSuccess() const
+bool GPrimitive::isDiscardCullingSuccess(int cullType) const
 {
+    if(cullType == 0) return false;
+
     QVector4D a = m_triangle[0].m_vertex;
     QVector4D b = m_triangle[1].m_vertex;
     QVector4D c = m_triangle[2].m_vertex;
     float value = (b.x() - a.x())*(c.y() - a.y()) - (b.y() - a.y())*(c.x() - a.x());
-//    return value < 0.0f;
+
+    if(cullType == 1) return value < 0.0f;
+    if(cullType == 2) return value > 0.0f;
     return false;
 }
 

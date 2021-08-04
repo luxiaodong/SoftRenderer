@@ -8,6 +8,7 @@ GShader::GShader()
 {
     m_white = QImage(1,1,QImage::Format_RGBA8888);
     m_white.fill(Qt::white);
+    m_cullType = 1;
 }
 
 QVector4D GShader::objectToClipping(QVector4D pos)

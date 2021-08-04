@@ -6,7 +6,7 @@
 class SkyboxShader : public GShader
 {
 public:
-    SkyboxShader();
+    SkyboxShader(bool is6Side);
 
     virtual GVertexAttribute vertex(GVertexAttribute& va);
     virtual QColor fragment(float x, float y, GVertexAttribute& va, QMap<QString, QImage>& map);
@@ -14,8 +14,11 @@ public:
 private:
     QString mapKey(QVector3D normal);
     QVector2D uvIn6Side(QString key, QVector2D uv);
+    QVector2D uvInPanoramic(QVector3D normal);
 
-    QVector2D uv(QString key, QVector3D normal);
+private:
+    bool m_is6Side;
+
 };
 
 #endif // SKYBOXSHADER_H

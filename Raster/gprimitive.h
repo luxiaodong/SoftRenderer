@@ -26,7 +26,7 @@ public:
     bool isPointInSinglePlane(QVector4D p, int plane) const;
 
     void homogeneousDiv();
-    bool isDiscardCullingSuccess() const;
+    bool isDiscardCullingSuccess(int cullType) const;
 
     QList<GVertexCullingRatio> culling() const;
     QList<GVertexCullingRatio> cullingSinglePlane(QList<GVertexCullingRatio>&, int plane) const;
