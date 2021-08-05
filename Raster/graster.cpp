@@ -312,12 +312,12 @@ void GRaster::doRendering()
                 // 计算插值后的深度值
 //                QVector4D pInView(0,0,-zView,1);
 //                QVector4D pInClip = m_pCamera->m_projMat*pInView;
-//                float zDepth = pInClip.z()/pInClip.w();
-//                zDepth = zDepth*0.5 + 0.5; //再转到 (0-1)
+//                float zNdc = pInClip.z()/pInClip.w();
+//                float zDepth = zNdc*0.5 + 0.5; //再转到 (0-1)
 
                 // 快速做法, 跳过投影矩阵
-                float zDepth = va.m_vertex.z()/va.m_vertex.w();
-                zDepth = zDepth*0.5 + 0.5; //再转到 (0-1)
+                float zNdc = va.m_vertex.z()/va.m_vertex.w();
+                float zDepth = zNdc*0.5 + 0.5; //再转到 (0-1)
 
 //if(x == 307 && y == 195)
 //{
