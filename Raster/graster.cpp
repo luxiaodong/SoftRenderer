@@ -306,21 +306,21 @@ void GRaster::doRendering()
                 beta  = beta*zView;
                 gamma = gamma*zView;
 
-                // 插值顶点属性,clip or ndc?
+                // 插值顶点属性, clip空间内
                 GVertexAttribute va = primitive.interpolationAttribute(QVector3D(alpha, beta, gamma));
 
                 // 计算插值后的深度值
-                QVector4D pInView(0,0,-zView,1);
-                QVector4D pInClip = m_pCamera->m_projMat*pInView;
-                float zDepth = pInClip.z()/pInClip.w();
+//                QVector4D pInView(0,0,-zView,1);
+//                QVector4D pInClip = m_pCamera->m_projMat*pInView;
+//                float zDepth = pInClip.z()/pInClip.w();
+//                zDepth = zDepth*0.5 + 0.5; //再转到 (0-1)
+
+                // 快速做法, 跳过投影矩阵
+                float zDepth = va.m_vertex.z()/va.m_vertex.w();
                 zDepth = zDepth*0.5 + 0.5; //再转到 (0-1)
 
 //if(x == 307 && y == 195)
 //{
-//    qDebug()<<zView;
-//    qDebug()<<va.m_vertex.w();
-//    QVector4D pp =
-//    zDepth = pp.z()/pp.w();
 //    qDebug()<<zDepth;
 //}
 
