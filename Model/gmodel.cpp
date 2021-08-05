@@ -51,10 +51,10 @@ GMesh GModel::loadTriangle()
 GMesh GModel::loadPlane()
 {
     GMesh mesh;
-    mesh.m_vertexs.append( QVector3D(-5.0, -5.0,  0.0) );
-    mesh.m_vertexs.append( QVector3D( 5.0, -5.0,  0.0) );
-    mesh.m_vertexs.append( QVector3D(-5.0,  5.0,  0.0) );
-    mesh.m_vertexs.append( QVector3D( 5.0,  5.0,  0.0) );
+    mesh.m_vertexs.append( QVector3D(-0.5, -0.5,  0.0) );
+    mesh.m_vertexs.append( QVector3D( 0.5, -0.5,  0.0) );
+    mesh.m_vertexs.append( QVector3D(-0.5,  0.5,  0.0) );
+    mesh.m_vertexs.append( QVector3D( 0.5,  0.5,  0.0) );
     mesh.m_normals.append( QVector3D( 0.0,  0.0, -1.0) );
     mesh.m_uvs.append(QVector2D(0.0, 0.0));
     mesh.m_uvs.append(QVector2D(1.0, 0.0));

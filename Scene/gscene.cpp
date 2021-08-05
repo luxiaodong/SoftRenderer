@@ -19,6 +19,7 @@ void GScene::loadPlane()
     obj.m_material.addImage("base", ":/texture/uv.tga");
     obj.setPosition(0,0,-1);
     obj.setRotate(90, 0, 0);
+    obj.setScale(10, 10, 10);
     m_gameObjects.append(obj);
 }
 
@@ -26,11 +27,12 @@ void GScene::loadModel()
 {
     GGameObject obj = GGameObject();
     obj.setMesh(GModel::loadObject(":/mesh/marry.obj"));
-    obj.m_material.setShader( new PhongShader() );
+//    obj.m_material.setShader( new PhongShader() );
+    obj.m_material.setShader( new GShader() );
     obj.m_material.addImage("base", ":/texture/marry.png");
-    obj.setPosition(0,0,-2);
-    obj.setScale(2, 2, 2);
+    obj.setPosition(0,0,-3);
     obj.setRotate(0, 180, 0);
+    obj.setScale(2, 2, 2);
     m_gameObjects.append(obj);
 }
 

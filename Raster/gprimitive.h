@@ -25,7 +25,7 @@ public:
     bool isPointInFrustum(QVector4D p) const;
     bool isPointInSinglePlane(QVector4D p, int plane) const;
 
-    void homogeneousDiv();
+    QList<QVector3D> homogeneousDiv();
     bool isDiscardCullingSuccess(int cullType) const;
 
     QList<GVertexCullingRatio> culling() const;

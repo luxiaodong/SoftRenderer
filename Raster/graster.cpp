@@ -225,7 +225,7 @@ void GRaster::doRendering()
     }
 
     //Clipping 剪裁(视锥体剪裁, 将屏幕外的三角形丢掉)
-    qDebug()<<"primitives count is "<<m_primitivesBeforeCulling.size();
+//    qDebug()<<"primitives count is "<<m_primitivesBeforeCulling.size();
     m_primitivesAfterCulling.clear();
     foreach (GPrimitive primitive, m_primitivesBeforeCulling)
     {
@@ -245,7 +245,7 @@ void GRaster::doRendering()
     foreach (GPrimitive primitive, m_primitivesAfterCulling)
     {
         //PD(perspective division) 透视除法
-        primitive.homogeneousDiv();
+        QList<QVector3D> ndcList = primitive.homogeneousDiv();
 
         //FC(face culling) 背面剔除
         if( primitive.isDiscardCullingSuccess(m_pShader->m_cullType) )
@@ -255,9 +255,9 @@ void GRaster::doRendering()
         }
 
         //Screen Mapping 屏幕映射
-        QPoint a = m_pCamera->ndcToScreenPoint(primitive.m_triangle[0].m_vertex.toVector3D());
-        QPoint b = m_pCamera->ndcToScreenPoint(primitive.m_triangle[1].m_vertex.toVector3D());
-        QPoint c = m_pCamera->ndcToScreenPoint(primitive.m_triangle[2].m_vertex.toVector3D());
+        QPoint a = m_pCamera->ndcToScreenPoint(ndcList.at(0));
+        QPoint b = m_pCamera->ndcToScreenPoint(ndcList.at(1));
+        QPoint c = m_pCamera->ndcToScreenPoint(ndcList.at(2));
 
         //面积为0的三角形跳过
         if( this->isZeroArea(a, b, c) )
@@ -291,7 +291,7 @@ void GRaster::doRendering()
                     continue;
                 }
 
-//                QRect debugRect(280,450,30,50);
+//                QRect debugRect(302,190,10,10);
 //                if(debugRect.contains(x, y) == false)
 //                {
 //                    continue;
@@ -301,19 +301,31 @@ void GRaster::doRendering()
                 float alpha = weight.x()/primitive.m_triangle[0].m_vertex.w();
                 float beta  = weight.y()/primitive.m_triangle[1].m_vertex.w();
                 float gamma = weight.z()/primitive.m_triangle[2].m_vertex.w();
-                float zView = alpha + beta + gamma;
-                alpha = alpha/zView;
-                beta  = beta/zView;
-                gamma = gamma/zView;
+                float zView = 1.0f/(alpha + beta + gamma);
+                alpha = alpha*zView;
+                beta  = beta*zView;
+                gamma = gamma*zView;
 
-                // 插值顶点属性
+                // 插值顶点属性,clip or ndc?
                 GVertexAttribute va = primitive.interpolationAttribute(QVector3D(alpha, beta, gamma));
-                float zDepth = va.m_vertex.z()*0.5f + 0.5; //再转到 (0-1).
 
-                // 先算zBuffer空间下的Z值,这里不用投影矩阵计算,而采用插值.
-//                float zDepth = alpha*a.z() + beta*b.z() + gamma*c.z();
+                // 计算插值后的深度值
+                QVector4D pInView(0,0,-zView,1);
+                QVector4D pInClip = m_pCamera->m_projMat*pInView;
+                float zDepth = pInClip.z()/pInClip.w();
+                zDepth = zDepth*0.5 + 0.5; //再转到 (0-1)
+
+//if(x == 307 && y == 195)
+//{
+//    qDebug()<<zView;
+//    qDebug()<<va.m_vertex.w();
+//    QVector4D pp =
+//    zDepth = pp.z()/pp.w();
+//    qDebug()<<zDepth;
+//}
+
                 // 对于非透明物体,进行ealy-z
-                if (m_enableDepthTest && zDepth > m_depthBuffer->depth(x, y) )
+                if (m_enableDepthTest && zDepth >= m_depthBuffer->depth(x, y) )
                 {
                     continue;
                 }

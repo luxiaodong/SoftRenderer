@@ -178,14 +178,16 @@ bool GPrimitive::isDiscardCullingSuccess(int cullType) const
     return false;
 }
 
-void GPrimitive::homogeneousDiv()
+QList<QVector3D> GPrimitive::homogeneousDiv()
 {
+    QList<QVector3D> list;
     for(int i = 0; i < 3; ++i)
     {
         QVector4D p = m_triangle[i].m_vertex;
-        p = QVector4D(p.x()/p.w(), p.y()/p.w(), p.z()/p.w(), p.w());
-        m_triangle[i].m_vertex = p;
+        list.append( QVector3D(p.x()/p.w(), p.y()/p.w(), p.z()/p.w()) );
     }
+
+    return list;
 }
 
 GVertexAttribute GPrimitive::interpolationAttribute(QVector3D weight)
