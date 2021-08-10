@@ -19,6 +19,7 @@ protected:
 
 private:
     QImage genImage(int width, int height, int* data);
+    QImage shadowImage(int width, int height, float* data);
 
 private:
     int m_width;

@@ -5,13 +5,13 @@ GDepthBuffer::GDepthBuffer(int width, int height):m_width(width), m_height(heigh
     m_data = new float[width*height];
 }
 
-void GDepthBuffer::clear()
+void GDepthBuffer::clear(float depth)
 {
     for(int j=0; j < m_height; ++j)
     {
         for(int i=0; i < m_width; ++i)
         {
-            m_data[(j*m_width + i)] = 1.0f;
+            m_data[(j*m_width + i)] = depth;
         }
     }
 }

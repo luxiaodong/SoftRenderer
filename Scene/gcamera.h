@@ -24,6 +24,7 @@ public:
     QMatrix4x4 m_viewMat; //视口矩阵
     QMatrix4x4 m_projMat; //投影矩阵,包括正交投影
     QMatrix4x4 m_viewPortMat;
+    bool m_isOrth;
 };
 
 #endif // GCAMEAR_H

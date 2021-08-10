@@ -39,7 +39,8 @@ SOURCES += main.cpp\
     Raster/gprimitive.cpp \
     Model/gmaterial.cpp \
     Shader/phongshader.cpp \
-    Shader/skyboxshader.cpp
+    Shader/skyboxshader.cpp \
+    Scene/glight.cpp
 
 HEADERS  += widget.h \
     Scene/gscene.h \
@@ -56,7 +57,8 @@ HEADERS  += widget.h \
     Raster/gprimitive.h \
     Model/gmaterial.h \
     Shader/phongshader.h \
-    Shader/skyboxshader.h
+    Shader/skyboxshader.h \
+    Scene/glight.h
 
 RESOURCES += \
     Resource/assets.qrc

@@ -6,6 +6,8 @@
 
 GGameObject::GGameObject()
 {
+    m_castShadow = false;
+    m_receiveShadow = false;
     m_position = QVector3D(0,0,0);
     m_rotate = QVector3D(0,0,0);
     m_scale = QVector3D(1,1,1);

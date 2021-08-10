@@ -8,7 +8,7 @@ public:
     GDepthBuffer(int, int);
     ~GDepthBuffer();
 
-    void clear();
+    void clear(float depth = 1.0f);
 
     void setDepth(int x, int y, float depth);
     float depth(int x, int y);

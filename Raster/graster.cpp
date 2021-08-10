@@ -9,6 +9,7 @@ GRaster::GRaster()
     m_enableDepthTest = true;
     m_enableDepthWrite = true;
     m_enableBlend = false;
+    m_enableShadow = false;
 }
 
 void GRaster::setRenderSize(const QSize& size)
@@ -16,6 +17,7 @@ void GRaster::setRenderSize(const QSize& size)
     m_size = size;
     m_frameBuffer = new GFrameBuffer(m_size.width(), m_size.height(), 3);
     m_depthBuffer = new GDepthBuffer(m_size.width(), m_size.height());
+    m_shadowMap = new GDepthBuffer(m_size.width(), m_size.height());
 }
 
 void GRaster::clearColor(const QColor& color)
@@ -25,7 +27,12 @@ void GRaster::clearColor(const QColor& color)
 
 void GRaster::clearDepth()
 {
-    m_depthBuffer->clear();
+    m_depthBuffer->clear(1.0f);
+}
+
+void GRaster::clearShadowMap()
+{
+    m_shadowMap->clear(0.0f);
 }
 
 void GRaster::renderGameObject(const GGameObject& obj)
@@ -298,16 +305,20 @@ void GRaster::doRendering()
 //                }
 
                 // 将2D的权重转化为3D的权重.
-                float alpha = weight.x()/primitive.m_triangle[0].m_vertex.w();
-                float beta  = weight.y()/primitive.m_triangle[1].m_vertex.w();
-                float gamma = weight.z()/primitive.m_triangle[2].m_vertex.w();
-                float zView = 1.0f/(alpha + beta + gamma);
-                alpha = alpha*zView;
-                beta  = beta*zView;
-                gamma = gamma*zView;
+                if(m_pCamera->m_isOrth == false)
+                {
+                    float alpha = weight.x()/primitive.m_triangle[0].m_vertex.w();
+                    float beta  = weight.y()/primitive.m_triangle[1].m_vertex.w();
+                    float gamma = weight.z()/primitive.m_triangle[2].m_vertex.w();
+                    float zView = 1.0f/(alpha + beta + gamma);
+                    alpha = alpha*zView;
+                    beta  = beta*zView;
+                    gamma = gamma*zView;
+                    weight = QVector3D(alpha, beta, gamma);
+                }
 
                 // 插值顶点属性, clip空间内
-                GVertexAttribute va = primitive.interpolationAttribute(QVector3D(alpha, beta, gamma));
+                GVertexAttribute va = primitive.interpolationAttribute(weight);
 
                 // 计算插值后的深度值
 //                QVector4D pInView(0,0,-zView,1);
@@ -344,6 +355,7 @@ void GRaster::doRendering()
                 if(m_enableDepthTest && m_enableDepthWrite)
                 {
                     m_depthBuffer->setDepth(x, y, zDepth);
+                    m_shadowMap->setDepth(x, y, 1.0f - zDepth);
                 }
 
                 // OM(Output Merger) 进行Alpha Blend，颜色混合

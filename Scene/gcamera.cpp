@@ -5,7 +5,7 @@
 
 GCamera::GCamera()
 {
-//    m_isProjection = true;
+    m_isOrth = false;
 }
 
 void GCamera::setViewMatrix(QVector3D position, float xDegree, float yDegree, float zDegree)
@@ -92,9 +92,10 @@ void GCamera::setOrthMatrix(float size, float aspect, float n, float f)
         1.0f/(aspect*size),      0.0f,          0.0f,          0.0f,
                 0.0f,       1.0f/size,          0.0f,          0.0f,
                 0.0f,            0.0f,       2/(n-f),   (n+f)/(n-f),
-                0.0f,            0.0f,         -1.0f,         0.0f);
+                0.0f,            0.0f,          0.0f,         1.0f);
 
     m_projMat = mat;
+    m_isOrth = true;
 }
 
 void GCamera::setProjMatrix(float fov,  float aspect, float n, float f)
@@ -107,6 +108,7 @@ void GCamera::setProjMatrix(float fov,  float aspect, float n, float f)
                 0.0f,            0.0f,   (f+n)/(n-f),   2*n*f/(n-f),
                 0.0f,            0.0f,         -1.0f,         0.0f);
     m_projMat = mat;
+    m_isOrth = false;
 }
 
 void GCamera::setViewPortMatrix(float x, float y, float w, float h)

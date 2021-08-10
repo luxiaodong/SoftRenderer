@@ -10,6 +10,7 @@
 #include "Model/gmesh.h"
 #include "Scene/gcamera.h"
 #include "Scene/ggameobject.h"
+#include "Scene/glight.h"
 #include <QMatrix4x4>
 #include <QVector4D>
 #include <QVector3D>
@@ -25,13 +26,15 @@ public:
     GRaster();
     void doRendering();
     int* frameBuffer(){return m_frameBuffer->m_data;}
+    float* shadowMap(){return m_shadowMap->m_data;}
 
     void setCamera(GCamera* camera){m_pCamera = camera;}
     void setRenderSize(const QSize& size);
     void clearColor(const QColor& color);
     void clearDepth();
+    void clearShadowMap();
 
-    void renderGameObject(const GGameObject& );
+    void renderGameObject(const GGameObject&);
 
     QList<QPoint> bresenham(int x0, int y0, int x1, int y1);
     QList<QPoint> calculateBoundary(QPoint&,QPoint&,QPoint&);
@@ -41,15 +44,19 @@ public:
     void cullingInHomogeneousSpace(GPrimitive& primitive);
     QRect aabb(QPoint& a, QPoint& b, QPoint& c);
 
+public:
+    void enableShadow(bool isEnable){m_enableShadow = isEnable;}
+
 private:
     QSize m_size;
     GFrameBuffer* m_frameBuffer;
     GDepthBuffer* m_depthBuffer;
+    GDepthBuffer* m_shadowMap;
 
+//    GLight* m_light;
     GCamera* m_pCamera;
     GMesh m_mesh;
     GMaterial m_material;
-
 
     GShader *m_pShader;
     QMatrix4x4 m_modelMat;
@@ -62,6 +69,7 @@ private:
     bool m_enableDepthTest;
     bool m_enableDepthWrite;
     bool m_enableBlend;
+    bool m_enableShadow;
 };
 
 #endif // GRASTER_H

@@ -8,7 +8,45 @@
 
 GScene::GScene()
 {
+    m_enableShadow = false;
     m_gameObjects.clear();
+    m_light = new GLight();
+    m_lightCamera = NULL;
+}
+
+void GScene::setLight()
+{
+    m_light->setRotate(50, -120, 0);
+    m_light->m_intensity = 1.0f;
+    qDebug()<<m_light->dir();
+}
+
+GCamera* GScene::getLightCamera()
+{
+    if(m_lightCamera == NULL)
+    {
+        m_lightCamera = new GCamera();
+//        m_lightCamera->setViewMatrix(QVector3D(0, 0, 0), 50, -120, 0);
+//        QMatrix4x4 matUnity(
+//                    -0.50000,	0.00000,	0.86603,	-9.61336,
+//                    -0.66341,	0.64279,	-0.38302,	11.35071,
+//                    0.55667,	0.76604,	0.32139,	-30.61082,
+//                    0.00000,	0.00000,	0.00000,	1.00000);
+//        qDebug()<<m_lightCamera->m_viewMat.inverted()*matUnity;
+
+        //位置不知道怎么计算,先抄unity.
+        m_lightCamera->setViewMatrix(QVector3D(19.7637f, 16.1532f, 22.5111f), 50, -120, 0);
+        //近平面,远平面,大小不知道怎么计算,先抄unity.
+        m_lightCamera->setOrthMatrix(29.6471f, 1, -23.431, 68.186f);
+        //阴影大小用屏幕大小,避免两次申请内存不一致.
+        m_lightCamera->m_viewPortMat = m_camera->m_viewPortMat;
+
+//        qDebug()<<m_lightCamera->m_viewMat;
+//        qDebug()<<m_lightCamera->m_projMat;
+//        qDebug()<<m_lightCamera->m_projMat*m_lightCamera->m_viewMat;
+    }
+
+    return m_lightCamera;
 }
 
 void GScene::loadPlane()
@@ -16,10 +54,11 @@ void GScene::loadPlane()
     GGameObject obj = GGameObject();
     obj.setMesh(GModel::loadPlane());
     obj.m_material.setShader( new GShader() );
-    obj.m_material.addImage("base", ":/texture/uv.tga");
+//    obj.m_material.addImage("base", ":/texture/uv.tga");
     obj.setPosition(0,0,-1);
     obj.setRotate(90, 0, 0);
     obj.setScale(10, 10, 10);
+    obj.m_receiveShadow = true;
     m_gameObjects.append(obj);
 }
 
@@ -33,6 +72,7 @@ void GScene::loadModel()
     obj.setPosition(0,0,-3);
     obj.setRotate(0, 180, 0);
     obj.setScale(2, 2, 2);
+    obj.m_castShadow = true;
     m_gameObjects.append(obj);
 }
 

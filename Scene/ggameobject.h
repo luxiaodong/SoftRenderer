@@ -28,6 +28,8 @@ public:
 
     GMesh m_mesh;
     GMaterial m_material;
+    bool m_castShadow;
+    bool m_receiveShadow;
 };
 
 #endif // GGAMEOBJECT_H
