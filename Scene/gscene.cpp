@@ -16,7 +16,7 @@ GScene::GScene()
 
 void GScene::setLight()
 {
-    m_light->setRotate(50, -120, 0);
+//    m_light->setRotate(50, -120, 0);
     m_light->m_intensity = 1.0f;
     qDebug()<<m_light->dir();
 }
@@ -40,6 +40,11 @@ GCamera* GScene::getLightCamera()
         m_lightCamera->setOrthMatrix(29.6471f, 1, -23.431, 68.186f);
         //阴影大小用屏幕大小,避免两次申请内存不一致.
         m_lightCamera->m_viewPortMat = m_camera->m_viewPortMat;
+
+        //在渲染物体的时候还要用到这些矩阵
+        m_light->m_viewMat = m_lightCamera->m_viewMat;
+        m_light->m_projMat = m_lightCamera->m_projMat;
+        m_light->m_viewPortMat = m_lightCamera->m_viewPortMat;
 
 //        qDebug()<<m_lightCamera->m_viewMat;
 //        qDebug()<<m_lightCamera->m_projMat;

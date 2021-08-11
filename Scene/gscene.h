@@ -1,9 +1,9 @@
 #ifndef WORLD_H
 #define WORLD_H
 
+#include "Scene/glight.h"
 #include "Model/gmodel.h"
 #include "Scene/ggameobject.h"
-#include "Scene/glight.h"
 #include "Scene/gcamera.h"
 #include <QList>
 

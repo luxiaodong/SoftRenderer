@@ -35,11 +35,6 @@ void GRaster::clearShadowMap()
     m_shadowMap->clear(0.0f);
 }
 
-void GRaster::storeShadowMapMatrix()
-{
-    m_shadowMapVP = m_pShader->m_projMat*m_pShader->m_viewMat;
-}
-
 void GRaster::renderGameObject(const GGameObject& obj, bool isReceiveShadow)
 {
     m_mesh = obj.m_mesh;
@@ -340,7 +335,7 @@ if(m_pShader->m_isReceiveShadow)
     //if(x == 307 && y == 195)
     if(x == 100 && y == 100)
     {
-        qDebug()<<m_shadowMapVP;
+//        qDebug()<<m_shadowMapVP;
     }
 }
 
@@ -353,16 +348,19 @@ if(m_pShader->m_isReceiveShadow)
                 // FS(Fragment Shader)
                 if(m_pShader->m_isReceiveShadow)
                 {
-                    m_pShader->m_shadowMapVP = this->m_shadowMapVP;
-                    m_pShader->m_depthInShadowMap = m_shadowMap->depth( x*1.0f/m_size.width(), y*1.0f/m_size.height() );
+                    m_pShader->m_light = this->m_light;
+                    m_pShader->m_shadowMap = this->m_shadowMap;
+
+//                    m_pShader->m_shadowMapVP = this->m_shadowMapVP;
+//                    m_pShader->m_depthInShadowMap = m_shadowMap->depth( x*1.0f/m_size.width(), y*1.0f/m_size.height() );
 
 if(m_pShader->m_isReceiveShadow)
 {
 //    if(x == 307 && y == 195)
     if(x == 100 && y == 100)
     {
-       qDebug()<<m_pShader->depthInLightCamera(va.m_vertex);
-       qDebug()<<m_pShader->m_depthInShadowMap;
+//       qDebug()<<m_pShader->depthInLightCamera(va.m_vertex);
+//       qDebug()<<m_pShader->m_depthInShadowMap;
     }
 }
                 }

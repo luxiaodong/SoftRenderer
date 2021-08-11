@@ -8,7 +8,9 @@
 #include <QImage>
 #include <QMap>
 #include <QString>
+#include "Scene/glight.h"
 #include "Raster/gvertexattribute.h"
+#include "Raster/gdepthbuffer.h"
 
 class GShader
 {
@@ -29,6 +31,7 @@ public:
 
 public:
     float depthInLightCamera(QVector4D posInClip);
+    float depthInShadowMap(QVector4D posInClip);
 
 public:
     int m_cullType; //0,双面, 1,顺时针, 2.逆时针
@@ -37,9 +40,9 @@ public:
     QMatrix4x4 m_projMat; //投影矩阵,包括正交投影
 
     //阴影
-    QMatrix4x4 m_shadowMapVP; //阴影贴图的VP矩阵
+    GLight* m_light;
+    GDepthBuffer* m_shadowMap;
     bool m_isReceiveShadow;
-    float m_depthInShadowMap;
 
     QImage m_white;
 };

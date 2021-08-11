@@ -46,7 +46,7 @@ public:
 
 public:
     void enableShadow(bool isEnable){m_enableShadow = isEnable;}
-    void storeShadowMapMatrix();
+    void setLight(GLight* light){m_light = light;}
 
 private:
     QSize m_size;
@@ -54,13 +54,12 @@ private:
     GDepthBuffer* m_depthBuffer;
     GDepthBuffer* m_shadowMap;
 
-//    GLight* m_light;
+    GLight* m_light;
     GCamera* m_pCamera;
     GMesh m_mesh;
     GMaterial m_material;
 
     GShader *m_pShader;
-    QMatrix4x4 m_shadowMapVP; //阴影贴图的VP矩阵
 
     QList<GVertexAttribute> m_vertexAttributesBeforeVertexShader;
     QList<GVertexAttribute> m_vertexAttributesAfterVertexShader;

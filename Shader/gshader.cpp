@@ -50,11 +50,24 @@ GVertexAttribute GShader::vertex(GVertexAttribute& va)
 float GShader::depthInLightCamera(QVector4D posInClip)
 {
     QMatrix4x4 currentVP = m_projMat*m_viewMat;
+    QMatrix4x4 lightVP = m_light->m_projMat*m_light->m_viewMat;
     QVector4D worldPos =  currentVP.inverted()*posInClip;
-    QVector4D clipPos = m_shadowMapVP*worldPos;
+    QVector4D clipPos = lightVP*worldPos;
     float zNdc = clipPos.z()/clipPos.w();
     float zDepth = zNdc*0.5 + 0.5; //再转到 (0-1)
     return zDepth;
+}
+
+float GShader::depthInShadowMap(QVector4D posInClip)
+{
+    QMatrix4x4 currentVP = m_projMat*m_viewMat;
+    QMatrix4x4 lightVP = m_light->m_projMat*m_light->m_viewMat;
+    QVector4D worldPos =  currentVP.inverted()*posInClip;
+    QVector4D clipPos = lightVP*worldPos;
+    QVector4D p = m_light->m_viewPortMat*QVector4D(clipPos.toVector3D(), 1.0f);
+    int x = p.x();
+    int y = p.y();
+    return m_shadowMap->depth(x,y);
 }
 
 QColor GShader::fragment(float x, float y, GVertexAttribute& va, QMap<QString, QImage>& map)
@@ -64,12 +77,13 @@ QColor GShader::fragment(float x, float y, GVertexAttribute& va, QMap<QString, Q
     if(m_isReceiveShadow == false) return color;
 
     bool isInShadow = false;
-    if( depthInLightCamera(va.m_vertex) > 1.0 - m_depthInShadowMap )
+    float bias = 0.0005f;
+    if( depthInLightCamera(va.m_vertex) - bias > 1.0f - depthInShadowMap(va.m_vertex) )
     {
         isInShadow = true;
     }
 
-    if (isInShadow) return Qt::red;
+    if (isInShadow) return Qt::gray;
     return color;
 }
 

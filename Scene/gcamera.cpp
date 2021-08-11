@@ -46,7 +46,7 @@ void GCamera::setViewMatrix(QVector3D position, float xDegree, float yDegree, fl
                 1.0, 0.0, 0.0, -position.x(),
                 0.0, 1.0, 0.0, -position.y(),
                 0.0, 0.0, 1.0, -position.z(),
-                0.0, 0.0, 0.0,          1.0
+                0.0, 0.0, 0.0,           1.0
                 );
 
     QMatrix4x4 xyzMat = yMat*xMat*zMat;

@@ -44,6 +44,7 @@ void Widget::paintEvent(QPaintEvent*)
             m_raster->clearShadowMap();
             m_raster->enableShadow(true);
             m_raster->setCamera(m_pScene->getLightCamera());
+            m_raster->setLight(m_pScene->m_light);
 
             qDebug()<<"gameobject count is "<<m_pScene->m_gameObjects.size();
             foreach (GGameObject go, m_pScene->m_gameObjects)
@@ -53,8 +54,6 @@ void Widget::paintEvent(QPaintEvent*)
                     m_raster->renderGameObject(go);
                 }
             }
-
-            m_raster->storeShadowMapMatrix();
         }
 
         m_raster->clearColor(Qt::black);
