@@ -9,6 +9,7 @@ GShader::GShader()
     m_white = QImage(1,1,QImage::Format_RGBA8888);
     m_white.fill(Qt::white);
     m_cullType = 1;
+    m_isReceiveShadow = false;
 }
 
 QVector4D GShader::objectToClipping(QVector4D pos)
@@ -46,10 +47,30 @@ GVertexAttribute GShader::vertex(GVertexAttribute& va)
     return outVa;
 }
 
+float GShader::depthInLightCamera(QVector4D posInClip)
+{
+    QMatrix4x4 currentVP = m_projMat*m_viewMat;
+    QVector4D worldPos =  currentVP.inverted()*posInClip;
+    QVector4D clipPos = m_shadowMapVP*worldPos;
+    float zNdc = clipPos.z()/clipPos.w();
+    float zDepth = zNdc*0.5 + 0.5; //再转到 (0-1)
+    return zDepth;
+}
+
 QColor GShader::fragment(float x, float y, GVertexAttribute& va, QMap<QString, QImage>& map)
 {
     QImage image = map.value("base", m_white);
-    return this->color(image, va.m_uv);
+    QColor color = this->color(image, va.m_uv);
+    if(m_isReceiveShadow == false) return color;
+
+    bool isInShadow = false;
+    if( depthInLightCamera(va.m_vertex) > 1.0 - m_depthInShadowMap )
+    {
+        isInShadow = true;
+    }
+
+    if (isInShadow) return Qt::red;
+    return color;
 }
 
 QColor GShader::color(QImage& image, QVector2D uv)

@@ -35,12 +35,20 @@ void GRaster::clearShadowMap()
     m_shadowMap->clear(0.0f);
 }
 
-void GRaster::renderGameObject(const GGameObject& obj)
+void GRaster::storeShadowMapMatrix()
 {
-    m_modelMat = obj.objectToWorldMatrix();
+    m_shadowMapVP = m_pShader->m_projMat*m_pShader->m_viewMat;
+}
+
+void GRaster::renderGameObject(const GGameObject& obj, bool isReceiveShadow)
+{
     m_mesh = obj.m_mesh;
     m_material = obj.m_material;
     m_pShader = obj.m_material.m_pShader;
+    m_pShader->m_isReceiveShadow = isReceiveShadow;
+    m_pShader->m_modelMat = obj.objectToWorldMatrix();
+    m_pShader->m_viewMat = m_pCamera->m_viewMat;
+    m_pShader->m_projMat = m_pCamera->m_projMat;
     this->doRendering();
 }
 
@@ -203,9 +211,6 @@ void GRaster::doRendering()
     }
 
     //VS(Vertex Shader) 顶点处理
-    m_pShader->m_modelMat = m_modelMat;
-    m_pShader->m_viewMat = m_pCamera->m_viewMat;
-    m_pShader->m_projMat = m_pCamera->m_projMat;
     m_vertexAttributesAfterVertexShader.clear();
     foreach(GVertexAttribute va, m_vertexAttributesBeforeVertexShader)
     {
@@ -298,7 +303,7 @@ void GRaster::doRendering()
                     continue;
                 }
 
-//                QRect debugRect(302,190,10,10);
+//                QRect debugRect(0,0,101,101);
 //                if(debugRect.contains(x, y) == false)
 //                {
 //                    continue;
@@ -330,10 +335,14 @@ void GRaster::doRendering()
                 float zNdc = va.m_vertex.z()/va.m_vertex.w();
                 float zDepth = zNdc*0.5 + 0.5; //再转到 (0-1)
 
-//if(x == 307 && y == 195)
-//{
-//    qDebug()<<zDepth;
-//}
+if(m_pShader->m_isReceiveShadow)
+{
+    //if(x == 307 && y == 195)
+    if(x == 100 && y == 100)
+    {
+        qDebug()<<m_shadowMapVP;
+    }
+}
 
                 // 对于非透明物体,进行ealy-z
                 if (m_enableDepthTest && zDepth >= m_depthBuffer->depth(x, y) )
@@ -342,6 +351,21 @@ void GRaster::doRendering()
                 }
 
                 // FS(Fragment Shader)
+                if(m_pShader->m_isReceiveShadow)
+                {
+                    m_pShader->m_shadowMapVP = this->m_shadowMapVP;
+                    m_pShader->m_depthInShadowMap = m_shadowMap->depth( x*1.0f/m_size.width(), y*1.0f/m_size.height() );
+
+if(m_pShader->m_isReceiveShadow)
+{
+//    if(x == 307 && y == 195)
+    if(x == 100 && y == 100)
+    {
+       qDebug()<<m_pShader->depthInLightCamera(va.m_vertex);
+       qDebug()<<m_pShader->m_depthInShadowMap;
+    }
+}
+                }
                 QColor srcColor = m_pShader->fragment(x*1.0f/m_size.width(), y*1.0f/m_size.height(), va, m_material.m_imageSet);
 
 //                QColor srcColor = Qt::white;
@@ -355,7 +379,11 @@ void GRaster::doRendering()
                 if(m_enableDepthTest && m_enableDepthWrite)
                 {
                     m_depthBuffer->setDepth(x, y, zDepth);
-                    m_shadowMap->setDepth(x, y, 1.0f - zDepth);
+
+                    if(m_enableShadow)
+                    {
+                        m_shadowMap->setDepth(x, y, 1.0f - zDepth);
+                    }
                 }
 
                 // OM(Output Merger) 进行Alpha Blend，颜色混合

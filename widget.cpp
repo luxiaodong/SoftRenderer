@@ -11,10 +11,10 @@ Widget::Widget(QWidget *parent)
     m_height = 600;
 
     GCamera* pCamera = new GCamera();
-    pCamera->setViewMatrix(QVector3D(0, 10, -10), 45, 0, 0);
 //    pCamera->setViewMatrix(QVector3D(0,0,0), QVector3D(-0.6, 0.8, 0), QVector3D(0, -5.0f/13, 12.0f/13));
-//    pCamera->setProjMatrix(60, m_width*1.0f/m_height, 0.3f, 1000.0f);
-    pCamera->setOrthMatrix(5,  m_width*1.0f/m_height, 0.3f, 1000.0f);
+    pCamera->setViewMatrix(QVector3D(0, 10, -10), 45, 0, 0);
+//    pCamera->setOrthMatrix(5,  m_width*1.0f/m_height, 0.3f, 1000.0f);
+    pCamera->setProjMatrix(60, m_width*1.0f/m_height, 0.3f, 1000.0f);
     pCamera->setViewPortMatrix(0,0,m_width,m_height);
 
     m_raster = new GRaster();
@@ -53,23 +53,25 @@ void Widget::paintEvent(QPaintEvent*)
                     m_raster->renderGameObject(go);
                 }
             }
+
+            m_raster->storeShadowMapMatrix();
         }
 
-//        m_raster->clearColor(Qt::black);
-//        m_raster->clearDepth();
-//        m_raster->enableShadow(false);
-//        m_raster->setCamera(m_pScene->m_camera);
-//        qDebug()<<"gameobject count is "<<m_pScene->m_gameObjects.size();
-//        foreach (GGameObject go, m_pScene->m_gameObjects)
-//        {
-//            m_raster->renderGameObject(go);
-//        }
+        m_raster->clearColor(Qt::black);
+        m_raster->clearDepth();
+        m_raster->enableShadow(false);
+        m_raster->setCamera(m_pScene->m_camera);
+        qDebug()<<"gameobject count is "<<m_pScene->m_gameObjects.size();
+        foreach (GGameObject go, m_pScene->m_gameObjects)
+        {
+            m_raster->renderGameObject(go, go.m_receiveShadow);
+        }
 
 //        m_raster->renderGameObject( m_pScene->skybox2() );
 
         QPainter painter(this);
-//        painter.drawImage( QRectF(0,0,m_width, m_height), this->genImage(m_width, m_height, m_raster->frameBuffer()));
-        painter.drawImage( QRectF(0,0,m_width, m_height), this->shadowImage(m_width, m_height, m_raster->shadowMap()));
+        painter.drawImage( QRectF(0,0,m_width, m_height), this->genImage(m_width, m_height, m_raster->frameBuffer()));
+//        painter.drawImage( QRectF(0,0,m_width, m_height), this->shadowImage(m_width, m_height, m_raster->shadowMap()));
 
 //        QPainter painter(this);
 //        QImage image;

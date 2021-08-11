@@ -34,7 +34,7 @@ public:
     void clearDepth();
     void clearShadowMap();
 
-    void renderGameObject(const GGameObject&);
+    void renderGameObject(const GGameObject&, bool isReceiveShadow = false);
 
     QList<QPoint> bresenham(int x0, int y0, int x1, int y1);
     QList<QPoint> calculateBoundary(QPoint&,QPoint&,QPoint&);
@@ -46,6 +46,7 @@ public:
 
 public:
     void enableShadow(bool isEnable){m_enableShadow = isEnable;}
+    void storeShadowMapMatrix();
 
 private:
     QSize m_size;
@@ -59,7 +60,7 @@ private:
     GMaterial m_material;
 
     GShader *m_pShader;
-    QMatrix4x4 m_modelMat;
+    QMatrix4x4 m_shadowMapVP; //阴影贴图的VP矩阵
 
     QList<GVertexAttribute> m_vertexAttributesBeforeVertexShader;
     QList<GVertexAttribute> m_vertexAttributesAfterVertexShader;

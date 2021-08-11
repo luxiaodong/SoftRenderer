@@ -28,10 +28,18 @@ public:
     QColor color(QImage& image, QVector2D uv);
 
 public:
-    int m_cullType; //0,双面, 1,顺时针, 2.逆时针.
+    float depthInLightCamera(QVector4D posInClip);
+
+public:
+    int m_cullType; //0,双面, 1,顺时针, 2.逆时针
     QMatrix4x4 m_modelMat; //模型矩阵
     QMatrix4x4 m_viewMat; //视口矩阵
     QMatrix4x4 m_projMat; //投影矩阵,包括正交投影
+
+    //阴影
+    QMatrix4x4 m_shadowMapVP; //阴影贴图的VP矩阵
+    bool m_isReceiveShadow;
+    float m_depthInShadowMap;
 
     QImage m_white;
 };

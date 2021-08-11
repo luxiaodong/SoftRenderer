@@ -58,6 +58,7 @@ void GScene::loadPlane()
     obj.setPosition(0,0,-1);
     obj.setRotate(90, 0, 0);
     obj.setScale(10, 10, 10);
+    obj.m_castShadow = true;
     obj.m_receiveShadow = true;
     m_gameObjects.append(obj);
 }
