@@ -8,6 +8,7 @@
 #include <QImage>
 #include <QMap>
 #include <QString>
+#include <QPoint>
 #include "Scene/glight.h"
 #include "Raster/gvertexattribute.h"
 #include "Raster/gdepthbuffer.h"
@@ -30,8 +31,9 @@ public:
     QColor color(QImage& image, QVector2D uv);
 
 public:
-    float depthInLightCamera(QVector4D posInClip);
-    float depthInShadowMap(QVector4D posInClip);
+    float shadowValue(QVector4D posInClip, QVector3D normalInWorld);
+    float depthInLightCamera(QVector4D posInClip, QVector3D normalInWorld);
+    float depthInShadowMap(QVector4D posInClip, QPoint offset);
 
 public:
     int m_cullType; //0,双面, 1,顺时针, 2.逆时针

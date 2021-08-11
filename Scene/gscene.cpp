@@ -18,7 +18,7 @@ void GScene::setLight()
 {
 //    m_light->setRotate(50, -120, 0);
     m_light->m_intensity = 1.0f;
-    qDebug()<<m_light->dir();
+//    qDebug()<<m_light->dir();
 }
 
 GCamera* GScene::getLightCamera()
@@ -42,6 +42,7 @@ GCamera* GScene::getLightCamera()
         m_lightCamera->m_viewPortMat = m_camera->m_viewPortMat;
 
         //在渲染物体的时候还要用到这些矩阵
+        m_light->m_lightDir = QVector3D(0.5566704f,0.7660444f,0.3213937f);
         m_light->m_viewMat = m_lightCamera->m_viewMat;
         m_light->m_projMat = m_lightCamera->m_projMat;
         m_light->m_viewPortMat = m_lightCamera->m_viewPortMat;

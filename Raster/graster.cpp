@@ -335,7 +335,6 @@ if(m_pShader->m_isReceiveShadow)
     //if(x == 307 && y == 195)
     if(x == 100 && y == 100)
     {
-//        qDebug()<<m_shadowMapVP;
     }
 }
 
@@ -359,8 +358,6 @@ if(m_pShader->m_isReceiveShadow)
 //    if(x == 307 && y == 195)
     if(x == 100 && y == 100)
     {
-//       qDebug()<<m_pShader->depthInLightCamera(va.m_vertex);
-//       qDebug()<<m_pShader->m_depthInShadowMap;
     }
 }
                 }
