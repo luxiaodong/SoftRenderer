@@ -23,9 +23,9 @@ Widget::Widget(QWidget *parent)
     m_pScene = new GScene();
     m_pScene->m_camera = pCamera;
 //    m_pScene->loadTriangle();
-    m_pScene->loadPlane();
-    m_pScene->loadModel();
-//    m_pScene->loadSphere();
+//    m_pScene->loadPlane();
+//    m_pScene->loadModel();
+    m_pScene->loadSphere();
 
     m_drawOnce = 0;
     this->resize(m_width, m_height);
@@ -36,7 +36,7 @@ void Widget::paintEvent(QPaintEvent*)
     m_drawOnce++;
     if(m_drawOnce >= 3)
     {
-        m_pScene->m_enableShadow = true;
+//        m_pScene->m_enableShadow = true;
         if(m_pScene->m_enableShadow)
         {
             m_raster->clearColor(Qt::black);
@@ -62,8 +62,8 @@ void Widget::paintEvent(QPaintEvent*)
         m_raster->setCamera(m_pScene->m_camera);
         qDebug()<<"gameobject count is "<<m_pScene->m_gameObjects.size();
         foreach (GGameObject go, m_pScene->m_gameObjects)
-        {
-            m_raster->renderGameObject(go, go.m_receiveShadow);
+        {            
+            m_raster->renderGameObject(go, m_pScene->m_enableShadow && go.m_receiveShadow);
         }
 
 //        m_raster->renderGameObject( m_pScene->skybox2() );
