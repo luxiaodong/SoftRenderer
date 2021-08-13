@@ -1,6 +1,7 @@
 #include "widget.h"
 #include "Scene/gscene.h"
 #include "Scene/gcamera.h"
+#include "Math/gsh.h"
 #include <QDebug>
 #include <QPainter>
 
@@ -33,6 +34,12 @@ Widget::Widget(QWidget *parent)
 
 void Widget::paintEvent(QPaintEvent*)
 {
+//    this->softRneder();
+    this->testSH();
+}
+
+void Widget::softRneder()
+{
     m_drawOnce++;
     if(m_drawOnce >= 3)
     {
@@ -62,7 +69,7 @@ void Widget::paintEvent(QPaintEvent*)
         m_raster->setCamera(m_pScene->m_camera);
         qDebug()<<"gameobject count is "<<m_pScene->m_gameObjects.size();
         foreach (GGameObject go, m_pScene->m_gameObjects)
-        {            
+        {
             m_raster->renderGameObject(go, m_pScene->m_enableShadow && go.m_receiveShadow);
         }
 
@@ -113,6 +120,17 @@ QImage Widget::genImage(int width, int height, int* data)
 
 //    image = image.copy(450,750,50,50);
     return image.mirrored();
+}
+
+void Widget::testSH()
+{
+    GSH sh;
+    QImage image = QImage(":/texture/sh.jpg", "jpg");
+    QImage origin = image.copy(0, 0, image.width(), image.height()/2);
+    QImage imageSH = sh.testImage(origin);
+    QPainter painter(this);
+    painter.drawImage(QRectF(0, 0, m_width, m_height/2), origin);
+    painter.drawImage(QRectF(0, m_height/2, m_width, m_height/2), imageSH);
 }
 
 Widget::~Widget()

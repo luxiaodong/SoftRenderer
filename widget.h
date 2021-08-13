@@ -18,8 +18,12 @@ protected:
     void paintEvent(QPaintEvent* );
 
 private:
+    void softRneder();
     QImage genImage(int width, int height, int* data);
     QImage shadowImage(int width, int height, float* data);
+
+    void testSH();
+
 
 private:
     int m_width;

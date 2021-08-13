@@ -5,6 +5,12 @@ GSH::GSH()
 {
 }
 
+QImage GSH::testImage(QImage& image)
+{
+    QList<QVector3D> coffs = calculateCoff(5, image);
+    return rebuildImage(coffs, image.width(), image.height());
+}
+
 QVector2D GSH::normalToPhiTheta(QVector3D n)
 {
     n.normalize();

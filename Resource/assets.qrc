@@ -16,5 +16,6 @@
         <file>cubmap/posx.jpg</file>
         <file>cubmap/posy.jpg</file>
         <file>cubmap/posz.jpg</file>
+        <file>sh.jpg</file>
     </qresource>
 </RCC>
