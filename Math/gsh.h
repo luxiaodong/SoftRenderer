@@ -5,6 +5,11 @@
 #include <QVector3D>
 #include <QVector2D>
 #include <QImage>
+#include "math/gshrotate.h"
+#include "Math/gmath.h"
+
+#define SH_MAX_ORDER 5
+#define SH_ORDER_SQUARE 25
 
 class GSH
 {
@@ -18,12 +23,10 @@ public:
     QImage rebuildImage(QList<QVector3D>& coffs, int width, int height);
 
     //核心函数,计算系数
-    QList<QVector3D> calculateCoff(int order, QImage& image);
-    float evalSH(QList<float>& coffs, QVector3D n);
-    float evalSH(QList< QList<float> >& coffss, QVector3D n);
-    QVector2D normalToPhiTheta(QVector3D n);
-    QVector3D phiThetaToNormal(QVector2D n);
+    QList<QVector3D> calculateCoff(QImage& image);
+    QVector3D toNormal(float phi, float theta);
     int indexSH(int m, int l);
+    QVector3D evalSH(QList<QVector3D>& coffs, QVector3D n);
 
     //球谐函数基函数
     float baseSH(int m, int l, QVector3D n);

@@ -1,5 +1,7 @@
 #include "gsh.h"
 #include <QtMath>
+#include <QQuaternion>
+#include <QGenericMatrix>
 
 GSH::GSH()
 {
@@ -7,29 +9,17 @@ GSH::GSH()
 
 QImage GSH::testImage(QImage& image)
 {
-    QList<QVector3D> coffs = calculateCoff(5, image);
+    QList<QVector3D> coffs = calculateCoff(image);
     return rebuildImage(coffs, image.width(), image.height());
 }
 
-QVector2D GSH::normalToPhiTheta(QVector3D n)
+QVector3D GSH::toNormal(float phi, float theta)
 {
-    n.normalize();
-    float phi = qAcos(n.y()); //(0, pi)
-    float theta = qAtan2(n.z(), n.x()); //(-pi, pi)
-    return QVector2D(theta, phi);
-}
-
-QVector3D GSH::phiThetaToNormal(QVector2D v)
-{
-    float theta = v.x();
-    float phi = v.y();
-    float r = qSin(phi);
-    return QVector3D( r*qCos(theta), qCos(phi), r*qSin(theta) );
+    return QVector3D( qSin(theta)*qCos(phi), qSin(theta)*qSin(phi), qCos(theta));
 }
 
 QImage GSH::rebuildImage(QList<QVector3D>& coffs, int width, int height)
 {
-    int order = qSqrt(coffs.size());
     QImage image = QImage(width, height, QImage::Format_RGBA8888);
     image.fill(Qt::black);
 
@@ -38,34 +28,22 @@ QImage GSH::rebuildImage(QList<QVector3D>& coffs, int width, int height)
 
     for(int h = 0; h < imageH; ++h)
     {
-        float phi = 3.1415926f*(h+0.5f)/imageH;
-
+        float theta = G_PI*(h+0.5f)/imageH;
         for(int w = 0; w < imageW; ++w)
         {
-            float theta = 2.0f*3.1415926f*(w+0.5f)/imageW;
-            QVector3D cv(0,0,0);
-
-            for(int m = 0; m < order; ++m)
-            {
-                for(int l = 0; l < 2*m + 1; ++l)
-                {
-                    float shBase = this->baseSH(m, l, this->phiThetaToNormal(QVector2D(theta, phi)));
-                    int index = indexSH(m, l);
-                    QVector3D coff = coffs.at(index);
-                    cv += coff*shBase;
-                }
-            }
-
+            float phi = 2.0f*G_PI*(w+0.5f)/imageW;
+            QVector3D cv = evalSH(coffs, toNormal(phi, theta));
             QColor c(cv.x()*255, cv.y()*255, cv.z()*255);
-            image.setPixelColor(w,h, c);
+            image.setPixelColor(w, h, c);
         }
     }
 
     return image;
 }
 
-QList<QVector3D> GSH::calculateCoff(int order, QImage& image)
+QList<QVector3D> GSH::calculateCoff(QImage& image)
 {
+    int order = SH_MAX_ORDER;
     QList<QVector3D> coffs;
     for(int i = 0; i<order*order; ++i)
     {
@@ -76,16 +54,16 @@ QList<QVector3D> GSH::calculateCoff(int order, QImage& image)
     float imageH = image.height();
 
     //参数取值范围是 phi(0,pi), theta(-pi,pi), 所以面积是2*pi*pi.
-    float pixel_per_area = 2.0f*3.1415926f*3.1415926f/(imageW*imageH);
+    float pixel_per_area = 2.0f*G_PI*G_PI/(imageW*imageH);
 
     for(int h = 0; h < imageH; ++h)
     {
-        float phi = 3.1415926f*(h+0.5f)/imageH;
-        float weight = pixel_per_area*qSin(phi);
+        float theta = G_PI*(h+0.5f)/imageH;
+        float weight = pixel_per_area*qSin(theta);
 
         for(int w = 0; w < imageW; ++w)
         {
-            float theta = 2.0f*3.1415926f*(w+0.5f)/imageW;
+            float phi = 2.0f*G_PI*(w+0.5f)/imageW;
             QColor c = image.pixel(w, h);
             QVector3D cv(c.redF(), c.greenF(), c.blueF() );
 
@@ -93,7 +71,7 @@ QList<QVector3D> GSH::calculateCoff(int order, QImage& image)
             {
                 for(int l = 0; l < 2*m + 1; ++l)
                 {
-                    float shBase = this->baseSH(m, l, this->phiThetaToNormal(QVector2D(theta, phi)));
+                    float shBase = this->baseSH(m, l, toNormal(phi, theta) );
                     int index = indexSH(m, l);
                     QVector3D coff = coffs.at(index);
                     coff += shBase*weight*cv;
@@ -111,38 +89,15 @@ int GSH::indexSH(int m, int l)
     return m*m + l;
 }
 
-float GSH::evalSH(QList<float>& coffs, QVector3D n)
+QVector3D GSH::evalSH(QList<QVector3D>& coffs, QVector3D n)
 {
-    QList< QList<float> > coffss;
-    for(int i = 0; i < 5; ++i)
+    GSHRotate shRotate;
+    QList<QVector3D> rotated_coffs = shRotate.getCoff(n);
+
+    QVector3D sum(0.0f,0.0f,0.0f);
+    for(int i = 0; i < coffs.size(); ++i)
     {
-        int ii = (i+1)*(i+1);
-        if( coffs.size() >= ii )
-        {
-            QList<float> temp;
-            for(int j = i*i; j < ii; ++j)
-            {
-                temp.append( coffs.at(j) );
-            }
-            coffss.append(temp);
-        }
-    }
-
-    return evalSH(coffss, n);
-}
-
-float GSH::evalSH(QList< QList<float> >& coffss, QVector3D n)
-{
-    if( coffss.size() == 0 ) return 0.0f;
-
-    float sum = 0.0f;
-    for(int m = 0; m < coffss.size(); ++m)
-    {
-        QList<float> coffs = coffss.at(m);
-        for(int l = 0; l < coffs.size(); ++l)
-        {
-            sum += baseSH(m, l, n);
-        }
+        sum += rotated_coffs.at(i)*coffs.at(i);
     }
 
     return sum;
