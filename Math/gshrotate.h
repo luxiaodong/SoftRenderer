@@ -14,6 +14,7 @@ public:
 
     QList<QVector3D> getCoff(QVector3D n);
     void createMatrix(QVector3D n);
+    QList<QVector3D> apply();
 
     QVector3D computeUVWCoeff(int m, int n, int l);
 

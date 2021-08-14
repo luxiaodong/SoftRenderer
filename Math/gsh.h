@@ -2,14 +2,14 @@
 #define GSH_H
 
 #include <QList>
-#include <QVector3D>
+#include <QVector>
 #include <QVector2D>
+#include <QVector3D>
 #include <QImage>
 #include "math/gshrotate.h"
 #include "Math/gmath.h"
 
 #define SH_MAX_ORDER 5
-#define SH_ORDER_SQUARE 25
 
 class GSH
 {
@@ -20,13 +20,14 @@ public:
     QImage testImage(QImage& image);
 
     //利用系数重建图片
-    QImage rebuildImage(QList<QVector3D>& coffs, int width, int height);
+    QImage rebuildImage(QList<QVector3D>& shCoffs, int width, int height);
 
     //核心函数,计算系数
-    QList<QVector3D> calculateCoff(QImage& image);
+    QList<QVector3D> calculateShCoffs(QImage& image);
+    QVector3D evalColor(QList<QVector3D>& shCoffs, QVector3D n);
+    QVector<float> calculateBaseCoffs(QVector3D n);
     QVector3D toNormal(float phi, float theta);
     int indexSH(int m, int l);
-    QVector3D evalSH(QList<QVector3D>& coffs, QVector3D n);
 
     //球谐函数基函数
     float baseSH(int m, int l, QVector3D n);

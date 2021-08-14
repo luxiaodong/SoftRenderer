@@ -11,14 +11,27 @@ GSHRotate::GSHRotate()
 
 QList<QVector3D> GSHRotate::getCoff(QVector3D n)
 {
-    QList<QVector3D> coffs;
+    createMatrix(n);
+    //还有一个apply函数.
+    return apply();
+}
+
+QList<QVector3D> GSHRotate::apply()
+{
+    QList<float> cosine_lobe;
+    cosine_lobe<<0.886227f<<0.0f<<1.02333f<<0.0f<<0.0f<<0.0f<<0.495416f<<0.0f<<0.0f;
+
+    QList<QVector3D> out_coffs;
     for(int i = 0; i < 25; ++i)
     {
-        coffs.append(QVector3D(0.0f, 0.0f, 0.0f));
+        out_coffs.append(QVector3D(0.0f, 0.0f, 0.0f));
     }
 
-    return coffs;
+    return out_coffs;
 }
+
+//const std::vector<double> cosine_lobe = { 0.886227, 0.0, 1.02333, 0.0, 0.0, 0.0,
+//                                          0.495416, 0.0, 0.0 };
 
 void GSHRotate::createMatrix(QVector3D normal)
 {

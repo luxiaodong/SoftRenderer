@@ -9,7 +9,7 @@ GSH::GSH()
 
 QImage GSH::testImage(QImage& image)
 {
-    QList<QVector3D> coffs = calculateCoff(image);
+    QList<QVector3D> coffs = calculateShCoffs(image);
     return rebuildImage(coffs, image.width(), image.height());
 }
 
@@ -32,7 +32,7 @@ QImage GSH::rebuildImage(QList<QVector3D>& coffs, int width, int height)
         for(int w = 0; w < imageW; ++w)
         {
             float phi = 2.0f*G_PI*(w+0.5f)/imageW;
-            QVector3D cv = evalSH(coffs, toNormal(phi, theta));
+            QVector3D cv = evalColor(coffs, toNormal(phi, theta));
             QColor c(cv.x()*255, cv.y()*255, cv.z()*255);
             image.setPixelColor(w, h, c);
         }
@@ -41,13 +41,12 @@ QImage GSH::rebuildImage(QList<QVector3D>& coffs, int width, int height)
     return image;
 }
 
-QList<QVector3D> GSH::calculateCoff(QImage& image)
+QList<QVector3D> GSH::calculateShCoffs(QImage& image)
 {
-    int order = SH_MAX_ORDER;
-    QList<QVector3D> coffs;
-    for(int i = 0; i<order*order; ++i)
+    QList<QVector3D> shCoffs;
+    for(int i = 0; i<(SH_MAX_ORDER*SH_MAX_ORDER); ++i)
     {
-        coffs.append(QVector3D(0,0,0));
+        shCoffs.append(QVector3D(0,0,0));
     }
 
     float imageW = image.width();
@@ -67,21 +66,22 @@ QList<QVector3D> GSH::calculateCoff(QImage& image)
             QColor c = image.pixel(w, h);
             QVector3D cv(c.redF(), c.greenF(), c.blueF() );
 
-            for(int m = 0; m < order; ++m)
+            //计算每个颜色点对球谐基函数的贡献.
+            for(int m = 0; m < SH_MAX_ORDER; ++m)
             {
                 for(int l = 0; l < 2*m + 1; ++l)
                 {
                     float shBase = this->baseSH(m, l, toNormal(phi, theta) );
                     int index = indexSH(m, l);
-                    QVector3D coff = coffs.at(index);
+                    QVector3D coff = shCoffs.at(index);
                     coff += shBase*weight*cv;
-                    coffs.replace(index, coff);
+                    shCoffs.replace(index, coff);
                 }
             }
         }
     }
 
-    return coffs;
+    return shCoffs;
 }
 
 int GSH::indexSH(int m, int l)
@@ -89,18 +89,29 @@ int GSH::indexSH(int m, int l)
     return m*m + l;
 }
 
-QVector3D GSH::evalSH(QList<QVector3D>& coffs, QVector3D n)
+QVector3D GSH::evalColor(QList<QVector3D>& shCoffs, QVector3D n)
 {
-    GSHRotate shRotate;
-    QList<QVector3D> rotated_coffs = shRotate.getCoff(n);
-
-    QVector3D sum(0.0f,0.0f,0.0f);
-    for(int i = 0; i < coffs.size(); ++i)
+    QVector3D sum(0,0,0);
+    QVector<float> baseCoffs = this->calculateBaseCoffs(n);
+    for(int i = 0; i < baseCoffs.size(); ++i)
     {
-        sum += rotated_coffs.at(i)*coffs.at(i);
+        sum += baseCoffs.at(i)*shCoffs.at(i);
+    }
+    return sum;
+}
+
+QVector<float> GSH::calculateBaseCoffs(QVector3D n)
+{
+    QVector<float> vec;
+    for(int m = 0; m < SH_MAX_ORDER; ++m)
+    {
+        for(int l = 0; l < 2*m + 1; ++l)
+        {
+            vec.append(baseSH(m, l, n));
+        }
     }
 
-    return sum;
+    return vec;
 }
 
 float GSH::baseSH(int m, int l, QVector3D n)
