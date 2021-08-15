@@ -7,6 +7,9 @@
 #include <QQuaternion>
 #include <QGenericMatrix>
 
+
+// https://zhuanlan.zhihu.com/p/153352797
+// https://github.com/google/spherical-harmonics
 class GSHRotate
 {
 public:

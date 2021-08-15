@@ -16,6 +16,48 @@ void GSH::test()
 
 //    this->testEvalColor();
 //    this->testCalculateShCoffs();
+    testImage();
+}
+
+void GSH::testImage()
+{
+    int imageW = 32;
+    int imageH = 16;
+    QImage originImage = QImage(imageW, imageH, QImage::Format_RGBA8888);
+    originImage.fill(Qt::black);
+
+    for(int j=0; j < imageH; ++j)
+    {
+        for(int i=0; i < imageW; ++i)
+        {
+            float r = i < imageW/2 ? 1.0 : 0.0;
+            float g = i >= imageW/2 ? 1.0 : 0.0;
+            float b = j > imageH/2 ? 1.0 : 0.0;
+            originImage.setPixelColor(i,j, QColor(r*255,g*255,b*255));
+        }
+    }
+
+    QList<QVector3D> coffs1 = calculateShCoffs(originImage);
+    QImage image1 = rebuildImage(coffs1, originImage.width(), originImage.height());
+    QList<QVector3D> coffs2 = calculateShCoffs(image1);
+    QImage image2 = rebuildImage(coffs2, originImage.width(), originImage.height());
+
+    //系数比较
+    for(int i = 0; i < coffs1.size(); ++i)
+    {
+        QVector3D diff = coffs2.at(i) - coffs1.at(i);
+        qDebug()<<diff;
+    }
+
+    //图片比较
+    for (int y = 0; y < image1.height(); y++) {
+        for (int x = 0; x < image1.width(); x++) {
+            QColor c1 = image1.pixelColor(x,y);
+            QColor c2 = image2.pixelColor(x,y);
+            QVector3D diff = GMath::toVector(c1) - GMath::toVector(c2);
+            qDebug()<<diff;
+        }
+    }
 }
 
 void GSH::testCalculateShCoffs()
@@ -105,6 +147,12 @@ void GSH::testEvalColor()
 
 QImage GSH::testImage(QImage& image)
 {
+//    QList<QVector3D> coffs = calculateShCoffs(image);
+//    QImage image1 = rebuildImage(coffs, image.width(), image.height());
+//    QList<QVector3D> coffs1 = calculateShCoffs(image1);
+//    QImage image2 = rebuildImage(coffs1, image.width(), image.height());
+//    return image2;
+
     QList<QVector3D> coffs = calculateShCoffs(image);
     return rebuildImage(coffs, image.width(), image.height());
 }
@@ -192,6 +240,12 @@ QList<QVector3D> GSH::calculateShCoffs(QImage& image)
 int GSH::indexSH(int m, int l)
 {
     return m*m + l;
+}
+
+QList<QVector3D> rotateSHCoffs(QList<QVector3D>& shCoffs, QVector3D n)
+{
+    QList<QVector3D> outCoffs;
+    return outCoffs;
 }
 
 QVector3D GSH::evalColor(QList<QVector3D>& shCoffs, QVector3D n)

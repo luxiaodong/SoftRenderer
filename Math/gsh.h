@@ -9,7 +9,7 @@
 #include "Math/gshrotate.h"
 #include "Math/gmath.h"
 
-#define SH_MAX_ORDER 7
+#define SH_MAX_ORDER 5
 
 class GSH
 {
@@ -28,7 +28,9 @@ public:
     //利用系数重建图片
     QImage rebuildImage(QList<QVector3D>& shCoffs, int width, int height);
 
-    //核心函数,计算系数
+    //旋转球谐系数
+    QList<QVector3D> rotateSHCoffs(QList<QVector3D>, QVector3D);
+    //计算系数
     QList<QVector3D> calculateShCoffs(QImage& image);
     QVector3D evalColor(QList<QVector3D>& shCoffs, QVector3D n);
     QVector<float> calculateBaseCoffs(QVector3D n);
