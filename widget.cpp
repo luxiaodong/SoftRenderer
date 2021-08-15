@@ -34,56 +34,56 @@ Widget::Widget(QWidget *parent)
 
 void Widget::paintEvent(QPaintEvent*)
 {
-//    this->softRneder();
-    this->testSH();
+    m_drawOnce++;
+    if(m_drawOnce >= 3)
+    {
+        //    this->softRneder();
+        this->testSH();
+    }
 }
 
 void Widget::softRneder()
 {
-    m_drawOnce++;
-    if(m_drawOnce >= 3)
-    {
 //        m_pScene->m_enableShadow = true;
-        if(m_pScene->m_enableShadow)
-        {
-            m_raster->clearColor(Qt::black);
-            m_raster->clearDepth();
-            m_raster->clearShadowMap();
-            m_raster->enableShadow(true);
-            m_raster->setCamera(m_pScene->getLightCamera());
-            m_raster->setLight(m_pScene->m_light);
-
-            qDebug()<<"gameobject count is "<<m_pScene->m_gameObjects.size();
-            foreach (GGameObject go, m_pScene->m_gameObjects)
-            {
-                if(go.m_castShadow)
-                {
-                    m_raster->renderGameObject(go);
-                }
-            }
-        }
-
+    if(m_pScene->m_enableShadow)
+    {
         m_raster->clearColor(Qt::black);
         m_raster->clearDepth();
-        m_raster->enableShadow(false);
-        m_raster->setCamera(m_pScene->m_camera);
+        m_raster->clearShadowMap();
+        m_raster->enableShadow(true);
+        m_raster->setCamera(m_pScene->getLightCamera());
+        m_raster->setLight(m_pScene->m_light);
+
         qDebug()<<"gameobject count is "<<m_pScene->m_gameObjects.size();
         foreach (GGameObject go, m_pScene->m_gameObjects)
         {
-            m_raster->renderGameObject(go, m_pScene->m_enableShadow && go.m_receiveShadow);
+            if(go.m_castShadow)
+            {
+                m_raster->renderGameObject(go);
+            }
         }
+    }
+
+    m_raster->clearColor(Qt::black);
+    m_raster->clearDepth();
+    m_raster->enableShadow(false);
+    m_raster->setCamera(m_pScene->m_camera);
+    qDebug()<<"gameobject count is "<<m_pScene->m_gameObjects.size();
+    foreach (GGameObject go, m_pScene->m_gameObjects)
+    {
+        m_raster->renderGameObject(go, m_pScene->m_enableShadow && go.m_receiveShadow);
+    }
 
 //        m_raster->renderGameObject( m_pScene->skybox2() );
 
-        QPainter painter(this);
-        painter.drawImage( QRectF(0,0,m_width, m_height), this->genImage(m_width, m_height, m_raster->frameBuffer()));
+    QPainter painter(this);
+    painter.drawImage( QRectF(0,0,m_width, m_height), this->genImage(m_width, m_height, m_raster->frameBuffer()));
 //        painter.drawImage( QRectF(0,0,m_width, m_height), this->shadowImage(m_width, m_height, m_raster->shadowMap()));
 
 //        QPainter painter(this);
 //        QImage image;
 //        image.load(":/texture/uv.tga");
 //        painter.drawImage( QRectF(0,0,m_width, m_height), image);
-    }
 }
 
 QImage Widget::shadowImage(int width, int height, float* data)
@@ -125,6 +125,7 @@ QImage Widget::genImage(int width, int height, int* data)
 void Widget::testSH()
 {
     GSH sh;
+    sh.test();
     QImage image = QImage(":/texture/sh.jpg", "jpg");
     QImage origin = image.copy(0, 0, image.width(), image.height()/2);
     QImage imageSH = sh.testImage(origin);

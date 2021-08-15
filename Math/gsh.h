@@ -6,10 +6,10 @@
 #include <QVector2D>
 #include <QVector3D>
 #include <QImage>
-#include "math/gshrotate.h"
+#include "Math/gshrotate.h"
 #include "Math/gmath.h"
 
-#define SH_MAX_ORDER 5
+#define SH_MAX_ORDER 7
 
 class GSH
 {
@@ -17,6 +17,12 @@ public:
     GSH();
 
     //测试函数
+    void test();
+
+    void testImage();
+    void testCalculateShCoffs();
+    void testEvalColor();
+
     QImage testImage(QImage& image);
 
     //利用系数重建图片
@@ -27,6 +33,7 @@ public:
     QVector3D evalColor(QList<QVector3D>& shCoffs, QVector3D n);
     QVector<float> calculateBaseCoffs(QVector3D n);
     QVector3D toNormal(float phi, float theta);
+    QVector2D toPhiTheta(QVector3D n);
     int indexSH(int m, int l);
 
     //球谐函数基函数
@@ -60,6 +67,11 @@ public:
     float baseSH_46(QVector3D& n);
     float baseSH_47(QVector3D& n);
     float baseSH_48(QVector3D& n);
+
+    double baseSH_other(int l, int m, QVector3D& n);
+    double factorial(int x);
+    double doubleFactorial(int x);
+    double evalLegendrePolynomial(int l, int m, float x);
 };
 
 #endif // GSH_H
