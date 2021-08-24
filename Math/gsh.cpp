@@ -16,7 +16,8 @@ void GSH::test()
 
 //    this->testEvalColor();
 //    this->testCalculateShCoffs();
-    testImage();
+//    testImage();
+    GMath::testDecompositionTRS();
 }
 
 void GSH::testImage()
