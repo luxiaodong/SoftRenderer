@@ -6,6 +6,7 @@
 
 GSH::GSH()
 {
+    m_sh_order = 5;
 }
 
 void GSH::test()
@@ -137,9 +138,9 @@ void GSH::testEvalColor()
 
     QVector3D n = toNormal(G_PI/4, G_PI/4);
     QVector3D expected(0.0f, 0.0f, 0.0f);
-    for (int m = 0; m < 3; m++) {
-        for (int l = 0; l < 2*m+1; l++) {
-            expected += shCoffs.at(indexSH(m,l)) * baseSH(m,l,n);
+    for (int l = 0; l < 3; l++) {
+        for (int m = 0; m < 2*l+1; m++) {
+            expected += shCoffs.at(indexSH(l,m)) * baseSH(l,m,n);
         }
     }
     expected -= this->evalColor(shCoffs, n);
@@ -154,8 +155,11 @@ QImage GSH::testImage(QImage& image)
 //    QImage image2 = rebuildImage(coffs1, image.width(), image.height());
 //    return image2;
 
-    QList<QVector3D> coffs = calculateShCoffs(image);
-    return rebuildImage(coffs, image.width(), image.height());
+//    QList<QVector3D> coffs = calculateShCoffs(image);
+//    return rebuildImage(coffs, image.width(), image.height());
+
+    QList<QVector3D> coffs = calculateShCoffs2(image);
+    return rebuildImage2(coffs, image.width(), image.height());
 }
 
 // --------以上都是测试函数--------------------
@@ -187,10 +191,33 @@ QImage GSH::rebuildImage(QList<QVector3D>& shCoffs, int width, int height)
     return image;
 }
 
+QImage GSH::rebuildImage2(QList<QVector3D>& shCoffs, int width, int height)
+{
+    QImage image = QImage(width, height, QImage::Format_RGBA8888);
+    image.fill(Qt::black);
+
+    float imageW = image.width();
+    float imageH = image.height();
+
+    for(int h = 0; h < imageH; ++h)
+    {
+        float v = (h+0.5f)/imageH;
+        for(int w = 0; w < imageW; ++w)
+        {
+            float u = (w+0.5f)/imageW;
+            QVector3D normal = GMath::uvToNormal(QVector2D(u,v));
+            QVector3D cv = evalColor(shCoffs, normal);
+            image.setPixelColor(w, h, GMath::toColor(cv) );
+        }
+    }
+
+    return image;
+}
+
 QList<QVector3D> GSH::calculateShCoffs(QImage& image)
 {
     QList<QVector3D> shCoffs;
-    for(int i = 0; i<(SH_MAX_ORDER*SH_MAX_ORDER); ++i)
+    for(int i = 0; i<(m_sh_order*m_sh_order); ++i)
     {
         shCoffs.append(QVector3D(0,0,0));
     }
@@ -214,24 +241,48 @@ QList<QVector3D> GSH::calculateShCoffs(QImage& image)
 
             //计算每个颜色点对球谐基函数的贡献. 2种计算,结果一样.
             QVector<float> baseCoffs = this->calculateBaseCoffs( toNormal(phi, theta) );
-            for(int i = 0; i<(SH_MAX_ORDER*SH_MAX_ORDER); ++i)
+            for(int i = 0; i<(m_sh_order*m_sh_order); ++i)
             {
                 QVector3D coff = shCoffs.at(i);
                 coff += baseCoffs.at(i)*weight*cv;
                 shCoffs.replace(i, coff);
             }
+        }
+    }
 
-//            for(int m = 0; m < SH_MAX_ORDER; ++m)
-//            {
-//                for(int l = 0; l < 2*m + 1; ++l)
-//                {
-//                    float shBase = this->baseSH(m, l, toNormal(phi, theta) );
-//                    int index = indexSH(m, l);
-//                    QVector3D coff = shCoffs.at(index);
-//                    coff += shBase*weight*cv;
-//                    shCoffs.replace(index, coff);
-//                }
-//            }
+    return shCoffs;
+}
+
+QList<QVector3D> GSH::calculateShCoffs2(QImage& image)
+{
+    QList<QVector3D> shCoffs;
+    for(int i = 0; i<(m_sh_order*m_sh_order); ++i)
+    {
+        shCoffs.append(QVector3D(0,0,0));
+    }
+
+    float imageW = image.width();
+    float imageH = image.height();
+
+    float weight = 4*G_PI/(imageW*imageH);
+
+    for(int h = 0; h < imageH; ++h)
+    {
+        float v = (h+0.5f)/imageH;
+
+        for(int w = 0; w < imageW; ++w)
+        {
+            float u = (w+0.5f)/imageW;
+            QVector3D normal = GMath::uvToNormal(QVector2D(u, v));
+            QVector3D cv = GMath::toVector(image.pixel(w, h));
+
+            QVector<float> baseCoffs = this->calculateBaseCoffs(normal);
+            for(int i = 0; i<(m_sh_order*m_sh_order); ++i)
+            {
+                QVector3D coff = shCoffs.at(i);
+                coff += baseCoffs.at(i)*weight*cv;
+                shCoffs.replace(i, coff);
+            }
         }
     }
 
@@ -263,61 +314,61 @@ QVector3D GSH::evalColor(QList<QVector3D>& shCoffs, QVector3D n)
 QVector<float> GSH::calculateBaseCoffs(QVector3D n)
 {
     QVector<float> vec;
-    for(int m = 0; m < SH_MAX_ORDER; ++m)
+    for(int l = 0; l < m_sh_order; ++l)
     {
-        for(int l = 0; l < 2*m + 1; ++l)
+        for(int m = 0; m < 2*l + 1; ++m)
         {
-            vec.append(baseSH(m, l, n));
+            vec.append(baseSH(l, m, n));
         }
     }
 
     return vec;
 }
 
-float GSH::baseSH(int m, int l, QVector3D n)
+float GSH::baseSH(int l, int m, QVector3D n)
 {
-    if(m == 0)
+    if(l == 0)
     {
-        if(l == 0) return baseSH_00(n);
+        if(m == 0) return baseSH_00(n);
     }
-    else if(m == 1)
+    else if(l == 1)
     {
-        if(l == 0) return baseSH_10(n);
-        if(l == 1) return baseSH_11(n);
-        if(l == 2) return baseSH_12(n);
+        if(m == 0) return baseSH_10(n);
+        if(m == 1) return baseSH_11(n);
+        if(m == 2) return baseSH_12(n);
     }
-    else if(m == 2)
+    else if(l == 2)
     {
-        if(l == 0) return baseSH_20(n);
-        if(l == 1) return baseSH_21(n);
-        if(l == 2) return baseSH_22(n);
-        if(l == 3) return baseSH_23(n);
-        if(l == 4) return baseSH_24(n);
+        if(m == 0) return baseSH_20(n);
+        if(m == 1) return baseSH_21(n);
+        if(m == 2) return baseSH_22(n);
+        if(m == 3) return baseSH_23(n);
+        if(m == 4) return baseSH_24(n);
     }
-    else if(m == 3)
+    else if(l == 3)
     {
-        if(l == 0) return baseSH_30(n);
-        if(l == 1) return baseSH_31(n);
-        if(l == 2) return baseSH_32(n);
-        if(l == 3) return baseSH_33(n);
-        if(l == 4) return baseSH_34(n);
-        if(l == 5) return baseSH_35(n);
-        if(l == 6) return baseSH_36(n);
+        if(m == 0) return baseSH_30(n);
+        if(m == 1) return baseSH_31(n);
+        if(m == 2) return baseSH_32(n);
+        if(m == 3) return baseSH_33(n);
+        if(m == 4) return baseSH_34(n);
+        if(m == 5) return baseSH_35(n);
+        if(m == 6) return baseSH_36(n);
     }
-    else if(m == 4)
+    else if(l == 4)
     {
-        if(l == 0) return baseSH_40(n);
-        if(l == 1) return baseSH_41(n);
-        if(l == 2) return baseSH_42(n);
-        if(l == 3) return baseSH_43(n);
-        if(l == 4) return baseSH_44(n);
-        if(l == 5) return baseSH_45(n);
-        if(l == 6) return baseSH_46(n);
-        if(l == 7) return baseSH_47(n);
-        if(l == 8) return baseSH_48(n);
+        if(m == 0) return baseSH_40(n);
+        if(m == 1) return baseSH_41(n);
+        if(m == 2) return baseSH_42(n);
+        if(m == 3) return baseSH_43(n);
+        if(m == 4) return baseSH_44(n);
+        if(m == 5) return baseSH_45(n);
+        if(m == 6) return baseSH_46(n);
+        if(m == 7) return baseSH_47(n);
+        if(m == 8) return baseSH_48(n);
     }
 
-    return baseSH_other(m, l-m, n);
+    return baseSH_other(l, m-l, n);
 }
 
 //0阶
@@ -376,7 +427,6 @@ float GSH::baseSH_24(QVector3D& n)
     // 0.25 * sqrt(15/pi) * (x^2 - y^2)
     return 0.546274 * (n.x() * n.x() - n.y() * n.y());
 }
-
 
 //3阶
 float GSH::baseSH_30(QVector3D& n)
@@ -489,11 +539,6 @@ QVector2D GSH::toPhiTheta(QVector3D n)
 
 double GSH::factorial(int x)
 {
-    if(x < 0)
-    {
-        qDebug()<<"error x "<<x;
-    }
-
     int kCacheSize = 16;
     static const double factorial_cache[16] = {1, 1, 2, 6, 24, 120, 720, 5040,
                                                   40320, 362880, 3628800, 39916800,
@@ -513,11 +558,6 @@ double GSH::factorial(int x)
 
 double GSH::doubleFactorial(int x)
 {
-//    if(x < 0)
-//    {
-//        qDebug()<<"error x "<<x;
-//    }
-
     int kCacheSize = 16;
     static const double dbl_factorial_cache[16] = {1, 1, 2, 3, 8, 15, 48, 105,
                                                       384, 945, 3840, 10395, 46080,

@@ -22,8 +22,10 @@ private:
     QImage genImage(int width, int height, int* data);
     QImage shadowImage(int width, int height, float* data);
 
-    void testSH();
+    void configScene1();
+    void configScene2();
 
+    void testSH();
 
 private:
     int m_width;

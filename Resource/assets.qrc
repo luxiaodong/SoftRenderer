@@ -4,6 +4,8 @@
         <file>suzanne.obj</file>
         <file>marry.obj</file>
         <file>sphere.obj</file>
+        <file>capsule.obj</file>
+        <file>floor.obj</file>
     </qresource>
     <qresource prefix="/texture">
         <file>rgb.png</file>

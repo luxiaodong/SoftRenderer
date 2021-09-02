@@ -13,7 +13,7 @@ public:
     GScene();
     void setLight();
 
-    void loadSceneTest();
+    void loadSHScene();
     void loadTriangle();
     void loadSphere();
     void loadPlane();

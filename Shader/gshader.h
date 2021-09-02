@@ -16,7 +16,7 @@
 class GShader
 {
 public:
-    GShader();
+    GShader(QColor color=Qt::white);
 
     virtual GVertexAttribute vertex(GVertexAttribute& va);
 

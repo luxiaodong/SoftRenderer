@@ -2,7 +2,7 @@
 #include <QtMath>
 #include <QtGlobal>
 
-PhongShader::PhongShader()
+PhongShader::PhongShader(QColor color):GShader(color)
 {
     float x = 0.3213938;
     float y = 0.7660444;
@@ -18,6 +18,5 @@ QColor PhongShader::fragment(float x, float y, GVertexAttribute& va, QMap<QStrin
     float r = ndotl*color.redF();
     float g = ndotl*color.greenF();
     float b = ndotl*color.blueF();
-    float a = ndotl*color.alphaF();
-    return QColor(r*255, g*255, b*255, a*255);
+    return QColor(r*255, g*255, b*255);
 }

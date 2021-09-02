@@ -98,4 +98,24 @@ QColor GMath::toColor(QVector3D v)
     return QColor(r,g,b);
 }
 
+QVector2D GMath::normalToUv(QVector3D n)
+{
+    float theta = qAcos(n.y()); //(0, pi)
+    float phi = qAtan2(n.z(), n.x()); //(-pi, pi]
+    phi += G_PI;
+    return QVector2D(phi/2/G_PI , theta/G_PI);
+}
+
+QVector3D GMath::uvToNormal(QVector2D uv)
+{
+    float phi = 2*G_PI*uv.x();
+//    float theta = G_PI*uv.y(); // 非均匀分布
+//    float theta = qACos(1 - uv.y()); //均匀分布
+//    float theta = 2*qAcos(qSqrt(1- uv.y())); // 余弦均匀分布
+    float theta = qAcos(1 - 2*uv.y()); //余弦均匀分布,等同于上面
+
+    return QVector3D( qSin(theta)*qCos(phi), qSin(theta)*qSin(phi), qCos(theta));
+}
+
+
 

@@ -303,7 +303,7 @@ GMesh GModel::loadObject(QString filePath)
                     float x = tempList.at(1).toFloat();
                     float y = tempList.at(2).toFloat();
                     float z = tempList.at(3).toFloat();
-                    mesh.m_normals.append(QVector3D(x, y, z));
+                    mesh.m_normals.append(QVector3D(-x, y, z));
                 }
                 else if (line.left(3) == "vt ")
                 {

@@ -4,10 +4,10 @@
 #include <QImage>
 #include <QDebug>
 
-GShader::GShader()
+GShader::GShader(QColor color)
 {
     m_white = QImage(1,1,QImage::Format_RGBA8888);
-    m_white.fill(Qt::white);
+    m_white.fill(color);
     m_cullType = 1;
     m_isReceiveShadow = false;
 }
@@ -32,8 +32,8 @@ QVector4D GShader::objectToWorld(QVector4D pos)
 
 QVector3D GShader::objectToWorldDir(QVector3D pos)
 {
-    QMatrix4x4 mat = m_modelMat.transposed().inverted();
-    QVector3D outPos = mat*QVector4D(pos,1).toVector3D().normalized();;
+    QMatrix4x4 mat = m_modelMat.inverted().transposed();
+    QVector3D outPos = (mat*QVector4D(pos,0)).toVector3D().normalized();
     return outPos;
 }
 
@@ -41,7 +41,7 @@ GVertexAttribute GShader::vertex(GVertexAttribute& va)
 {
     GVertexAttribute outVa;
     outVa.m_vertex = this->objectToClipping(va.m_vertex);
-    outVa.m_normal = this->objectToWorldDir(va.m_normal);
+    outVa.m_normal = this->objectToWorldDir(va.m_normal).normalized();
     outVa.m_uv = va.m_uv;
 //qDebug()<<va.m_vertex<<"--->"<<objectToWorld(va.m_vertex)<<"--->"<<(outVa.m_vertex/outVa.m_vertex.w());
     return outVa;

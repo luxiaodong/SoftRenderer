@@ -10,7 +10,18 @@ Widget::Widget(QWidget *parent)
 {
     m_width = 600;
     m_height = 600;
+//    configScene1();
+    configScene2();
 
+    m_raster = new GRaster();
+    m_raster->setRenderSize(QSize(m_width, m_height));
+
+    m_drawOnce = 0;
+    this->resize(m_width, m_height);
+}
+
+void Widget::configScene1()
+{
     GCamera* pCamera = new GCamera();
 //    pCamera->setViewMatrix(QVector3D(0,0,0), QVector3D(-0.6, 0.8, 0), QVector3D(0, -5.0f/13, 12.0f/13));
     pCamera->setViewMatrix(QVector3D(0, 10, -10), 45, 0, 0);
@@ -18,18 +29,24 @@ Widget::Widget(QWidget *parent)
     pCamera->setProjMatrix(60, m_width*1.0f/m_height, 0.3f, 1000.0f);
     pCamera->setViewPortMatrix(0,0,m_width,m_height);
 
-    m_raster = new GRaster();
-    m_raster->setRenderSize(QSize(m_width, m_height));
-
     m_pScene = new GScene();
     m_pScene->m_camera = pCamera;
 //    m_pScene->loadTriangle();
 //    m_pScene->loadPlane();
 //    m_pScene->loadModel();
     m_pScene->loadSphere();
+}
 
-    m_drawOnce = 0;
-    this->resize(m_width, m_height);
+void Widget::configScene2()
+{
+    GCamera* pCamera = new GCamera();
+    pCamera->setViewMatrix(QVector3D(0, 10, -10), 45, 0, 0);
+    pCamera->setProjMatrix(60, m_width*1.0f/m_height, 0.3f, 1000.0f);
+    pCamera->setViewPortMatrix(0,0,m_width,m_height);
+
+    m_pScene = new GScene();
+    m_pScene->m_camera = pCamera;
+    m_pScene->loadSHScene();
 }
 
 void Widget::paintEvent(QPaintEvent*)
@@ -37,8 +54,8 @@ void Widget::paintEvent(QPaintEvent*)
     m_drawOnce++;
     if(m_drawOnce >= 3)
     {
-        //    this->softRneder();
-        this->testSH();
+        this->softRneder();
+//        this->testSH();
     }
 }
 

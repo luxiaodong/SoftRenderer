@@ -7,7 +7,7 @@
 class PhongShader : public GShader
 {
 public:
-    PhongShader();
+    PhongShader(QColor color=Qt::white);
 
     virtual QColor fragment(float x, float y, GVertexAttribute& va, QMap<QString, QImage>& map);
 

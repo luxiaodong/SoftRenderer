@@ -9,10 +9,12 @@
 #include "Math/gshrotate.h"
 #include "Math/gmath.h"
 
-#define SH_MAX_ORDER 5
 
 class GSH
 {
+private:
+    int m_sh_order;
+
 public:
     GSH();
 
@@ -27,11 +29,13 @@ public:
 
     //利用系数重建图片
     QImage rebuildImage(QList<QVector3D>& shCoffs, int width, int height);
+    QImage rebuildImage2(QList<QVector3D>& shCoffs, int width, int height);
 
     //旋转球谐系数
     QList<QVector3D> rotateSHCoffs(QList<QVector3D>, QVector3D);
     //计算系数
     QList<QVector3D> calculateShCoffs(QImage& image);
+    QList<QVector3D> calculateShCoffs2(QImage& image);
     QVector3D evalColor(QList<QVector3D>& shCoffs, QVector3D n);
     QVector<float> calculateBaseCoffs(QVector3D n);
     QVector3D toNormal(float phi, float theta);
@@ -39,7 +43,7 @@ public:
     int indexSH(int m, int l);
 
     //球谐函数基函数
-    float baseSH(int m, int l, QVector3D n);
+    float baseSH(int l, int m, QVector3D n);
     float baseSH_00(QVector3D& n);
 
     float baseSH_10(QVector3D& n);

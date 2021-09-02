@@ -5,6 +5,7 @@
 #include "Shader/gshader.h"
 #include "Shader/phongshader.h"
 #include "Shader/skyboxshader.h"
+#include "Shader/shshader.h"
 
 GScene::GScene()
 {
@@ -152,4 +153,56 @@ GGameObject GScene::skybox2()
 //    obj.setRotate(0,0,0);
     obj.setScale(camearFar,camearFar,camearFar);
     return obj;
+}
+
+//球谐系数测试场景
+void GScene::loadSHScene()
+{
+    GGameObject cube1 = GGameObject();
+    cube1.setMesh(GModel::loadUnityCube());
+    cube1.m_material.setShader( new SHShader(QColor(0,1,1)) );
+    cube1.setPosition(0,0,-2);
+    cube1.setRotate(0,-45,0);
+    cube1.setScale(10,0.2,10);
+    m_gameObjects.append(cube1);
+
+    GGameObject cube2 = GGameObject();
+    cube2.setMesh(GModel::loadUnityCube());
+    cube2.m_material.setShader( new SHShader(QColor(0,1,1)) );
+    cube2.setPosition(3.535534,2.6,1.535534);
+    cube2.setRotate(0,-45,0);
+    cube2.setScale(0.2,5,10);
+    m_gameObjects.append(cube2);
+
+    GGameObject cube3 = GGameObject();
+    cube3.setMesh(GModel::loadUnityCube());
+    cube3.m_material.setShader( new SHShader(QColor(0,1,1)) );
+    cube3.setPosition(-3.535534,2.6,1.535534);
+    cube3.setRotate(0,-45,0);
+    cube3.setScale(10,5,0.2);
+    m_gameObjects.append(cube3);
+
+    GGameObject capsule1 = GGameObject();
+    capsule1.setMesh(GModel::loadObject(":/mesh/capsule.obj"));
+    capsule1.m_material.setShader( new SHShader(Qt::red) );
+    capsule1.setPosition(-2.76,1.05,-1.74);
+    capsule1.setRotate(90,45,0);
+    capsule1.setScale(2,2,2);
+    m_gameObjects.append(capsule1);
+
+    GGameObject capsule2 = GGameObject();
+    capsule2.setMesh(GModel::loadObject(":/mesh/capsule.obj"));
+    capsule2.m_material.setShader( new SHShader(Qt::green) );
+    capsule2.setPosition(3.592103,1.05,-2.141421);
+    capsule2.setRotate(90,0,45);
+    capsule2.setScale(2,2,2);
+    m_gameObjects.append(capsule2);
+
+    GGameObject sphere = GGameObject();
+    sphere.setMesh(GModel::loadObject(":/mesh/sphere.obj"));
+    sphere.m_material.setShader( new SHShader() );
+    sphere.setPosition(0.3606246,2.6,1.387042);
+    sphere.setRotate(0,-45,0);
+    sphere.setScale(5,5,5);
+    m_gameObjects.append(sphere);
 }
