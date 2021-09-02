@@ -46,7 +46,8 @@ void Widget::configScene2()
 
     m_pScene = new GScene();
     m_pScene->m_camera = pCamera;
-    m_pScene->loadSHScene();
+//    m_pScene->loadSHScene();
+    m_pScene->loadBRDFScene();
 }
 
 void Widget::paintEvent(QPaintEvent*)

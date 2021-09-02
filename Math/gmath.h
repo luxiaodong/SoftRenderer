@@ -23,6 +23,7 @@ public:
     static QColor toColor(QVector3D);
     static QVector2D normalToUv(QVector3D n);
     static QVector3D uvToNormal(QVector2D uv);
+    static QVector3D lerp(QVector3D a, QVector3D b, float p);
 };
 
 #endif // GMATH_H

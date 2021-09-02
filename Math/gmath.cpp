@@ -113,9 +113,13 @@ QVector3D GMath::uvToNormal(QVector2D uv)
 //    float theta = qACos(1 - uv.y()); //均匀分布
 //    float theta = 2*qAcos(qSqrt(1- uv.y())); // 余弦均匀分布
     float theta = qAcos(1 - 2*uv.y()); //余弦均匀分布,等同于上面
-
     return QVector3D( qSin(theta)*qCos(phi), qSin(theta)*qSin(phi), qCos(theta));
 }
 
+QVector3D GMath::lerp(QVector3D a, QVector3D b, float p)
+{
+    p = GMath::clamp(p);
+    return a + (b-a)*p;
+}
 
 

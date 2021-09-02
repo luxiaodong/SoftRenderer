@@ -6,6 +6,7 @@
 #include "Shader/phongshader.h"
 #include "Shader/skyboxshader.h"
 #include "Shader/shshader.h"
+#include "Shader/brdfshader.h"
 
 GScene::GScene()
 {
@@ -201,6 +202,17 @@ void GScene::loadSHScene()
     GGameObject sphere = GGameObject();
     sphere.setMesh(GModel::loadObject(":/mesh/sphere.obj"));
     sphere.m_material.setShader( new SHShader() );
+    sphere.setPosition(0.3606246,2.6,1.387042);
+    sphere.setRotate(0,-45,0);
+    sphere.setScale(5,5,5);
+    m_gameObjects.append(sphere);
+}
+
+void GScene::loadBRDFScene()
+{
+    GGameObject sphere = GGameObject();
+    sphere.setMesh(GModel::loadObject(":/mesh/sphere.obj"));
+    sphere.m_material.setShader( new BRDFShader(Qt::red) );
     sphere.setPosition(0.3606246,2.6,1.387042);
     sphere.setRotate(0,-45,0);
     sphere.setScale(5,5,5);

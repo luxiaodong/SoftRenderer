@@ -43,7 +43,8 @@ SOURCES += main.cpp\
     Scene/glight.cpp \
     Math/gsh.cpp \
     Math/gshrotate.cpp \
-    Shader/shshader.cpp
+    Shader/shshader.cpp \
+    Shader/brdfshader.cpp
 
 HEADERS  += widget.h \
     Scene/gscene.h \
@@ -64,7 +65,8 @@ HEADERS  += widget.h \
     Scene/glight.h \
     Math/gsh.h \
     Math/gshrotate.h \
-    Shader/shshader.h
+    Shader/shshader.h \
+    Shader/brdfshader.h
 
 RESOURCES += \
     Resource/assets.qrc
