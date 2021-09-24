@@ -17,6 +17,7 @@ public:
     void setOrthMatrix(float size, float aspect, float n, float f); // aspect = width/height
     void setProjMatrix(float fov,  float aspect, float n, float f);
     void setViewPortMatrix(float x, float y, float w, float h);
+    void testMatrix();
 
     QPoint ndcToScreenPoint(QVector3D pos);
 

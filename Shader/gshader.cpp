@@ -17,6 +17,26 @@ QVector4D GShader::objectToClipping(QVector4D pos)
 //qDebug()<<"model:"<<m_modelMat;
 //qDebug()<<"view:"<<m_viewMat;
 //qDebug()<<"proj:"<<m_projMat;
+//qDebug()<<"view inv :"<<m_viewMat.inverted();
+//qDebug()<<"proj inv :"<<m_projMat.inverted();
+    QMatrix4x4 mat(
+                    1.0f, 0.0f, 0.0f, 0.0f,
+                    0.0f, -1.0f, 0.0f, 0.0f,
+                    0.0f, 0.0f, -0.5f, 0.5f,
+                    0.0f, 0.0f, 0.0f, 1.0f
+                );
+
+    QMatrix4x4 matGl = m_projMat*m_viewMat;
+    QMatrix4x4 matDx = mat*m_projMat*m_viewMat;
+//qDebug()<<"matGl : "<<matGl;
+//qDebug()<<"matDx : "<<matDx;
+//qDebug()<<matDx*m_modelMat*pos;
+
+//    qDebug()<<"OS :"<<pos;
+//    qDebug()<<"WS :"<<m_modelMat*pos;
+//    qDebug()<<"VS :"<<m_viewMat*m_modelMat*pos;
+//    qDebug()<<"CS :"<<m_projMat*m_viewMat*m_modelMat*pos;
+
     return m_projMat*m_viewMat*m_modelMat*pos;
 }
 

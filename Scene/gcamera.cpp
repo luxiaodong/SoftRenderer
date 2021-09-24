@@ -91,10 +91,17 @@ void GCamera::setOrthMatrix(float size, float aspect, float n, float f)
     QMatrix4x4 mat(
         1.0f/(aspect*size),      0.0f,          0.0f,          0.0f,
                 0.0f,       1.0f/size,          0.0f,          0.0f,
-                0.0f,            0.0f,       2/(n-f),   (n+f)/(n-f),
+                0.0f,            0.0f,       2/(f-n),   (n+f)/(f-n),
                 0.0f,            0.0f,          0.0f,         1.0f);
 
-    m_projMat = mat;
+    QMatrix4x4 zflip(
+                1.0, 0.0,  0.0, 0.0,
+                0.0, 1.0,  0.0, 0.0,
+                0.0, 0.0, -1.0, 0.0,
+                0.0, 0.0,  0.0, 1.0
+                );
+
+    m_projMat = zflip*mat;
     m_isOrth = true;
 }
 
@@ -105,9 +112,17 @@ void GCamera::setProjMatrix(float fov,  float aspect, float n, float f)
     QMatrix4x4 mat(
         1.0f/(aspect*tan),       0.0f,          0.0f,          0.0f,
                 0.0f,        1.0f/tan,          0.0f,          0.0f,
-                0.0f,            0.0f,   (f+n)/(n-f),   2*n*f/(n-f),
+                0.0f,            0.0f,   (f+n)/(f-n),   2*n*f/(f-n),
                 0.0f,            0.0f,         -1.0f,         0.0f);
-    m_projMat = mat;
+
+    QMatrix4x4 zflip(
+                1.0, 0.0,  0.0, 0.0,
+                0.0, 1.0,  0.0, 0.0,
+                0.0, 0.0, -1.0, 0.0,
+                0.0, 0.0,  0.0, 1.0
+                );
+
+    m_projMat = zflip*mat;
     m_isOrth = false;
 }
 
@@ -137,3 +152,40 @@ QPoint GCamera::ndcToScreenPoint(QVector3D pos)
     QVector4D p = m_viewPortMat*QVector4D(pos, 1.0f);
     return QPoint(p.x(), p.y());
 }
+
+void GCamera::testMatrix()
+{
+    QVector4D testPt(-8.66025, 4.89898, 16.3806, 16.9706);
+    QVector4D posNDC = testPt/testPt.w();
+qDebug()<<"view:"<<m_viewMat;
+qDebug()<<"proj:"<<m_projMat;
+qDebug()<<"vp  :"<<m_projMat*m_viewMat;
+qDebug()<<"proj inv :"<<m_projMat.inverted();
+qDebug()<<"view inv :"<<m_viewMat.inverted();
+qDebug()<<testPt<<posNDC;
+
+    //方法1.
+    float a = m_projMat(2,2);
+    float b = m_projMat(2,3);
+    float rview = 1.0/b*posNDC.z() + a/b;
+    QVector4D posCS(posNDC.x()/(rview), posNDC.y()/(rview), posNDC.z()/(rview), 1.0f/(rview));
+    QVector4D posVS = m_projMat.inverted()*posCS;
+qDebug()<<posCS<<posVS;
+
+    //方法2.
+    posCS = m_projMat.inverted()*posNDC;
+    posVS = posCS/posCS.w();
+qDebug()<<posCS<<posVS;
+
+    //test.
+    QVector4D posWS = m_viewMat.inverted()*posVS;
+qDebug()<<posWS;
+    QMatrix4x4 invViewMat = m_viewMat.inverted();
+    a = invViewMat(1, 1);
+    invViewMat(2,2) = a;
+    invViewMat(1,2) = -a;
+    posVS.setZ(-posVS.z());
+    posWS = invViewMat*posVS;
+qDebug()<<posWS;
+}
+
