@@ -115,6 +115,12 @@ void GCamera::setProjMatrix(float fov,  float aspect, float n, float f)
                 0.0f,            0.0f,   (f+n)/(f-n),   2*n*f/(f-n),
                 0.0f,            0.0f,         -1.0f,         0.0f);
 
+    // 逆矩阵.
+    // 1/A
+    //     1/B
+    //          0    -1
+    //          1/D  C/D
+
     QMatrix4x4 zflip(
                 1.0, 0.0,  0.0, 0.0,
                 0.0, 1.0,  0.0, 0.0,
