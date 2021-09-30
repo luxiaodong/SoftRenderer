@@ -11,7 +11,7 @@ GRaster::GRaster()
     m_enableBlend = false;
     m_enableShadow = false;
     m_isTileBased = true;
-    m_tileSize = QSize(64,64);
+    m_tileSize = QSize(128,128);
 }
 
 void GRaster::setRenderSize(const QSize& size)
@@ -430,10 +430,10 @@ void GRaster::tileBasedRendering()
     this->tileBinning();
 
     for(int j=0; j<m_tileCount.height(); ++j)
-    //int j = 3;
+//    int j = 0;
     {
         for(int i=0; i<m_tileCount.width(); ++i)
-        //int i = 3;
+//        int i = 1;
         {
             int x = m_tileSize.width()*i;
             int y = m_tileSize.height()*j;
@@ -462,6 +462,8 @@ void GRaster::loadBuffer(int index)
             int ii = x*m_tileSize.width() + i;
             int jj = y*m_tileSize.height() + j;
 
+            if(ii >= m_size.width() || jj >= m_size.height()) continue;
+
             float depth = m_depthBuffer->depth(ii,jj);
             m_tileDepthBuffer->setDepth(i,j, depth);
 
@@ -483,6 +485,8 @@ void GRaster::saveBuffer(int index)
             int ii = x*m_tileSize.width() + i;
             int jj = y*m_tileSize.height() + j;
 
+            if(ii >= m_size.width() || jj >= m_size.height()) continue;
+
             float depth = m_tileDepthBuffer->depth(i,j);
             m_depthBuffer->setDepth(ii,jj,depth);
 
@@ -492,7 +496,20 @@ void GRaster::saveBuffer(int index)
     }
 }
 
-// 三角形和矩形是否相交,不知道是否正确
+bool GRaster::isLineSegment(QPoint a, QPoint b, QPoint c, QPoint d)
+{
+    QVector2D ca(c.x()-a.x(), c.y()-a.y());
+    QVector2D cd(c.x()-a.x(), d.y()-d.y());
+    QVector2D cb(c.x()-a.x(), b.y()-b.y());
+
+    float cross1 = ca.x()*cd.y() - cd.x()*ca.y();
+    float cross2 = cb.x()*cd.y() - cd.x()*cb.y();
+
+    if(cross1*cross2) return true;
+    return false;
+}
+
+// 三角形和矩形是否相交
 bool GRaster::isIntersectInTile(QPoint a, QPoint b, QPoint c, QRect rect)
 {
     if(rect.contains(a)) return true;
@@ -508,6 +525,30 @@ bool GRaster::isIntersectInTile(QPoint a, QPoint b, QPoint c, QRect rect)
     if(this->isInTriangle(weight)) return true;
     weight = this->interpolationCoffInTriangle(a,b,c, rect.topRight());
     if(this->isInTriangle(weight)) return true;
+
+    QList<QPoint> list;
+    list<<a<<b<<rect.bottomLeft()<<rect.bottomRight();
+    list<<a<<c<<rect.bottomLeft()<<rect.bottomRight();
+    list<<b<<c<<rect.bottomLeft()<<rect.bottomRight();
+    list<<a<<b<<rect.topLeft()<<rect.topRight();
+    list<<a<<c<<rect.topLeft()<<rect.topRight();
+    list<<b<<c<<rect.topLeft()<<rect.topRight();
+    list<<a<<b<<rect.bottomLeft()<<rect.topLeft();
+    list<<a<<c<<rect.bottomLeft()<<rect.topLeft();
+    list<<b<<c<<rect.bottomLeft()<<rect.topLeft();
+    list<<a<<b<<rect.bottomRight()<<rect.topRight();
+    list<<a<<c<<rect.bottomRight()<<rect.topRight();
+    list<<b<<c<<rect.bottomRight()<<rect.topRight();
+
+    for(int i=0; i<list.size(); i+=4)
+    {
+        QPoint a = list.at(i);
+        QPoint b = list.at(i+1);
+        QPoint c = list.at(i+2);
+        QPoint d = list.at(i+3);
+
+        if(this->isLineSegment(a,b,c,d)) return true;
+    }
 
     return false;
 }

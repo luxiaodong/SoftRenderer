@@ -14,6 +14,7 @@
 #include <QMatrix4x4>
 #include <QVector4D>
 #include <QVector3D>
+#include <QVector2D>
 #include <QMap>
 #include <QSize>
 #include <QColor>
@@ -53,6 +54,7 @@ private:
     void vertexProcess();
 
     void tileBinning();
+    bool isLineSegment(QPoint a, QPoint b, QPoint c, QPoint d);
     bool isIntersectInTile(QPoint a, QPoint b, QPoint c, QRect rect);
     void renderingTile(const QList<GPrimitive> primitivesList, QRect rect);
     void loadBuffer(int index);
