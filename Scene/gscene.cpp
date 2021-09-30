@@ -62,7 +62,7 @@ void GScene::loadPlane()
     GGameObject obj = GGameObject();
     obj.setMesh(GModel::loadPlane());
     obj.m_material.setShader( new GShader() );
-//    obj.m_material.addImage("base", ":/texture/uv.tga");
+    obj.m_material.addImage("base", ":/texture/uv.tga");
     obj.setPosition(0,0,-1);
     obj.setRotate(90, 0, 0);
     obj.setScale(10, 10, 10);

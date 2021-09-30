@@ -10,6 +10,8 @@ GRaster::GRaster()
     m_enableDepthWrite = true;
     m_enableBlend = false;
     m_enableShadow = false;
+    m_isTileBased = true;
+    m_tileSize = QSize(64,64);
 }
 
 void GRaster::setRenderSize(const QSize& size)
@@ -18,6 +20,19 @@ void GRaster::setRenderSize(const QSize& size)
     m_frameBuffer = new GFrameBuffer(m_size.width(), m_size.height(), 3);
     m_depthBuffer = new GDepthBuffer(m_size.width(), m_size.height());
     m_shadowMap = new GDepthBuffer(m_size.width(), m_size.height());
+
+    if(m_isTileBased)
+    {
+        m_tileFrameBuffer = new GFrameBuffer(m_tileSize.width(), m_tileSize.height(), 3);
+        m_tileDepthBuffer = new GDepthBuffer(m_tileSize.width(), m_tileSize.height());
+        m_tileShadowMap = new GDepthBuffer(m_tileSize.width(), m_tileSize.height());
+
+        int tileWidthCount = m_size.width()/m_tileSize.width();
+        int tileHeightCount = m_size.height()/m_tileSize.height();
+        if(tileWidthCount*m_tileSize.width() < m_size.width()) tileWidthCount++;
+        if(tileHeightCount*m_tileSize.height() < m_size.height()) tileHeightCount++;
+        m_tileCount = QSize(tileWidthCount, tileHeightCount);
+    }
 }
 
 void GRaster::clearColor(const QColor& color)
@@ -44,7 +59,16 @@ void GRaster::renderGameObject(const GGameObject& obj, bool isReceiveShadow)
     m_pShader->m_modelMat = obj.objectToWorldMatrix();
     m_pShader->m_viewMat = m_pCamera->m_viewMat;
     m_pShader->m_projMat = m_pCamera->m_projMat;
-    this->doRendering();
+    if(m_isTileBased)
+    {
+        m_enableShadow = false;
+        m_pShader->m_isReceiveShadow = false;
+        this->tileBasedRendering();
+    }
+    else
+    {
+        this->immediateRendering();
+    }
 }
 
 void GRaster::cullingInHomogeneousSpace(GPrimitive& primitive)
@@ -174,7 +198,7 @@ bool GRaster::isInTriangle(QVector3D weight)
     return true;
 }
 
-void GRaster::doRendering()
+void GRaster::immediateRendering()
 {
     //ME(Micro Engine) 配置管线, 比如渲染结果回传给cpu
 
@@ -232,7 +256,7 @@ void GRaster::doRendering()
     }
 
     //Clipping 剪裁(视锥体剪裁, 将屏幕外的三角形丢掉)
-//    qDebug()<<"primitives count is "<<m_primitivesBeforeCulling.size();
+    //qDebug()<<"primitives count is "<<m_primitivesBeforeCulling.size();
     m_primitivesAfterCulling.clear();
     foreach (GPrimitive primitive, m_primitivesBeforeCulling)
     {
@@ -298,7 +322,7 @@ void GRaster::doRendering()
                     continue;
                 }
 
-//                QRect debugRect(0,0,101,101);
+//                QRect debugRect( 3*m_tileSize.width(), 3*m_tileSize.height(), m_tileSize.width(), m_tileSize.height() );
 //                if(debugRect.contains(x, y) == false)
 //                {
 //                    continue;
@@ -393,6 +417,293 @@ if(m_pShader->m_isReceiveShadow)
                 else
                 {
                     m_frameBuffer->setPixel(x, y, srcColor);
+                }
+            }
+        }
+    }
+}
+
+// ============================= tile based rendering ============================
+void GRaster::tileBasedRendering()
+{
+    this->vertexProcess();
+    this->tileBinning();
+
+    for(int j=0; j<m_tileCount.height(); ++j)
+    //int j = 3;
+    {
+        for(int i=0; i<m_tileCount.width(); ++i)
+        //int i = 3;
+        {
+            int x = m_tileSize.width()*i;
+            int y = m_tileSize.height()*j;
+            int index = j*m_tileCount.width() + i;
+            QList<GPrimitive> tilePrimitives = m_tilePrimitivesAfterCulling.at(index);
+
+            if(tilePrimitives.size() > 0)
+            {
+                this->loadBuffer(index);
+                this->renderingTile(tilePrimitives, QRect(x, y, m_tileSize.width(), m_tileSize.height()) );
+                this->saveBuffer(index);
+            }
+        }
+    }
+}
+
+void GRaster::loadBuffer(int index)
+{
+    int x = index%m_tileCount.width();
+    int y = index/m_tileCount.width();
+
+    for(int j=0; j<m_tileSize.height(); ++j)
+    {
+        for(int i=0; i<m_tileSize.width(); ++i)
+        {
+            int ii = x*m_tileSize.width() + i;
+            int jj = y*m_tileSize.height() + j;
+
+            float depth = m_depthBuffer->depth(ii,jj);
+            m_tileDepthBuffer->setDepth(i,j, depth);
+
+            QColor color = m_frameBuffer->pixel(ii,jj);
+            m_tileFrameBuffer->setPixel(i,j, color);
+        }
+    }
+}
+
+void GRaster::saveBuffer(int index)
+{
+    int x = index%m_tileCount.width();
+    int y = index/m_tileCount.width();
+
+    for(int j=0; j<m_tileSize.height(); ++j)
+    {
+        for(int i=0; i<m_tileSize.width(); ++i)
+        {
+            int ii = x*m_tileSize.width() + i;
+            int jj = y*m_tileSize.height() + j;
+
+            float depth = m_tileDepthBuffer->depth(i,j);
+            m_depthBuffer->setDepth(ii,jj,depth);
+
+            QColor color = m_tileFrameBuffer->pixel(i,j);
+            m_frameBuffer->setPixel(ii,jj,color);
+        }
+    }
+}
+
+// 三角形和矩形是否相交,不知道是否正确
+bool GRaster::isIntersectInTile(QPoint a, QPoint b, QPoint c, QRect rect)
+{
+    if(rect.contains(a)) return true;
+    if(rect.contains(b)) return true;
+    if(rect.contains(c)) return true;
+
+    QVector3D weight;
+    weight = this->interpolationCoffInTriangle(a,b,c, rect.bottomLeft());
+    if(this->isInTriangle(weight)) return true;
+    weight = this->interpolationCoffInTriangle(a,b,c, rect.bottomRight());
+    if(this->isInTriangle(weight)) return true;
+    weight = this->interpolationCoffInTriangle(a,b,c, rect.topLeft());
+    if(this->isInTriangle(weight)) return true;
+    weight = this->interpolationCoffInTriangle(a,b,c, rect.topRight());
+    if(this->isInTriangle(weight)) return true;
+
+    return false;
+}
+
+void GRaster::vertexProcess()
+{
+    m_vertexAttributesBeforeVertexShader.clear();
+    foreach (GVertexIndex index, m_mesh.m_indexs)
+    {
+        QVector3D vertex = m_mesh.m_vertexs.at( index.m_vertexIndex );
+
+        QVector2D uv = QVector2D(0,0);
+        if (m_mesh.m_uvs.size() > 0)
+        {
+            uv = m_mesh.m_uvs.at( index.m_uvIndex );
+        }
+
+        QVector3D normal = QVector3D(0,0,1);
+        if (m_mesh.m_normals.size() > 0)
+        {
+            normal = m_mesh.m_normals.at( index.m_normalIndex );
+        }
+
+        m_vertexAttributesBeforeVertexShader.append( GVertexAttribute(vertex, uv, normal) );
+    }
+
+    if ( m_vertexAttributesBeforeVertexShader.size()%3 > 0 )
+    {
+        qDebug()<<"vertex count is not 3n.";
+        return ;
+    }
+
+    //VS(Vertex Shader) 顶点处理
+    m_vertexAttributesAfterVertexShader.clear();
+    foreach(GVertexAttribute va, m_vertexAttributesBeforeVertexShader)
+    {
+        m_vertexAttributesAfterVertexShader.append( m_pShader->vertex(va) );
+    }
+
+    m_primitivesBeforeCulling.clear();
+    int count = m_vertexAttributesAfterVertexShader.size()/3;
+    for(int i = 0; i < count; ++i)
+    {
+        GVertexAttribute v1 = m_vertexAttributesAfterVertexShader.at(3*i);
+        GVertexAttribute v2 = m_vertexAttributesAfterVertexShader.at(3*i+1);
+        GVertexAttribute v3 = m_vertexAttributesAfterVertexShader.at(3*i+2);
+        m_primitivesBeforeCulling.append( GPrimitive(v1, v2, v3) );
+    }
+
+    //Clipping 剪裁(视锥体剪裁, 将屏幕外的三角形丢掉)
+    //qDebug()<<"primitives count is "<<m_primitivesBeforeCulling.size();
+    m_primitivesAfterCulling.clear();
+    foreach (GPrimitive primitive, m_primitivesBeforeCulling)
+    {
+        if(primitive.isTriangleInFrustum())
+        {
+            m_primitivesAfterCulling.append(primitive);
+        }
+        else
+        {
+            this->cullingInHomogeneousSpace(primitive);
+        }
+    }
+}
+
+// 将tile打包
+void GRaster::tileBinning()
+{
+    m_tilePrimitivesAfterCulling.clear();
+    for(int i=0; i<m_tileCount.width()*m_tileCount.height(); ++i)
+    {
+        QList<GPrimitive> tilePrimitives;
+        m_tilePrimitivesAfterCulling.append(tilePrimitives);
+    }
+
+    qDebug()<<"primitives count is "<<m_primitivesAfterCulling.size();
+    foreach (GPrimitive primitive, m_primitivesAfterCulling)
+    {
+        QList<QVector3D> ndcList = primitive.homogeneousDiv();
+        if( primitive.isDiscardCullingSuccess(m_pShader->m_cullType) )
+        {
+            continue;
+        }
+
+        QPoint a = m_pCamera->ndcToScreenPoint(ndcList.at(0));
+        QPoint b = m_pCamera->ndcToScreenPoint(ndcList.at(1));
+        QPoint c = m_pCamera->ndcToScreenPoint(ndcList.at(2));
+
+        if( this->isZeroArea(a, b, c) )
+        {
+            continue;
+        }
+
+        for(int j=0; j<m_tileCount.height(); ++j)
+        {
+            for(int i=0; i<m_tileCount.width(); ++i)
+            {
+                int x = m_tileSize.width()*i;
+                int y = m_tileSize.height()*j;
+                int index = j*m_tileCount.width() + i;
+                QList<GPrimitive> tilePrimitives = m_tilePrimitivesAfterCulling.at(index);
+                if(this->isIntersectInTile(a,b,c,QRect(x, y, m_tileSize.width(), m_tileSize.height())))
+                {
+                    tilePrimitives.append(primitive);
+                    m_tilePrimitivesAfterCulling.replace(index, tilePrimitives);
+                }
+            }
+        }
+    }
+}
+
+void GRaster::renderingTile(const QList<GPrimitive> primitivesList, QRect rect)
+{
+//    qDebug()<<"tile primitives count is "<<primitivesList.size();
+    foreach (GPrimitive primitive, primitivesList)
+    {
+        //PD(perspective division) 透视除法
+        QList<QVector3D> ndcList = primitive.homogeneousDiv();
+        //Screen Mapping 屏幕映射
+        QPoint a = m_pCamera->ndcToScreenPoint(ndcList.at(0));
+        QPoint b = m_pCamera->ndcToScreenPoint(ndcList.at(1));
+        QPoint c = m_pCamera->ndcToScreenPoint(ndcList.at(2));
+
+        QList<QPoint> boundaryPair = this->calculateBoundary(a,b,c);
+
+        //建立三角形,然后遍历,从三个顶点建立三条线,再遍历每条扫描线
+        int pairSize = boundaryPair.size()/2;
+
+        for(int j=0; j<pairSize; ++j)
+        {
+            int xMin = boundaryPair.at(2*j).x();
+            int xMax = boundaryPair.at(2*j+1).x();
+            int y = boundaryPair.at(2*j).y();
+
+            if(y > rect.bottom()) continue;
+            if(y < rect.top()) continue;
+
+            //从左到右扫描
+            for(int x=xMin; x<=xMax; ++x)
+            {
+                if(x > rect.right()) continue;
+                if(x < rect.left()) continue;
+
+                QVector3D weight = this->interpolationCoffInTriangle(a,b,c,QPoint(x,y));
+                if(this->isInTriangle(weight) == false)
+                {
+                    continue;
+                }
+
+                // 将2D的权重转化为3D的权重
+                if(m_pCamera->m_isOrth == false)
+                {
+                    float alpha = weight.x()/primitive.m_triangle[0].m_vertex.w();
+                    float beta  = weight.y()/primitive.m_triangle[1].m_vertex.w();
+                    float gamma = weight.z()/primitive.m_triangle[2].m_vertex.w();
+                    float zView = 1.0f/(alpha + beta + gamma);
+                    alpha = alpha*zView;
+                    beta  = beta*zView;
+                    gamma = gamma*zView;
+                    weight = QVector3D(alpha, beta, gamma);
+                }
+
+                // 插值顶点属性, clip空间内
+                GVertexAttribute va = primitive.interpolationAttribute(weight);
+
+                // 快速做法, 跳过投影矩阵
+                float zNdc = va.m_vertex.z()/va.m_vertex.w();
+                float zDepth = zNdc*0.5 + 0.5; //再转到 (0-1)
+
+                // 对于非透明物体,进行ealy-z
+                if (m_enableDepthTest && zDepth >= m_tileDepthBuffer->depth(x%m_tileSize.width(), y%m_tileSize.height()) )
+                {
+                    continue;
+                }
+
+                QColor srcColor = m_pShader->fragment(x*1.0f/m_tileSize.width(), y*1.0f/m_tileSize.height(), va, m_material.m_imageSet);
+
+                // 模版测试, 暂不支持
+                // ZT(Z-Test) 深度测试
+                if(m_enableDepthTest && m_enableDepthWrite)
+                {
+                    m_tileDepthBuffer->setDepth(x%m_tileSize.width(), y%m_tileSize.height(), zDepth);
+                }
+
+                // OM(Output Merger) 进行Alpha Blend，颜色混合
+                if(m_enableBlend)
+                {
+                    QColor dstColor = m_tileFrameBuffer->pixel(x, y);
+                    float r = srcColor.redF()  *srcColor.alphaF() + dstColor.redF()  *(1 - srcColor.alphaF());
+                    float g = srcColor.greenF()*srcColor.alphaF() + dstColor.greenF()*(1 - srcColor.alphaF());
+                    float b = srcColor.blueF() *srcColor.alphaF() + dstColor.blueF() *(1 - srcColor.alphaF());
+                    m_tileFrameBuffer->setPixel(x%m_tileSize.width(), y%m_tileSize.height(), QColor(r*255, g*255, b*255) );
+                }
+                else
+                {
+                    m_tileFrameBuffer->setPixel(x%m_tileSize.width(), y%m_tileSize.height(), srcColor);
                 }
             }
         }

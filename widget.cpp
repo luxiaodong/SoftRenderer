@@ -28,13 +28,13 @@ void Widget::configScene1()
 //    pCamera->setOrthMatrix(5,  m_width*1.0f/m_height, 0.3f, 1000.0f);
     pCamera->setProjMatrix(60, m_width*1.0f/m_height, 0.3f, 1000.0f);
     pCamera->setViewPortMatrix(0,0,m_width,m_height);
-    pCamera->testMatrix();
+//    pCamera->testMatrix();
 
     m_pScene = new GScene();
     m_pScene->m_camera = pCamera;
 //    m_pScene->loadTriangle();
     m_pScene->loadPlane();
-//    m_pScene->loadModel();
+    m_pScene->loadModel();
 //    m_pScene->loadSphere();
 }
 

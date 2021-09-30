@@ -24,7 +24,6 @@ class GRaster
 {
 public:
     GRaster();
-    void doRendering();
     int* frameBuffer(){return m_frameBuffer->m_data;}
     float* shadowMap(){return m_shadowMap->m_data;}
 
@@ -49,6 +48,17 @@ public:
     void setLight(GLight* light){m_light = light;}
 
 private:
+    void immediateRendering();
+    void tileBasedRendering();
+    void vertexProcess();
+
+    void tileBinning();
+    bool isIntersectInTile(QPoint a, QPoint b, QPoint c, QRect rect);
+    void renderingTile(const QList<GPrimitive> primitivesList, QRect rect);
+    void loadBuffer(int index);
+    void saveBuffer(int index);
+
+private:
     QSize m_size;
     GFrameBuffer* m_frameBuffer;
     GDepthBuffer* m_depthBuffer;
@@ -58,7 +68,6 @@ private:
     GCamera* m_pCamera;
     GMesh m_mesh;
     GMaterial m_material;
-
     GShader *m_pShader;
 
     QList<GVertexAttribute> m_vertexAttributesBeforeVertexShader;
@@ -70,6 +79,15 @@ private:
     bool m_enableDepthWrite;
     bool m_enableBlend;
     bool m_enableShadow;
+
+    // tile based rendering
+    bool m_isTileBased;
+    QSize m_tileSize;
+    QSize m_tileCount;
+    GFrameBuffer* m_tileFrameBuffer;
+    GDepthBuffer* m_tileDepthBuffer;
+    GDepthBuffer* m_tileShadowMap;
+    QList< QList<GPrimitive> > m_tilePrimitivesAfterCulling;
 };
 
 #endif // GRASTER_H
