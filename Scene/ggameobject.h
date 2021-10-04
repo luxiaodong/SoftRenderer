@@ -13,7 +13,7 @@ class GGameObject
 public:
     GGameObject();
     void setMesh(const GMesh &);
-    void setMaterial(const GMaterial &);
+    void setMaterial(GMaterial* );
     void setScale(float sx, float sy, float sz);
     void setRotate(float rx, float ry, float rz);
     void setPosition(float x, float y, float z);
@@ -27,7 +27,7 @@ public:
     GGameObject* m_parent;
 
     GMesh m_mesh;
-    GMaterial m_material;
+    GMaterial* m_material;
     bool m_castShadow;
     bool m_receiveShadow;
 };

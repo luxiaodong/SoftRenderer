@@ -93,7 +93,16 @@ void Widget::softRneder()
         m_raster->renderGameObject(go, m_pScene->m_enableShadow && go.m_receiveShadow);
     }
 
+    if(m_raster->isTileBased())
+    {
+        m_raster->tileBasedRendering(2);
+    }
+    else
+    {
 //        m_raster->renderGameObject( m_pScene->skybox2() );
+    }
+
+
 
     QPainter painter(this);
     painter.drawImage( QRectF(0,0,m_width, m_height), this->genImage(m_width, m_height, m_raster->frameBuffer()));

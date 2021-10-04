@@ -12,6 +12,7 @@ GRaster::GRaster()
     m_enableShadow = false;
     m_isTileBased = true;
     m_tileSize = QSize(128,128);
+    m_isUseHSR = true;
 }
 
 void GRaster::setRenderSize(const QSize& size)
@@ -32,6 +33,17 @@ void GRaster::setRenderSize(const QSize& size)
         if(tileWidthCount*m_tileSize.width() < m_size.width()) tileWidthCount++;
         if(tileHeightCount*m_tileSize.height() < m_size.height()) tileHeightCount++;
         m_tileCount = QSize(tileWidthCount, tileHeightCount);
+
+        m_tilePrimitivesAfterCulling.clear();
+        m_tileFragmentAttribute.clear();
+        for(int i=0; i<m_tileCount.width()*m_tileCount.height(); ++i)
+        {
+            QList<GPrimitive> tilePrimitives;
+            m_tilePrimitivesAfterCulling.append(tilePrimitives);
+
+            QList<GFragmentAttribute> fragAttribute;
+            m_tileFragmentAttribute.append(fragAttribute);
+        }
     }
 }
 
@@ -54,7 +66,7 @@ void GRaster::renderGameObject(const GGameObject& obj, bool isReceiveShadow)
 {
     m_mesh = obj.m_mesh;
     m_material = obj.m_material;
-    m_pShader = obj.m_material.m_pShader;
+    m_pShader = obj.m_material->m_pShader;
     m_pShader->m_isReceiveShadow = isReceiveShadow;
     m_pShader->m_modelMat = obj.objectToWorldMatrix();
     m_pShader->m_viewMat = m_pCamera->m_viewMat;
@@ -63,7 +75,7 @@ void GRaster::renderGameObject(const GGameObject& obj, bool isReceiveShadow)
     {
         m_enableShadow = false;
         m_pShader->m_isReceiveShadow = false;
-        this->tileBasedRendering();
+        this->tileBasedRendering(1);
     }
     else
     {
@@ -385,7 +397,7 @@ if(m_pShader->m_isReceiveShadow)
     }
 }
                 }
-                QColor srcColor = m_pShader->fragment(x*1.0f/m_size.width(), y*1.0f/m_size.height(), va, m_material.m_imageSet);
+                QColor srcColor = m_pShader->fragment(x*1.0f/m_size.width(), y*1.0f/m_size.height(), va, m_material->m_imageSet);
 
 //                QColor srcColor = Qt::white;
 //                if( va.m_uv.x() == nan  || va.m_uv.y() == nan )
@@ -424,26 +436,66 @@ if(m_pShader->m_isReceiveShadow)
 }
 
 // ============================= tile based rendering ============================
-void GRaster::tileBasedRendering()
+void GRaster::tileBasedRendering(int step)
+{
+    if(step == 1)
+    {
+        this->tileBasedRendering_front();
+    }
+    if(step == 2)
+    {
+        this->tileBasedRendering_after();
+    }
+}
+
+void GRaster::tileBasedRendering_front()
 {
     this->vertexProcess();
     this->tileBinning();
 
     for(int j=0; j<m_tileCount.height(); ++j)
-//    int j = 0;
     {
         for(int i=0; i<m_tileCount.width(); ++i)
-//        int i = 1;
         {
             int x = m_tileSize.width()*i;
             int y = m_tileSize.height()*j;
             int index = j*m_tileCount.width() + i;
             QList<GPrimitive> tilePrimitives = m_tilePrimitivesAfterCulling.at(index);
+            QList<GFragmentAttribute> tileFragAttributeList = m_tileFragmentAttribute.at(index);
 
             if(tilePrimitives.size() > 0)
             {
+                QList<GFragmentAttribute> falist = this->tileRaster(tilePrimitives, QRect(x, y, m_tileSize.width(), m_tileSize.height()) );
+                tileFragAttributeList.append(falist);
+                m_tileFragmentAttribute.replace(index, tileFragAttributeList);
+            }
+        }
+    }
+}
+
+void GRaster::tileBasedRendering_after()
+{
+    for(int j=0; j<m_tileCount.height(); ++j)
+    {
+        for(int i=0; i<m_tileCount.width(); ++i)
+        {
+            int index = j*m_tileCount.width() + i;
+            QList<GFragmentAttribute> tileFragAttributeList = m_tileFragmentAttribute.at(index);
+
+            if(m_isUseHSR)
+            {
+                tileFragAttributeList = this->sortFragmentAttribute(tileFragAttributeList);
+            }
+
+            if(tileFragAttributeList.size() > 0)
+            {
                 this->loadBuffer(index);
-                this->renderingTile(tilePrimitives, QRect(x, y, m_tileSize.width(), m_tileSize.height()) );
+
+                foreach(GFragmentAttribute tileFragAttribute, tileFragAttributeList)
+                {
+                    this->renderingTile(tileFragAttribute);
+                }
+
                 this->saveBuffer(index);
             }
         }
@@ -617,13 +669,6 @@ void GRaster::vertexProcess()
 // 将tile打包
 void GRaster::tileBinning()
 {
-    m_tilePrimitivesAfterCulling.clear();
-    for(int i=0; i<m_tileCount.width()*m_tileCount.height(); ++i)
-    {
-        QList<GPrimitive> tilePrimitives;
-        m_tilePrimitivesAfterCulling.append(tilePrimitives);
-    }
-
     qDebug()<<"primitives count is "<<m_primitivesAfterCulling.size();
     foreach (GPrimitive primitive, m_primitivesAfterCulling)
     {
@@ -660,9 +705,10 @@ void GRaster::tileBinning()
     }
 }
 
-void GRaster::renderingTile(const QList<GPrimitive> primitivesList, QRect rect)
+QList<GFragmentAttribute> GRaster::tileRaster(const QList<GPrimitive> &primitivesList, QRect rect)
 {
-//    qDebug()<<"tile primitives count is "<<primitivesList.size();
+    QList<GFragmentAttribute> fragAttributeList;
+    //qDebug()<<"tile primitives count is "<<primitivesList.size();
     foreach (GPrimitive primitive, primitivesList)
     {
         //PD(perspective division) 透视除法
@@ -718,35 +764,86 @@ void GRaster::renderingTile(const QList<GPrimitive> primitivesList, QRect rect)
                 float zNdc = va.m_vertex.z()/va.m_vertex.w();
                 float zDepth = zNdc*0.5 + 0.5; //再转到 (0-1)
 
-                // 对于非透明物体,进行ealy-z
-                if (m_enableDepthTest && zDepth >= m_tileDepthBuffer->depth(x%m_tileSize.width(), y%m_tileSize.height()) )
-                {
-                    continue;
-                }
-
-                QColor srcColor = m_pShader->fragment(x*1.0f/m_tileSize.width(), y*1.0f/m_tileSize.height(), va, m_material.m_imageSet);
-
-                // 模版测试, 暂不支持
-                // ZT(Z-Test) 深度测试
-                if(m_enableDepthTest && m_enableDepthWrite)
-                {
-                    m_tileDepthBuffer->setDepth(x%m_tileSize.width(), y%m_tileSize.height(), zDepth);
-                }
-
-                // OM(Output Merger) 进行Alpha Blend，颜色混合
-                if(m_enableBlend)
-                {
-                    QColor dstColor = m_tileFrameBuffer->pixel(x, y);
-                    float r = srcColor.redF()  *srcColor.alphaF() + dstColor.redF()  *(1 - srcColor.alphaF());
-                    float g = srcColor.greenF()*srcColor.alphaF() + dstColor.greenF()*(1 - srcColor.alphaF());
-                    float b = srcColor.blueF() *srcColor.alphaF() + dstColor.blueF() *(1 - srcColor.alphaF());
-                    m_tileFrameBuffer->setPixel(x%m_tileSize.width(), y%m_tileSize.height(), QColor(r*255, g*255, b*255) );
-                }
-                else
-                {
-                    m_tileFrameBuffer->setPixel(x%m_tileSize.width(), y%m_tileSize.height(), srcColor);
-                }
+                GFragmentAttribute fa;
+                fa.m_pt = QPoint(x,y);
+                fa.m_depth = zDepth;
+                fa.m_va = va;
+                fa.m_pShader = m_pShader;
+                fa.m_material = m_material;
+                fragAttributeList.append(fa);
             }
         }
     }
+
+    return fragAttributeList;
+}
+
+void GRaster::renderingTile(const GFragmentAttribute &tileFragAttribute)
+{
+    int x = tileFragAttribute.m_pt.x();
+    int y = tileFragAttribute.m_pt.y();
+    float zDepth = tileFragAttribute.m_depth;
+    GShader* shader = tileFragAttribute.m_pShader;
+    GMaterial* material = tileFragAttribute.m_material;
+    GVertexAttribute va = tileFragAttribute.m_va;
+
+    // 对于非透明物体,进行ealy-z
+    if (m_enableDepthTest && zDepth >= m_tileDepthBuffer->depth(x%m_tileSize.width(), y%m_tileSize.height()) )
+    {
+        return;
+    }
+
+    QColor srcColor = shader->fragment(x*1.0f/m_tileSize.width(), y*1.0f/m_tileSize.height(), va, material->m_imageSet);
+
+    // 模版测试, 暂不支持
+    // ZT(Z-Test) 深度测试
+    if(m_enableDepthTest && m_enableDepthWrite)
+    {
+        m_tileDepthBuffer->setDepth(x%m_tileSize.width(), y%m_tileSize.height(), zDepth);
+    }
+
+    // OM(Output Merger) 进行Alpha Blend，颜色混合
+    if(m_enableBlend)
+    {
+        QColor dstColor = m_tileFrameBuffer->pixel(x, y);
+        float r = srcColor.redF()  *srcColor.alphaF() + dstColor.redF()  *(1 - srcColor.alphaF());
+        float g = srcColor.greenF()*srcColor.alphaF() + dstColor.greenF()*(1 - srcColor.alphaF());
+        float b = srcColor.blueF() *srcColor.alphaF() + dstColor.blueF() *(1 - srcColor.alphaF());
+        m_tileFrameBuffer->setPixel(x%m_tileSize.width(), y%m_tileSize.height(), QColor(r*255, g*255, b*255) );
+    }
+    else
+    {
+        m_tileFrameBuffer->setPixel(x%m_tileSize.width(), y%m_tileSize.height(), srcColor);
+    }
+}
+
+QList<GFragmentAttribute> GRaster::sortFragmentAttribute(const QList<GFragmentAttribute> &tileFragAttributeList)
+{
+    QList<GFragmentAttribute> faList;
+    foreach(GFragmentAttribute one, tileFragAttributeList)
+    {
+        int findIndex = -1;
+        for(int i = 0; i < faList.size(); ++i)
+        {
+            GFragmentAttribute other = faList.at(i);
+            if(one.m_pt == other.m_pt)
+            {
+                findIndex = i;
+            }
+        }
+
+        if(findIndex == -1)
+        {
+            faList.append(one);
+        }
+        else
+        {
+            GFragmentAttribute other = faList.at(findIndex);
+            if( one.m_depth < other.m_depth )
+            {
+                faList.replace(findIndex, one);
+            }
+        }
+    }
+    return faList;
 }

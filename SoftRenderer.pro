@@ -44,7 +44,8 @@ SOURCES += main.cpp\
     Math/gsh.cpp \
     Math/gshrotate.cpp \
     Shader/shshader.cpp \
-    Shader/brdfshader.cpp
+    Shader/brdfshader.cpp \
+    Raster/gfragmentattribute.cpp
 
 HEADERS  += widget.h \
     Scene/gscene.h \
@@ -66,7 +67,8 @@ HEADERS  += widget.h \
     Math/gsh.h \
     Math/gshrotate.h \
     Shader/shshader.h \
-    Shader/brdfshader.h
+    Shader/brdfshader.h \
+    Raster/gfragmentattribute.h
 
 RESOURCES += \
     Resource/assets.qrc

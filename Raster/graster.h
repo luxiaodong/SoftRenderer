@@ -4,6 +4,7 @@
 #include "Raster/gframebuffer.h"
 #include "Raster/gdepthbuffer.h"
 #include "Raster/gvertexattribute.h"
+#include "Raster/gfragmentattribute.h"
 #include "Raster/gprimitive.h"
 #include "Shader/gshader.h"
 #include "Model/gmaterial.h"
@@ -48,17 +49,24 @@ public:
     void enableShadow(bool isEnable){m_enableShadow = isEnable;}
     void setLight(GLight* light){m_light = light;}
 
-private:
+public:
     void immediateRendering();
-    void tileBasedRendering();
-    void vertexProcess();
+    void tileBasedRendering(int step);
+    bool isTileBased(){return m_isTileBased;}
 
+private:
+    void tileBasedRendering_front();
+    void tileBasedRendering_after();
+    void vertexProcess();
     void tileBinning();
+    QList<GFragmentAttribute> tileRaster(const QList<GPrimitive> &primitivesList, QRect rect);
+    void renderingTile(const GFragmentAttribute &tileFragAttribute);
+
     bool isLineSegment(QPoint a, QPoint b, QPoint c, QPoint d);
     bool isIntersectInTile(QPoint a, QPoint b, QPoint c, QRect rect);
-    void renderingTile(const QList<GPrimitive> primitivesList, QRect rect);
     void loadBuffer(int index);
     void saveBuffer(int index);
+    QList<GFragmentAttribute> sortFragmentAttribute(const QList<GFragmentAttribute> &tileFragAttributeList);
 
 private:
     QSize m_size;
@@ -69,7 +77,7 @@ private:
     GLight* m_light;
     GCamera* m_pCamera;
     GMesh m_mesh;
-    GMaterial m_material;
+    GMaterial* m_material;
     GShader *m_pShader;
 
     QList<GVertexAttribute> m_vertexAttributesBeforeVertexShader;
@@ -82,7 +90,7 @@ private:
     bool m_enableBlend;
     bool m_enableShadow;
 
-    // tile based rendering
+    // tile based rendering, 仅单个物体的tilebase, 没有处理物体间的
     bool m_isTileBased;
     QSize m_tileSize;
     QSize m_tileCount;
@@ -90,6 +98,9 @@ private:
     GDepthBuffer* m_tileDepthBuffer;
     GDepthBuffer* m_tileShadowMap;
     QList< QList<GPrimitive> > m_tilePrimitivesAfterCulling;
+    QList< QList<GFragmentAttribute> > m_tileFragmentAttribute;
+    bool m_isUseHSR; //隐藏面消除.
+
 };
 
 #endif // GRASTER_H

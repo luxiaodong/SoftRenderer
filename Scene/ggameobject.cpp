@@ -11,6 +11,8 @@ GGameObject::GGameObject()
     m_position = QVector3D(0,0,0);
     m_rotate = QVector3D(0,0,0);
     m_scale = QVector3D(1,1,1);
+
+    m_material = new GMaterial();
 }
 
 void GGameObject::setMesh(const GMesh &mesh)
@@ -18,7 +20,7 @@ void GGameObject::setMesh(const GMesh &mesh)
     m_mesh = mesh;
 }
 
-void GGameObject::setMaterial(const GMaterial &material)
+void GGameObject::setMaterial(GMaterial* material)
 {
     m_material = material;
 }
