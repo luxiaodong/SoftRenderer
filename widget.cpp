@@ -7,8 +7,8 @@
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
 {
-    m_width = 600;
-    m_height = 600;
+    m_width = 512;
+    m_height = 512;
 
     GCamera* pCamera = new GCamera();
 //    pCamera->setViewMatrix(QVector3D(0,0,0), QVector3D(-0.6, 0.8, 0), QVector3D(0, -5.0f/13, 12.0f/13));
@@ -51,7 +51,7 @@ void Widget::paintEvent(QPaintEvent*)
             {
                 if(go.m_castShadow)
                 {
-                    m_raster->renderGameObject(go);
+                    m_raster->renderGameObject(go, go.m_castShadow, false);
                 }
             }
         }
@@ -63,7 +63,7 @@ void Widget::paintEvent(QPaintEvent*)
         qDebug()<<"gameobject count is "<<m_pScene->m_gameObjects.size();
         foreach (GGameObject go, m_pScene->m_gameObjects)
         {
-            m_raster->renderGameObject(go, go.m_receiveShadow);
+            m_raster->renderGameObject(go, false, go.m_receiveShadow);
         }
 
 //        m_raster->renderGameObject( m_pScene->skybox2() );

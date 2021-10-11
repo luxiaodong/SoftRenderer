@@ -34,7 +34,7 @@ public:
     void clearDepth();
     void clearShadowMap();
 
-    void renderGameObject(const GGameObject&, bool isReceiveShadow = false);
+    void renderGameObject(const GGameObject&, bool isCastShadow = false, bool isReceiveShadow = false);
 
     QList<QPoint> bresenham(int x0, int y0, int x1, int y1);
     QList<QPoint> calculateBoundary(QPoint&,QPoint&,QPoint&);

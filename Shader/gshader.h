@@ -28,6 +28,7 @@ public:
     QVector4D objectToWorld(QVector4D pos);
     QVector4D objectToView(QVector4D pos);
     QVector4D objectToClipping(QVector4D pos);
+    QVector4D worldToClipping(QVector4D pos);
     QColor color(QImage& image, QVector2D uv);
 
 public:
@@ -44,6 +45,7 @@ public:
     //阴影
     GLight* m_light;
     GDepthBuffer* m_shadowMap;
+    bool m_isCastShadow;
     bool m_isReceiveShadow;
 
     QImage m_white;

@@ -35,11 +35,12 @@ void GRaster::clearShadowMap()
     m_shadowMap->clear(0.0f);
 }
 
-void GRaster::renderGameObject(const GGameObject& obj, bool isReceiveShadow)
+void GRaster::renderGameObject(const GGameObject& obj, bool isCastShadow, bool isReceiveShadow)
 {
     m_mesh = obj.m_mesh;
     m_material = obj.m_material;
     m_pShader = obj.m_material.m_pShader;
+    m_pShader->m_isCastShadow = isCastShadow;
     m_pShader->m_isReceiveShadow = isReceiveShadow;
     m_pShader->m_modelMat = obj.objectToWorldMatrix();
     m_pShader->m_viewMat = m_pCamera->m_viewMat;
@@ -207,6 +208,13 @@ void GRaster::doRendering()
 
     //VS(Vertex Shader) 顶点处理
     m_vertexAttributesAfterVertexShader.clear();
+
+    if(m_pShader->m_isReceiveShadow || m_pShader->m_isCastShadow)
+    {
+        m_pShader->m_light = this->m_light;
+        m_pShader->m_shadowMap = this->m_shadowMap;
+    }
+
     foreach(GVertexAttribute va, m_vertexAttributesBeforeVertexShader)
     {
         m_vertexAttributesAfterVertexShader.append( m_pShader->vertex(va) );
@@ -345,10 +353,10 @@ if(m_pShader->m_isReceiveShadow)
                 }
 
                 // FS(Fragment Shader)
-                if(m_pShader->m_isReceiveShadow)
-                {
-                    m_pShader->m_light = this->m_light;
-                    m_pShader->m_shadowMap = this->m_shadowMap;
+//                if(m_pShader->m_isReceiveShadow || m_pShader->m_isCastShadow)
+//                {
+//                    m_pShader->m_light = this->m_light;
+//                    m_pShader->m_shadowMap = this->m_shadowMap;
 
 //                    m_pShader->m_shadowMapVP = this->m_shadowMapVP;
 //                    m_pShader->m_depthInShadowMap = m_shadowMap->depth( x*1.0f/m_size.width(), y*1.0f/m_size.height() );
@@ -360,14 +368,8 @@ if(m_pShader->m_isReceiveShadow)
     {
     }
 }
-                }
-                QColor srcColor = m_pShader->fragment(x*1.0f/m_size.width(), y*1.0f/m_size.height(), va, m_material.m_imageSet);
-
-//                QColor srcColor = Qt::white;
-//                if( va.m_uv.x() == nan  || va.m_uv.y() == nan )
-//                {
-//                    srcColor = Qt::black;
 //                }
+                QColor srcColor = m_pShader->fragment(x*1.0f/m_size.width(), y*1.0f/m_size.height(), va, m_material.m_imageSet);
 
                 // 模版测试, 暂不支持
                 // ZT(Z-Test) 深度测试
@@ -381,18 +383,21 @@ if(m_pShader->m_isReceiveShadow)
                     }
                 }
 
-                // OM(Output Merger) 进行Alpha Blend，颜色混合
-                if(m_enableBlend)
+                if(m_pShader->m_isCastShadow == false)
                 {
-                    QColor dstColor = m_frameBuffer->pixel(x, y);
-                    float r = srcColor.redF()  *srcColor.alphaF() + dstColor.redF()  *(1 - srcColor.alphaF());
-                    float g = srcColor.greenF()*srcColor.alphaF() + dstColor.greenF()*(1 - srcColor.alphaF());
-                    float b = srcColor.blueF() *srcColor.alphaF() + dstColor.blueF() *(1 - srcColor.alphaF());
-                    m_frameBuffer->setPixel(x, y, QColor(r*255, g*255, b*255) );
-                }
-                else
-                {
-                    m_frameBuffer->setPixel(x, y, srcColor);
+                    // OM(Output Merger) 进行Alpha Blend，颜色混合
+                    if(m_enableBlend)
+                    {
+                        QColor dstColor = m_frameBuffer->pixel(x, y);
+                        float r = srcColor.redF()  *srcColor.alphaF() + dstColor.redF()  *(1 - srcColor.alphaF());
+                        float g = srcColor.greenF()*srcColor.alphaF() + dstColor.greenF()*(1 - srcColor.alphaF());
+                        float b = srcColor.blueF() *srcColor.alphaF() + dstColor.blueF() *(1 - srcColor.alphaF());
+                        m_frameBuffer->setPixel(x, y, QColor(r*255, g*255, b*255) );
+                    }
+                    else
+                    {
+                        m_frameBuffer->setPixel(x, y, srcColor);
+                    }
                 }
             }
         }

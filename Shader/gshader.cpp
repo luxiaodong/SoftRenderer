@@ -9,6 +9,7 @@ GShader::GShader()
     m_white = QImage(1,1,QImage::Format_RGBA8888);
     m_white.fill(Qt::white);
     m_cullType = 1;
+    m_isCastShadow = false;
     m_isReceiveShadow = false;
 }
 
@@ -17,12 +18,12 @@ QVector4D GShader::objectToClipping(QVector4D pos)
 //qDebug()<<"model:"<<m_modelMat;
 //qDebug()<<"view:"<<m_viewMat;
 //qDebug()<<"proj:"<<m_projMat;
-    return m_projMat*m_viewMat*m_modelMat*pos;
+    return (m_projMat*m_viewMat*m_modelMat)*pos;
 }
 
 QVector4D GShader::objectToView(QVector4D pos)
 {
-    return m_viewMat*m_modelMat*pos;
+    return (m_viewMat*m_modelMat)*pos;
 }
 
 QVector4D GShader::objectToWorld(QVector4D pos)
@@ -37,19 +38,42 @@ QVector3D GShader::objectToWorldDir(QVector3D pos)
     return outPos;
 }
 
+QVector4D GShader::worldToClipping(QVector4D pos)
+{
+    return (m_projMat*m_viewMat)*pos;
+}
+
 GVertexAttribute GShader::vertex(GVertexAttribute& va)
 {
     GVertexAttribute outVa;
-    outVa.m_vertex = this->objectToClipping(va.m_vertex);
     outVa.m_normal = this->objectToWorldDir(va.m_normal);
+    if(m_isCastShadow)
+    {
+        QVector3D normalInWorld = outVa.m_normal.normalized();
+        QVector4D  worldPos = this->objectToWorld(va.m_vertex);
+        float invNdotL = 1.0f - qMax( QVector3D::dotProduct( m_light->m_lightDir, normalInWorld ), 0.0f);
+        float shadowBias = -0.1158236;
+        float scale = invNdotL*shadowBias;
+        worldPos = worldPos + m_light->m_lightDir*scale;
+
+        float shadowNormalBias = -0.1158236;
+        worldPos = worldPos + normalInWorld * shadowNormalBias;
+        outVa.m_vertex = this->worldToClipping(worldPos);
+    }
+    else
+    {
+        outVa.m_vertex = this->objectToClipping(va.m_vertex);
+    }
+
     outVa.m_uv = va.m_uv;
 //qDebug()<<va.m_vertex<<"--->"<<objectToWorld(va.m_vertex)<<"--->"<<(outVa.m_vertex/outVa.m_vertex.w());
     return outVa;
+
 }
 
 float GShader::shadowValue(QVector4D posInClip, QVector3D normalInWorld)
 {
-    bool isPCF = true;
+    bool isPCF = false;
     float value = 0.0;
     float depthInCamera = depthInLightCamera(posInClip, normalInWorld);
     if( depthInCamera > 1.0f - depthInShadowMap(posInClip, QPoint(0,0)) ) value += 1.0;
@@ -86,14 +110,14 @@ float GShader::depthInLightCamera(QVector4D posInClip, QVector3D normalInWorld)
     QVector4D worldPos =  currentVP.inverted()*posInClip;
 
     //根据光源方向将物体提上一点点
-    float invNdotL = 1.0f - qMax( QVector3D::dotProduct( m_light->m_lightDir, normalInWorld ), 0.0f);
-    float shadowBias = 1.0;
-    float scale = invNdotL*shadowBias;
-    worldPos = worldPos + m_light->m_lightDir*scale;
+//    float invNdotL = 1.0f - qMax( QVector3D::dotProduct( m_light->m_lightDir, normalInWorld ), 0.0f);
+//    float shadowBias = 1.0;
+//    float scale = invNdotL*shadowBias;
+//    worldPos = worldPos + m_light->m_lightDir*scale;
 
     //根据法线将物体提上一点点
-    float shadowNormalBias = 1.0;
-    worldPos = worldPos + normalInWorld * shadowNormalBias;
+//    float shadowNormalBias = 1.0;
+//    worldPos = worldPos + normalInWorld * shadowNormalBias;
 
     QVector4D clipPos = lightVP*worldPos;
     float zNdc = clipPos.z()/clipPos.w();
