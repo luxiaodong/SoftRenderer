@@ -18,6 +18,8 @@ public:
     QMatrix4x4 m_viewMat;  //视口矩阵
     QMatrix4x4 m_projMat;  //投影矩阵,包括正交投影
     QMatrix4x4 m_viewPortMat; //转屏幕的矩阵
+    float m_near;
+    float m_far;
 };
 
 #endif // GLIGHT_H

@@ -36,6 +36,7 @@ void Widget::paintEvent(QPaintEvent*)
     m_drawOnce++;
     if(m_drawOnce >= 3)
     {
+        m_raster->m_isUseVSM = true;
         m_pScene->m_enableShadow = true;
         if(m_pScene->m_enableShadow)
         {
@@ -54,6 +55,11 @@ void Widget::paintEvent(QPaintEvent*)
                     m_raster->renderGameObject(go, go.m_castShadow, false);
                 }
             }
+        }
+
+        if(m_raster->m_isUseVSM)
+        {
+            m_raster->m_vsmBuffer->genAverageDepth();
         }
 
         m_raster->clearColor(Qt::black);

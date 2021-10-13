@@ -19,11 +19,14 @@ public:
     void setViewPortMatrix(float x, float y, float w, float h);
 
     QPoint ndcToScreenPoint(QVector3D pos);
+    float linearZ(float depthInView);
 
 public:
     QMatrix4x4 m_viewMat; //视口矩阵
     QMatrix4x4 m_projMat; //投影矩阵,包括正交投影
     QMatrix4x4 m_viewPortMat;
+    float m_near;
+    float m_far;
     bool m_isOrth;
 };
 

@@ -46,6 +46,8 @@ GCamera* GScene::getLightCamera()
         m_light->m_viewMat = m_lightCamera->m_viewMat;
         m_light->m_projMat = m_lightCamera->m_projMat;
         m_light->m_viewPortMat = m_lightCamera->m_viewPortMat;
+        m_light->m_near = -23.431f;
+        m_light->m_far = 68.186f;
 
 //        qDebug()<<m_lightCamera->m_viewMat;
 //        qDebug()<<m_lightCamera->m_projMat;

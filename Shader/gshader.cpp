@@ -68,7 +68,19 @@ GVertexAttribute GShader::vertex(GVertexAttribute& va)
     outVa.m_uv = va.m_uv;
 //qDebug()<<va.m_vertex<<"--->"<<objectToWorld(va.m_vertex)<<"--->"<<(outVa.m_vertex/outVa.m_vertex.w());
     return outVa;
+}
 
+float GShader::shadowValueByVSM(QVector4D posInClip, QVector3D normalInWorld)
+{
+    float depthInCamera = depthInLightCamera(posInClip, normalInWorld);
+    QPoint pt = this->uvInShadowMap(posInClip, QPoint(0,0));
+    float t = depthInCamera;
+    // c * Z(occ) + (1-c) * Z(unocc) = Z(avg)
+    float c = this->m_vsmBuffer->chebyshev(pt.x(), pt.y(), t);
+    float zAvg = this->m_vsmBuffer->depthAverage(pt.x(), pt.y());
+    float zOcc = (zAvg - (1-c)*depthInCamera)/c;
+    zOcc = qMax(qMin(zOcc, 1.0f), 0.0f);
+    return  zOcc;
 }
 
 float GShader::shadowValue(QVector4D posInClip, QVector3D normalInWorld)
@@ -125,7 +137,7 @@ float GShader::depthInLightCamera(QVector4D posInClip, QVector3D normalInWorld)
     return zDepth;
 }
 
-float GShader::depthInShadowMap(QVector4D posInClip, QPoint offset)
+QPoint GShader::uvInShadowMap(QVector4D posInClip, QPoint offset)
 {
     QMatrix4x4 currentVP = m_projMat*m_viewMat;
     QMatrix4x4 lightVP = m_light->m_projMat*m_light->m_viewMat;
@@ -135,7 +147,13 @@ float GShader::depthInShadowMap(QVector4D posInClip, QPoint offset)
     //这里有可能越界
     int x = p.x() + offset.x();
     int y = p.y() + offset.y();
-    return m_shadowMap->depth(x,y);
+    return QPoint(x, y);
+}
+
+float GShader::depthInShadowMap(QVector4D posInClip, QPoint offset)
+{
+    QPoint pt = this->uvInShadowMap(posInClip, offset);
+    return m_shadowMap->depth(pt.x(), pt.y());
 }
 
 QColor GShader::fragment(float x, float y, GVertexAttribute& va, QMap<QString, QImage>& map)
@@ -144,7 +162,8 @@ QColor GShader::fragment(float x, float y, GVertexAttribute& va, QMap<QString, Q
     QColor color = this->color(image, va.m_uv);
     if(m_isReceiveShadow == false) return color;
 
-    float p = this->shadowValue(va.m_vertex, va.m_normal);
+//    float p = this->shadowValue(va.m_vertex, va.m_normal);
+    float p = this->shadowValueByVSM(va.m_vertex, va.m_normal);
     QColor shadowColor = Qt::gray;
 
     float r = (1.0f - p)*color.redF() + p*shadowColor.redF();

@@ -3,6 +3,7 @@
 
 #include "Raster/gframebuffer.h"
 #include "Raster/gdepthbuffer.h"
+#include "Raster/gvsmbuffer.h"
 #include "Raster/gvertexattribute.h"
 #include "Raster/gprimitive.h"
 #include "Shader/gshader.h"
@@ -48,11 +49,16 @@ public:
     void enableShadow(bool isEnable){m_enableShadow = isEnable;}
     void setLight(GLight* light){m_light = light;}
 
+public:
+    bool m_isUseVSM;
+    GVSMBuffer*   m_vsmBuffer;
+
 private:
     QSize m_size;
     GFrameBuffer* m_frameBuffer;
     GDepthBuffer* m_depthBuffer;
     GDepthBuffer* m_shadowMap;
+
 
     GLight* m_light;
     GCamera* m_pCamera;

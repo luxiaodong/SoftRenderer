@@ -96,6 +96,8 @@ void GCamera::setOrthMatrix(float size, float aspect, float n, float f)
 
     m_projMat = mat;
     m_isOrth = true;
+    m_near = n;
+    m_far = f;
 }
 
 void GCamera::setProjMatrix(float fov,  float aspect, float n, float f)
@@ -109,6 +111,8 @@ void GCamera::setProjMatrix(float fov,  float aspect, float n, float f)
                 0.0f,            0.0f,         -1.0f,         0.0f);
     m_projMat = mat;
     m_isOrth = false;
+    m_near = n;
+    m_far = f;
 }
 
 void GCamera::setViewPortMatrix(float x, float y, float w, float h)
@@ -130,6 +134,11 @@ void GCamera::setViewPortMatrix(float x, float y, float w, float h)
     // 这里将z从[-1,1]映射到[0,1]
     QMatrix4x4 mat = t*s;
     m_viewPortMat = mat;
+}
+
+float GCamera::linearZ(float depthInView)
+{
+    return (qAbs(depthInView) - m_near)/(m_far - m_near);
 }
 
 QPoint GCamera::ndcToScreenPoint(QVector3D pos)

@@ -10,6 +10,7 @@
 #include <QString>
 #include <QPoint>
 #include "Scene/glight.h"
+#include "Raster/gvsmbuffer.h"
 #include "Raster/gvertexattribute.h"
 #include "Raster/gdepthbuffer.h"
 
@@ -33,8 +34,10 @@ public:
 
 public:
     float shadowValue(QVector4D posInClip, QVector3D normalInWorld);
+    float shadowValueByVSM(QVector4D posInClip, QVector3D normalInWorld);
     float depthInLightCamera(QVector4D posInClip, QVector3D normalInWorld);
     float depthInShadowMap(QVector4D posInClip, QPoint offset);
+    QPoint uvInShadowMap(QVector4D posInClip, QPoint offset);
 
 public:
     int m_cullType; //0,双面, 1,顺时针, 2.逆时针
@@ -45,6 +48,7 @@ public:
     //阴影
     GLight* m_light;
     GDepthBuffer* m_shadowMap;
+    GVSMBuffer* m_vsmBuffer;
     bool m_isCastShadow;
     bool m_isReceiveShadow;
 

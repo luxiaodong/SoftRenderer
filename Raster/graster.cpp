@@ -10,6 +10,7 @@ GRaster::GRaster()
     m_enableDepthWrite = true;
     m_enableBlend = false;
     m_enableShadow = false;
+    m_isUseVSM = false;
 }
 
 void GRaster::setRenderSize(const QSize& size)
@@ -18,6 +19,7 @@ void GRaster::setRenderSize(const QSize& size)
     m_frameBuffer = new GFrameBuffer(m_size.width(), m_size.height(), 3);
     m_depthBuffer = new GDepthBuffer(m_size.width(), m_size.height());
     m_shadowMap = new GDepthBuffer(m_size.width(), m_size.height());
+    m_vsmBuffer = new GVSMBuffer(m_size.width(), m_size.height());
 }
 
 void GRaster::clearColor(const QColor& color)
@@ -33,6 +35,7 @@ void GRaster::clearDepth()
 void GRaster::clearShadowMap()
 {
     m_shadowMap->clear(0.0f);
+    m_vsmBuffer->clear(0.0f);
 }
 
 void GRaster::renderGameObject(const GGameObject& obj, bool isCastShadow, bool isReceiveShadow)
@@ -213,6 +216,7 @@ void GRaster::doRendering()
     {
         m_pShader->m_light = this->m_light;
         m_pShader->m_shadowMap = this->m_shadowMap;
+        m_pShader->m_vsmBuffer = this->m_vsmBuffer;
     }
 
     foreach(GVertexAttribute va, m_vertexAttributesBeforeVertexShader)
@@ -353,14 +357,6 @@ if(m_pShader->m_isReceiveShadow)
                 }
 
                 // FS(Fragment Shader)
-//                if(m_pShader->m_isReceiveShadow || m_pShader->m_isCastShadow)
-//                {
-//                    m_pShader->m_light = this->m_light;
-//                    m_pShader->m_shadowMap = this->m_shadowMap;
-
-//                    m_pShader->m_shadowMapVP = this->m_shadowMapVP;
-//                    m_pShader->m_depthInShadowMap = m_shadowMap->depth( x*1.0f/m_size.width(), y*1.0f/m_size.height() );
-
 if(m_pShader->m_isReceiveShadow)
 {
 //    if(x == 307 && y == 195)
@@ -380,6 +376,7 @@ if(m_pShader->m_isReceiveShadow)
                     if(m_enableShadow)
                     {
                         m_shadowMap->setDepth(x, y, 1.0f - zDepth);
+                        m_vsmBuffer->setDepth(x, y, 1.0f - zDepth);
                     }
                 }
 
