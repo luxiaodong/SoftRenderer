@@ -2,6 +2,7 @@
 #include "Scene/gscene.h"
 #include "Scene/gcamera.h"
 #include "Math/gsh.h"
+#include "Model/gmipmap.h"
 #include <QDebug>
 #include <QPainter>
 
@@ -10,8 +11,9 @@ Widget::Widget(QWidget *parent)
 {
     m_width = 600;
     m_height = 600;
-    configScene1();
+//    configScene1();
     //configScene2();
+    configScene3();
 
     m_raster = new GRaster();
     m_raster->setRenderSize(QSize(m_width, m_height));
@@ -34,7 +36,7 @@ void Widget::configScene1()
     m_pScene->m_camera = pCamera;
 //    m_pScene->loadTriangle();
     m_pScene->loadPlane();
-    m_pScene->loadModel();
+//    m_pScene->loadModel();
 //    m_pScene->loadSphere();
 }
 
@@ -51,13 +53,26 @@ void Widget::configScene2()
     m_pScene->loadBRDFScene();
 }
 
+void Widget::configScene3()
+{
+    GCamera* pCamera = new GCamera();
+    pCamera->setViewMatrix(QVector3D(0, 2, -10), 30, 0, 0);
+    pCamera->setProjMatrix(60, m_width*1.0f/m_height, 0.3f, 1000.0f);
+    pCamera->setViewPortMatrix(0,0,m_width,m_height);
+
+    m_pScene = new GScene();
+    m_pScene->m_camera = pCamera;
+    m_pScene->loadBigPlane();
+}
+
 void Widget::paintEvent(QPaintEvent*)
 {
     m_drawOnce++;
-    if(m_drawOnce >= 3)
+    if(m_drawOnce >= 1)
     {
         this->softRneder();
 //        this->testSH();
+//        this->testMipmap();
     }
 }
 
@@ -101,8 +116,6 @@ void Widget::softRneder()
     {
 //        m_raster->renderGameObject( m_pScene->skybox2() );
     }
-
-
 
     QPainter painter(this);
     painter.drawImage( QRectF(0,0,m_width, m_height), this->genImage(m_width, m_height, m_raster->frameBuffer()));
@@ -160,6 +173,16 @@ void Widget::testSH()
     QPainter painter(this);
     painter.drawImage(QRectF(0, 0, m_width, m_height/2), origin);
     painter.drawImage(QRectF(0, m_height/2, m_width, m_height/2), imageSH);
+}
+
+void Widget::testMipmap()
+{
+    this->resize(1024,1024);
+//    QImage image = QImage(":/texture/rgb.png", "png");
+    GMipmap mipmap = GMipmap(":/texture/grid.png");
+    QPainter painter(this);
+    mipmap.test();
+    painter.drawImage(QPoint(0,0), mipmap.m_target);
 }
 
 Widget::~Widget()

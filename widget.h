@@ -24,8 +24,10 @@ private:
 
     void configScene1();
     void configScene2();
+    void configScene3();
 
     void testSH();
+    void testMipmap();
 
 private:
     int m_width;

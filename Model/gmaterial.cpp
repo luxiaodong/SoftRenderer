@@ -5,6 +5,16 @@
 #include <QDebug>
 #include <QDir>
 
+GMaterial::GMaterial()
+{
+    m_uvArgs.setRect(0,0,1,1);
+}
+
+GMaterial::GMaterial(GShader* shader):m_pShader(shader)
+{
+    m_uvArgs.setRect(0,0,1,1);
+}
+
 void GMaterial::addImage(QString key, QString filePath)
 {
     QImage image;
@@ -23,4 +33,9 @@ void GMaterial::addImage(QString key, QString filePath)
     }
 
     m_imageSet.insert(key, image.mirrored() );
+}
+
+void GMaterial::setUVArgs(float offsetX, float offsetY, float scaleX, float scaleY)
+{
+    m_uvArgs.setRect(static_cast<double>(offsetX),static_cast<double>(offsetY),static_cast<double>(scaleX),static_cast<double>(scaleY));
 }

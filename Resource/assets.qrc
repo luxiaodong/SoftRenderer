@@ -19,5 +19,6 @@
         <file>cubmap/posy.jpg</file>
         <file>cubmap/posz.jpg</file>
         <file>sh.jpg</file>
+        <file>grid.png</file>
     </qresource>
 </RCC>

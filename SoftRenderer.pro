@@ -45,7 +45,8 @@ SOURCES += main.cpp\
     Math/gshrotate.cpp \
     Shader/shshader.cpp \
     Shader/brdfshader.cpp \
-    Raster/gfragmentattribute.cpp
+    Raster/gfragmentattribute.cpp \
+    Model/gmipmap.cpp
 
 HEADERS  += widget.h \
     Scene/gscene.h \
@@ -68,7 +69,8 @@ HEADERS  += widget.h \
     Math/gshrotate.h \
     Shader/shshader.h \
     Shader/brdfshader.h \
-    Raster/gfragmentattribute.h
+    Raster/gfragmentattribute.h \
+    Model/gmipmap.h
 
 RESOURCES += \
     Resource/assets.qrc

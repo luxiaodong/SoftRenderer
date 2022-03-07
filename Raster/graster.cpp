@@ -10,9 +10,9 @@ GRaster::GRaster()
     m_enableDepthWrite = true;
     m_enableBlend = false;
     m_enableShadow = false;
-    m_isTileBased = true;
+    m_isTileBased = false;
     m_tileSize = QSize(128,128);
-    m_isUseHSR = true;
+    m_isUseHSR = false;
 }
 
 void GRaster::setRenderSize(const QSize& size)
@@ -224,6 +224,9 @@ void GRaster::immediateRendering()
         if (m_mesh.m_uvs.size() > 0)
         {
             uv = m_mesh.m_uvs.at( index.m_uvIndex );
+            float u = m_material->m_uvArgs.x() + uv.x()*m_material->m_uvArgs.width();
+            float v = m_material->m_uvArgs.y() + uv.y()*m_material->m_uvArgs.height();
+            uv = QVector2D(u,v);
         }
 
         QVector3D normal = QVector3D(0,0,1);
@@ -616,6 +619,9 @@ void GRaster::vertexProcess()
         if (m_mesh.m_uvs.size() > 0)
         {
             uv = m_mesh.m_uvs.at( index.m_uvIndex );
+            float u = m_material->m_uvArgs.x() + uv.x()*m_material->m_uvArgs.width();
+            float v = m_material->m_uvArgs.y() + uv.y()*m_material->m_uvArgs.height();
+            uv = QVector2D(u,v);
         }
 
         QVector3D normal = QVector3D(0,0,1);

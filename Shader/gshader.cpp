@@ -152,6 +152,12 @@ QColor GShader::fragment(float x, float y, GVertexAttribute& va, QMap<QString, Q
 
 QColor GShader::color(QImage& image, QVector2D uv)
 {
-    QPoint pt = QPoint( uv.x()*(image.width()-1), uv.y()*(image.height()-1) );
-    return image.pixelColor(pt.x(), pt.y());
+    QPoint pt = QPoint( uv.x()*image.width(), uv.y()*image.height() );
+
+    //这里错的,1的时候对应的应该是image.width()-1
+
+    int x = pt.x()%image.width();
+    int y = pt.y()%image.height();
+
+    return image.pixelColor(x, y);
 }

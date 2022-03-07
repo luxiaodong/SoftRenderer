@@ -18,6 +18,7 @@ public:
     void loadTriangle();
     void loadSphere();
     void loadPlane();
+    void loadBigPlane();
     void loadModel();
 
     GGameObject skybox();

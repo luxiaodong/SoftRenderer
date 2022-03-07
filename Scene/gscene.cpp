@@ -71,6 +71,21 @@ void GScene::loadPlane()
     m_gameObjects.append(obj);
 }
 
+void GScene::loadBigPlane()
+{
+    GGameObject obj = GGameObject();
+    obj.setMesh(GModel::loadPlane());
+    obj.m_material->setShader( new GShader() );
+    obj.m_material->addImage("base", ":/texture/grid.png");
+    obj.m_material->setUVArgs(0,0,10,10);
+    obj.setPosition(0,0,0);
+    obj.setRotate(90, 0, 0);
+    obj.setScale(20, 20, 20);
+    obj.m_castShadow = false;
+    obj.m_receiveShadow = false;
+    m_gameObjects.append(obj);
+}
+
 void GScene::loadModel()
 {
     GGameObject obj = GGameObject();
